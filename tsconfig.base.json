@@ -1,21 +1,31 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declarationMap": true,
-    "emitDeclarationOnly": true,
-    "importHelpers": true,
-    "isolatedModules": true,
-    "lib": ["es2022"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "noEmitOnError": true,
-    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "target": "es2022",
+    "lib": [
+      "es2022",
+      "dom"
+    ],
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "strict": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
-    "strict": true,
-    "target": "es2022",
-    "customConditions": ["@org/source"]
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "paths": {
+      "auth/Routes": [
+        "apps/auth/src/app/remote-entry/entry.routes.ts"
+      ],
+      "platform/Routes": [
+        "apps/platform/src/app/remote-entry/entry.routes.ts"
+      ],
+      "admin/Routes": [
+        "apps/admin/src/app/remote-entry/entry.routes.ts"
+      ]
+    }
   }
 }
