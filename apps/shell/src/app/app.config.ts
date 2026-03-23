@@ -10,6 +10,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { AuthHttpInterceptor, provideAuth0 } from '@auth0/auth0-angular';
 import { appRoutes } from './app.routes';
+import { API_BASE_URL } from '@org/shared/util-types';
 import { environment } from 'src/environments/environment';
 
 export const appConfig: ApplicationConfig = {
@@ -18,6 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(appRoutes),
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
+    { provide: API_BASE_URL, useValue: environment.apiUrl },
     provideAuth0({
       domain: environment.auth0Domain,
       clientId: environment.auth0ClientId,

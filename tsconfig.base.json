@@ -17,6 +17,36 @@
     "esModuleInterop": true,
     "importHelpers": true,
     "paths": {
+      "@org/shared/util-types": [
+        "libs/shared/util-types/src/index.ts"
+      ],
+      "@org/activity-log/data-access": [
+        "libs/activity-log/data-access/src/index.ts"
+      ],
+      "@org/auth/data-access": [
+        "libs/auth/data-access/src/index.ts"
+      ],
+      "@org/billing/data-access": [
+        "libs/billing/data-access/src/index.ts"
+      ],
+      "@org/entitlements/data-access": [
+        "libs/entitlements/data-access/src/index.ts"
+      ],
+      "@org/memberships/data-access": [
+        "libs/memberships/data-access/src/index.ts"
+      ],
+      "@org/notifications/data-access": [
+        "libs/notifications/data-access/src/index.ts"
+      ],
+      "@org/organizations/data-access": [
+        "libs/organizations/data-access/src/index.ts"
+      ],
+      "@org/storage/data-access": [
+        "libs/storage/data-access/src/index.ts"
+      ],
+      "@org/tasks/data-access": [
+        "libs/tasks/data-access/src/index.ts"
+      ],
       "auth/Routes": [
         "apps/auth/src/app/remote-entry/entry.routes.ts"
       ],
