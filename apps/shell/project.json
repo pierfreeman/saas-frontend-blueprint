@@ -86,6 +86,14 @@
     "lint": {
       "executor": "@nx/eslint:lint"
     },
+    "test": {
+      "executor": "@nx/angular:unit-test",
+      "options": {
+        "buildTarget": "shell:build:development",
+        "tsConfig": "apps/shell/tsconfig.spec.json",
+        "runnerConfig": "apps/shell/vitest.config.ts"
+      }
+    },
     "serve-static": {
       "continuous": true,
       "executor": "@nx/web:file-server",
