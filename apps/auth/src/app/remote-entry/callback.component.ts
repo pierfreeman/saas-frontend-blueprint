@@ -34,10 +34,9 @@ export class CallbackComponent implements OnInit {
         }),
       )
       .subscribe((orgs) => {
-        // 3. Restore a previously selected org or default to the first one
-        this.#orgsStore.hydrateFromStorage();
+        // 3. Default to the first org if none is already persisted in localStorage
         if (!this.#orgsStore.activeOrgId() && orgs.length > 0) {
-          this.#orgsStore.setActiveOrg(orgs[0].id!);
+          this.#orgsStore.setActiveOrg(orgs[0].id!, orgs[0].name ?? undefined);
         }
         // 4. Enter the app
         this.#router.navigateByUrl('/');

@@ -30,7 +30,7 @@ import {
                       styleClass="w-full"
                       [label]="org.name ?? org.id"
                       severity="secondary"
-                      (onClick)="selectOrg(org.id!)"
+                      (onClick)="selectOrg(org)"
                     />
                   </li>
                 }
@@ -61,8 +61,8 @@ export class OrgSelectComponent implements OnInit {
     });
   }
 
-  selectOrg(id: string): void {
-    this.#store.setActiveOrg(id);
+  selectOrg(org: OrganizationSummary): void {
+    this.#store.setActiveOrg(org.id!, org.name ?? undefined);
     this.#router.navigateByUrl('/');
   }
 }

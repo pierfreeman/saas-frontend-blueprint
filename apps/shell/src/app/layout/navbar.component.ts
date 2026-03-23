@@ -53,7 +53,7 @@ import { OrganizationsStore } from '@org/organizations/data-access';
         <!-- Org switcher -->
         @if (activeOrgId()) {
           <p-button
-            [label]="activeOrgId()!"
+            [label]="activeOrgName() ?? activeOrgId()!"
             severity="secondary"
             size="small"
             icon="pi pi-building"
@@ -80,6 +80,7 @@ export class NavbarComponent {
   readonly #router = inject(Router);
 
   readonly activeOrgId = this.#orgsStore.activeOrgId;
+  readonly activeOrgName = this.#orgsStore.activeOrgName;
 
   readonly avatarLabel = computed(() => {
     const email = this.#authStore.currentUser()?.email ?? '';
