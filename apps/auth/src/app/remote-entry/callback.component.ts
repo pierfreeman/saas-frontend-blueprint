@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { filter, switchMap, take } from 'rxjs';
-import { AuthApi } from '@org/auth/data-access';
+import { AuthApi, AuthStore } from '@org/auth/data-access';
 import {
   OrganizationsApi,
   OrganizationsStore,
@@ -16,6 +16,7 @@ export class CallbackComponent implements OnInit {
   readonly #auth = inject(AuthService);
   readonly #router = inject(Router);
   readonly #authApi = inject(AuthApi);
+  readonly #authStore = inject(AuthStore);
   readonly #orgsApi = inject(OrganizationsApi);
   readonly #orgsStore = inject(OrganizationsStore);
 
@@ -26,8 +27,11 @@ export class CallbackComponent implements OnInit {
         take(1),
         // 1. Sync the Auth0 identity with the backend (upserts on first login)
         switchMap(() => this.#authApi.getMe()),
-        // 2. Fetch the user's organizations
-        switchMap(() => this.#orgsApi.getOrganizations()),
+        // 2. Store the user in the shared AuthStore
+        switchMap((user) => {
+          this.#authStore.setUser(user);
+          return this.#orgsApi.getOrganizations();
+        }),
       )
       .subscribe((orgs) => {
         // 3. Restore a previously selected org or default to the first one
