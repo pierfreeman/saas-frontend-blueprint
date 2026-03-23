@@ -1,27 +1,67 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
 import { AvatarModule } from 'primeng/avatar';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
+import { InputTextModule } from 'primeng/inputtext';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import {
   MembershipsApi,
   MembershipSummary,
+  MembershipRole,
 } from '@org/memberships/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 
-const ROLE_SEVERITY: Record<string, 'success' | 'info' | 'secondary' | 'warn'> =
-  {
-    OWNER: 'warn',
-    ADMIN: 'info',
-    MEMBER: 'success',
-    READ_ONLY: 'secondary',
-  };
+type TagSeverity = 'success' | 'info' | 'secondary' | 'warn';
+
+const ROLE_SEVERITY: Record<string, TagSeverity> = {
+  OWNER: 'warn',
+  ADMIN: 'info',
+  MEMBER: 'success',
+  READ_ONLY: 'secondary',
+};
+
+const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
+  { label: 'Owner', value: 'OWNER' },
+  { label: 'Admin', value: 'ADMIN' },
+  { label: 'Member', value: 'MEMBER' },
+  { label: 'Read only', value: 'READ_ONLY' },
+];
 
 @Component({
   selector: 'app-members',
   standalone: true,
-  imports: [CardModule, TagModule, SkeletonModule, AvatarModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    CardModule,
+    TagModule,
+    SkeletonModule,
+    AvatarModule,
+    ButtonModule,
+    DialogModule,
+    SelectModule,
+    InputTextModule,
+    ConfirmDialogModule,
+    ToastModule,
+  ],
+  providers: [ConfirmationService, MessageService],
   template: `
+    <p-toast />
+    <p-confirmDialog />
+
     <div class="flex flex-col gap-6">
       <div class="flex items-center justify-between">
         <div>
@@ -30,6 +70,11 @@ const ROLE_SEVERITY: Record<string, 'success' | 'info' | 'secondary' | 'warn'> =
             People with access to this organization.
           </p>
         </div>
+        <p-button
+          label="Invite member"
+          icon="pi pi-user-plus"
+          (onClick)="openInviteDialog()"
+        />
       </div>
 
       <p-card>
@@ -67,6 +112,7 @@ const ROLE_SEVERITY: Record<string, 'success' | 'info' | 'secondary' | 'warn'> =
                   shape="circle"
                   styleClass="shrink-0"
                 />
+
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-surface-900 m-0 truncate">
                     {{ m.userId }}
@@ -75,29 +121,260 @@ const ROLE_SEVERITY: Record<string, 'success' | 'info' | 'secondary' | 'warn'> =
                     {{ m.status ?? 'ACTIVE' }}
                   </p>
                 </div>
-                <p-tag
-                  [value]="m.role ?? '—'"
-                  [severity]="roleSeverity(m.role)"
-                />
+
+                @if (canEditRole(m)) {
+                  <p-select
+                    [options]="roleOptions"
+                    optionLabel="label"
+                    optionValue="value"
+                    [ngModel]="m.role"
+                    (ngModelChange)="changeRole(m, $event)"
+                    [disabled]="saving()"
+                    styleClass="text-sm"
+                    appendTo="body"
+                  />
+                } @else {
+                  <p-tag
+                    [value]="m.role ?? '—'"
+                    [severity]="roleSeverity(m.role)"
+                  />
+                }
+
+                @if (canRemove(m)) {
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [text]="true"
+                    size="small"
+                    [disabled]="saving()"
+                    (onClick)="confirmRemove(m)"
+                    pTooltip="Remove member"
+                    tooltipPosition="left"
+                  />
+                }
               </li>
             }
           </ul>
         }
       </p-card>
     </div>
+
+    <p-dialog
+      header="Invite member"
+      [(visible)]="inviteVisible"
+      [modal]="true"
+      [style]="{ width: '28rem' }"
+      [draggable]="false"
+    >
+      <div class="flex flex-col gap-4 pt-2">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700" for="inviteUserId"
+            >User ID</label
+          >
+          <input
+            id="inviteUserId"
+            pInputText
+            [(ngModel)]="inviteUserId"
+            placeholder="UUID of the user to invite"
+            class="w-full"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700" for="inviteRole"
+            >Role</label
+          >
+          <p-select
+            inputId="inviteRole"
+            [options]="roleOptions"
+            optionLabel="label"
+            optionValue="value"
+            [(ngModel)]="inviteRole"
+            appendTo="body"
+            class="w-full"
+          />
+        </div>
+        @if (inviteError()) {
+          <p class="text-red-500 text-sm m-0">{{ inviteError() }}</p>
+        }
+      </div>
+
+      <ng-template pTemplate="footer">
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          [text]="true"
+          (onClick)="inviteVisible = false"
+        />
+        <p-button
+          label="Invite"
+          icon="pi pi-send"
+          [loading]="saving()"
+          [disabled]="!inviteUserId.trim()"
+          (onClick)="submitInvite()"
+        />
+      </ng-template>
+    </p-dialog>
   `,
 })
 export class MembersComponent implements OnInit {
   readonly #api = inject(MembershipsApi);
   readonly #orgsStore = inject(OrganizationsStore);
+  readonly #confirm = inject(ConfirmationService);
+  readonly #toast = inject(MessageService);
 
   readonly members = signal<MembershipSummary[]>([]);
   readonly loading = signal(true);
+  readonly saving = signal(false);
   readonly error = signal(false);
+  readonly inviteError = signal<string | null>(null);
 
+  readonly roleOptions = ROLE_OPTIONS;
   readonly skeletonRows = new Array(4);
 
+  inviteVisible = false;
+  inviteUserId = '';
+  inviteRole: MembershipRole = 'MEMBER';
+
   ngOnInit(): void {
+    this.#loadMembers();
+  }
+
+  avatarLabel(m: MembershipSummary): string {
+    return (m.userId ?? '?').charAt(0).toUpperCase();
+  }
+
+  roleSeverity(role?: string): TagSeverity {
+    return ROLE_SEVERITY[role ?? ''] ?? 'secondary';
+  }
+
+  canEditRole(m: MembershipSummary): boolean {
+    return m.role !== 'OWNER';
+  }
+
+  canRemove(m: MembershipSummary): boolean {
+    return m.role !== 'OWNER';
+  }
+
+  openInviteDialog(): void {
+    this.inviteUserId = '';
+    this.inviteRole = 'MEMBER';
+    this.inviteError.set(null);
+    this.inviteVisible = true;
+  }
+
+  submitInvite(): void {
+    const orgId = this.#orgsStore.activeOrgId();
+    if (!orgId || !this.inviteUserId.trim()) return;
+
+    this.saving.set(true);
+    this.inviteError.set(null);
+
+    this.#api
+      .createMembership(orgId, {
+        userId: this.inviteUserId.trim(),
+        role: this.inviteRole,
+      })
+      .subscribe({
+        next: (membership) => {
+          this.members.update((list) => [
+            ...list,
+            {
+              id: membership.id,
+              userId: membership.userId,
+              orgId: membership.orgId,
+              role: membership.role as MembershipRole,
+              status: membership.status as 'ACTIVE' | 'INVITED' | 'SUSPENDED',
+              createdAt: membership.createdAt,
+              updatedAt: membership.updatedAt,
+            },
+          ]);
+          this.inviteVisible = false;
+          this.saving.set(false);
+          this.#toast.add({
+            severity: 'success',
+            summary: 'Invited',
+            detail: 'Member added successfully.',
+            life: 3000,
+          });
+        },
+        error: (err) => {
+          this.inviteError.set(
+            err?.error?.message ?? 'Failed to invite member.',
+          );
+          this.saving.set(false);
+        },
+      });
+  }
+
+  changeRole(m: MembershipSummary, newRole: MembershipRole): void {
+    const orgId = this.#orgsStore.activeOrgId();
+    if (!orgId || !m.id) return;
+
+    this.saving.set(true);
+    this.#api.updateMembership(orgId, m.id, { role: newRole }).subscribe({
+      next: (updated) => {
+        this.members.update((list) =>
+          list.map((item) =>
+            item.id === m.id ? { ...item, role: updated.role } : item,
+          ),
+        );
+        this.saving.set(false);
+        this.#toast.add({
+          severity: 'success',
+          summary: 'Role updated',
+          life: 3000,
+        });
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.#toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message ?? 'Failed to update role.',
+          life: 4000,
+        });
+      },
+    });
+  }
+
+  confirmRemove(m: MembershipSummary): void {
+    this.#confirm.confirm({
+      message: `Remove member ${m.userId} from this organization?`,
+      header: 'Confirm removal',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => this.#doRemove(m),
+    });
+  }
+
+  #doRemove(m: MembershipSummary): void {
+    const orgId = this.#orgsStore.activeOrgId();
+    if (!orgId || !m.id) return;
+
+    this.saving.set(true);
+    this.#api.deleteMembership(orgId, m.id).subscribe({
+      next: () => {
+        this.members.update((list) => list.filter((item) => item.id !== m.id));
+        this.saving.set(false);
+        this.#toast.add({
+          severity: 'success',
+          summary: 'Removed',
+          detail: 'Member removed.',
+          life: 3000,
+        });
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.#toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message ?? 'Failed to remove member.',
+          life: 4000,
+        });
+      },
+    });
+  }
+
+  #loadMembers(): void {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId) {
       this.loading.set(false);
@@ -113,13 +390,5 @@ export class MembersComponent implements OnInit {
         this.loading.set(false);
       },
     });
-  }
-
-  avatarLabel(m: MembershipSummary): string {
-    return (m.userId ?? '?').charAt(0).toUpperCase();
-  }
-
-  roleSeverity(role?: string): 'success' | 'info' | 'secondary' | 'warn' {
-    return ROLE_SEVERITY[role ?? ''] ?? 'secondary';
   }
 }
