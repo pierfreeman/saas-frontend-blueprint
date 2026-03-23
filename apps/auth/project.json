@@ -20,7 +20,10 @@
             "input": "apps/auth/public"
           }
         ],
-        "styles": ["apps/auth/src/styles.css"],
+        "styles": [
+          "node_modules/primeicons/primeicons.css",
+          "apps/auth/src/styles.css"
+        ],
         "customWebpackConfig": {
           "path": "apps/auth/webpack.config.ts"
         }

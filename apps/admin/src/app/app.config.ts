@@ -6,11 +6,16 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import {
+  HTTP_INTERCEPTORS,
   provideHttpClient,
+  withInterceptors,
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { AuthHttpInterceptor } from '@auth0/auth0-angular';
 import { appRoutes } from './app.routes';
+import { API_BASE_URL } from '@org/shared/util-types';
+import { tenantInterceptor } from '@org/organizations/data-access';
 
 export const appConfig: ApplicationConfig = {
   // These providers are only active when admin runs standalone (port 4203).
@@ -19,7 +24,12 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideAnimationsAsync(),
     provideRouter(appRoutes),
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(
+      withInterceptorsFromDi(),
+      withInterceptors([tenantInterceptor]),
+    ),
+    { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
+    { provide: API_BASE_URL, useValue: 'http://localhost:3000' },
     providePrimeNG({
       theme: { preset: Aura, options: { darkModeSelector: 'false' } },
     }),

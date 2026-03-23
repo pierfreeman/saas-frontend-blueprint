@@ -20,7 +20,10 @@
             "input": "apps/platform/public"
           }
         ],
-        "styles": ["apps/platform/src/styles.css"],
+        "styles": [
+          "node_modules/primeicons/primeicons.css",
+          "apps/platform/src/styles.css"
+        ],
         "customWebpackConfig": {
           "path": "apps/platform/webpack.config.ts"
         }

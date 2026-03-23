@@ -1,12 +1,17 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
+import { SkeletonModule } from 'primeng/skeleton';
+import { TagModule } from 'primeng/tag';
 import { AuthStore } from '@org/auth/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
+import { MembershipsApi } from '@org/memberships/data-access';
+import { BillingApi, SubscriptionResponse } from '@org/billing/data-access';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CardModule],
+  imports: [CardModule, SkeletonModule, TagModule, RouterLink],
   template: `
     <div class="flex flex-col gap-6">
       <!-- Welcome header -->
@@ -19,17 +24,54 @@ import { OrganizationsStore } from '@org/organizations/data-access';
 
       <!-- Stat cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Members -->
+        <a routerLink="/members" class="no-underline">
+          <p-card
+            styleClass="text-center hover:shadow-md transition-shadow cursor-pointer"
+          >
+            @if (loadingMembers()) {
+              <p-skeleton
+                height="2.25rem"
+                width="3rem"
+                styleClass="mx-auto mb-1"
+              />
+            } @else {
+              <div class="text-3xl font-bold text-primary">
+                {{ memberCount() }}
+              </div>
+            }
+            <div class="text-surface-500 text-sm mt-1">Members</div>
+          </p-card>
+        </a>
+
+        <!-- Plan -->
         <p-card styleClass="text-center">
-          <div class="text-3xl font-bold text-primary">—</div>
-          <div class="text-surface-500 text-sm mt-1">Members</div>
+          @if (loadingBilling()) {
+            <p-skeleton
+              height="2.25rem"
+              width="5rem"
+              styleClass="mx-auto mb-1"
+            />
+          } @else {
+            <div class="text-3xl font-bold text-primary">
+              {{ planLabel() }}
+            </div>
+          }
+          <div class="text-surface-500 text-sm mt-1">Plan</div>
         </p-card>
+
+        <!-- Seats -->
         <p-card styleClass="text-center">
-          <div class="text-3xl font-bold text-primary">—</div>
-          <div class="text-surface-500 text-sm mt-1">Events (30d)</div>
-        </p-card>
-        <p-card styleClass="text-center">
-          <div class="text-3xl font-bold text-primary">—</div>
-          <div class="text-surface-500 text-sm mt-1">Storage used</div>
+          @if (loadingBilling()) {
+            <p-skeleton
+              height="2.25rem"
+              width="3rem"
+              styleClass="mx-auto mb-1"
+            />
+          } @else {
+            <div class="text-3xl font-bold text-primary">{{ seatCount() }}</div>
+          }
+          <div class="text-surface-500 text-sm mt-1">Seats</div>
         </p-card>
       </div>
 
@@ -40,18 +82,53 @@ import { OrganizationsStore } from '@org/organizations/data-access';
     </div>
   `,
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   readonly #authStore = inject(AuthStore);
   readonly #orgsStore = inject(OrganizationsStore);
+  readonly #membershipsApi = inject(MembershipsApi);
+  readonly #billingApi = inject(BillingApi);
 
-  readonly email = this.#authStore.currentUser
-    ? () => this.#authStore.currentUser()?.email ?? ''
-    : () => '';
+  readonly memberCount = signal<number | null>(null);
+  readonly subscription = signal<SubscriptionResponse | null>(null);
+  readonly loadingMembers = signal(true);
+  readonly loadingBilling = signal(true);
 
-  readonly name = () => {
-    const user = this.#authStore.currentUser();
-    return user?.email?.split('@')[0] ?? '';
+  readonly email = () => this.#authStore.currentUser()?.email ?? '';
+  readonly name = () =>
+    this.#authStore.currentUser()?.email?.split('@')[0] ?? '';
+
+  readonly planLabel = () => {
+    const sub = this.subscription();
+    if (!sub) return '—';
+    const status = sub.billingStatus;
+    if (status === 'NONE') return 'Free';
+    return status.charAt(0) + status.slice(1).toLowerCase().replace('_', ' ');
   };
 
-  readonly activeOrgId = this.#orgsStore.activeOrgId;
+  readonly seatCount = () => this.subscription()?.seatCount ?? '—';
+
+  ngOnInit(): void {
+    const orgId = this.#orgsStore.activeOrgId();
+    if (!orgId) {
+      this.loadingMembers.set(false);
+      this.loadingBilling.set(false);
+      return;
+    }
+
+    this.#membershipsApi.getMemberships(orgId).subscribe({
+      next: (list) => {
+        this.memberCount.set(list.length);
+        this.loadingMembers.set(false);
+      },
+      error: () => this.loadingMembers.set(false),
+    });
+
+    this.#billingApi.getSubscription(orgId).subscribe({
+      next: (sub) => {
+        this.subscription.set(sub);
+        this.loadingBilling.set(false);
+      },
+      error: () => this.loadingBilling.set(false),
+    });
+  }
 }

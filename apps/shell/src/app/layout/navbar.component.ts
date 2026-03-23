@@ -40,6 +40,13 @@ import { OrganizationsStore } from '@org/organizations/data-access';
             Dashboard
           </a>
           <a
+            routerLink="/members"
+            routerLinkActive="text-primary font-semibold"
+            class="px-3 py-1.5 rounded text-sm text-surface-600 hover:bg-surface-100 no-underline transition-colors"
+          >
+            Members
+          </a>
+          <a
             routerLink="/settings"
             routerLinkActive="text-primary font-semibold"
             class="px-3 py-1.5 rounded text-sm text-surface-600 hover:bg-surface-100 no-underline transition-colors"
