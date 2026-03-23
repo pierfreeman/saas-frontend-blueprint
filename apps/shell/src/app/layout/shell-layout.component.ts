@@ -8,7 +8,7 @@ import { NavbarComponent } from './navbar.component';
   standalone: true,
   imports: [RouterModule, NavbarComponent, ToastModule],
   template: `
-    <div class="flex flex-col min-h-screen bg-surface-ground">
+    <div class="flex flex-col min-h-screen bg-surface-100">
       <app-navbar />
       <main class="flex-1 p-6">
         <router-outlet />

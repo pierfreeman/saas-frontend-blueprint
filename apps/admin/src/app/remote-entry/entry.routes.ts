@@ -1,4 +1,12 @@
 import { Route } from '@angular/router';
-import { RemoteEntry } from './entry';
 
-export const ADMIN_ROUTES: Route[] = [{ path: '', component: RemoteEntry }];
+export const ADMIN_ROUTES: Route[] = [
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('../admin-dashboard/admin-dashboard.component').then(
+        (m) => m.AdminDashboardComponent,
+      ),
+  },
+];

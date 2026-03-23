@@ -10,9 +10,7 @@ import { CardModule } from 'primeng/card';
   standalone: true,
   imports: [ButtonModule, CardModule],
   template: `
-    <div
-      class="flex min-h-screen items-center justify-center bg-surface-ground"
-    >
+    <div class="flex min-h-screen items-center justify-center bg-surface-100">
       <p-card class="w-full max-w-sm">
         <ng-template pTemplate="header">
           <div class="flex flex-col items-center pt-8 pb-2 px-6">

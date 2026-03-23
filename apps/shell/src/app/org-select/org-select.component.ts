@@ -14,7 +14,7 @@ import {
   imports: [ButtonModule, CardModule],
   template: `
     <div
-      class="flex min-h-screen items-center justify-center bg-surface-ground p-4"
+      class="flex min-h-screen items-center justify-center bg-surface-100 p-4"
     >
       <div class="w-full max-w-md">
         <p-card>
