@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { ToastModule } from 'primeng/toast';
 import { NavbarComponent } from './navbar.component';
 
 @Component({
   selector: 'app-shell-layout',
   standalone: true,
-  imports: [RouterModule, NavbarComponent],
+  imports: [RouterModule, NavbarComponent, ToastModule],
   template: `
     <div class="flex flex-col min-h-screen bg-surface-ground">
       <app-navbar />
@@ -13,6 +14,7 @@ import { NavbarComponent } from './navbar.component';
         <router-outlet />
       </main>
     </div>
+    <p-toast position="bottom-right" />
   `,
 })
 export class ShellLayoutComponent {}

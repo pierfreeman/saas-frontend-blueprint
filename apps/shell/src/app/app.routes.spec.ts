@@ -1,9 +1,3 @@
-import { vi } from 'vitest';
-
-vi.mock('auth/Routes', () => ({ AUTH_ROUTES: [] }));
-vi.mock('admin/Routes', () => ({ ADMIN_ROUTES: [] }));
-vi.mock('platform/Routes', () => ({ PLATFORM_ROUTES: [] }));
-
 import { appRoutes } from './app.routes';
 import { authGuard } from './app.guard';
 import { orgGuard } from './org.guard';

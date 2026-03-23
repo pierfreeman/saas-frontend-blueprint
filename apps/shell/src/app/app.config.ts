@@ -15,17 +15,20 @@ import { provideRouter } from '@angular/router';
 import { AuthHttpInterceptor, provideAuth0 } from '@auth0/auth0-angular';
 import { appRoutes } from './app.routes';
 import { API_BASE_URL } from '@org/shared/util-types';
+import { MessageService } from 'primeng/api';
 import { tenantInterceptor } from '@org/organizations/data-access';
+import { errorInterceptor } from './error.interceptor';
 import { environment } from 'src/environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideAnimationsAsync(),
+    MessageService,
     provideRouter(appRoutes),
     provideHttpClient(
       withInterceptorsFromDi(),
-      withInterceptors([tenantInterceptor]),
+      withInterceptors([tenantInterceptor, errorInterceptor]),
     ),
     { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
     { provide: API_BASE_URL, useValue: environment.apiUrl },
