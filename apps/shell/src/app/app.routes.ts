@@ -1,3 +1,4 @@
+import { authGuard } from './app.guard';
 import { NxWelcome } from './nx-welcome';
 import { Route } from '@angular/router';
 
@@ -8,11 +9,14 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'admin',
+    canActivate: [authGuard],
     loadChildren: () => import('admin/Routes').then((m) => m.ADMIN_ROUTES),
   },
   {
     path: '',
-    loadChildren: () => import('platform/Routes').then((m) => m.PLATFORM_ROUTES),
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('platform/Routes').then((m) => m.PLATFORM_ROUTES),
   },
   {
     path: '**',
