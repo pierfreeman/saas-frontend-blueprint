@@ -6,4 +6,6 @@ export type {
   Membership,
   MembershipSummary,
   DeleteMembershipResponse,
+  InviteMemberDto,
+  InviteMemberResponse,
 } from './lib/memberships.api.types';

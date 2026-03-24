@@ -168,14 +168,15 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
     >
       <div class="flex flex-col gap-4 pt-2">
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-surface-700" for="inviteUserId"
-            >User ID</label
+          <label class="text-sm font-medium text-surface-700" for="inviteEmail"
+            >Email</label
           >
           <input
-            id="inviteUserId"
+            id="inviteEmail"
             pInputText
-            [(ngModel)]="inviteUserId"
-            placeholder="UUID of the user to invite"
+            type="email"
+            [(ngModel)]="inviteEmail"
+            placeholder="alice@example.com"
             class="w-full"
           />
         </div>
@@ -209,7 +210,7 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
           label="Invite"
           icon="pi pi-send"
           [loading]="saving()"
-          [disabled]="!inviteUserId.trim()"
+          [disabled]="!inviteEmail.trim()"
           (onClick)="submitInvite()"
         />
       </ng-template>
@@ -232,7 +233,7 @@ export class MembersComponent implements OnInit {
   readonly skeletonRows = new Array(4);
 
   inviteVisible = false;
-  inviteUserId = '';
+  inviteEmail = '';
   inviteRole: MembershipRole = 'MEMBER';
 
   ngOnInit(): void {
@@ -256,7 +257,7 @@ export class MembersComponent implements OnInit {
   }
 
   openInviteDialog(): void {
-    this.inviteUserId = '';
+    this.inviteEmail = '';
     this.inviteRole = 'MEMBER';
     this.inviteError.set(null);
     this.inviteVisible = true;
@@ -264,42 +265,32 @@ export class MembersComponent implements OnInit {
 
   submitInvite(): void {
     const orgId = this.#orgsStore.activeOrgId();
-    if (!orgId || !this.inviteUserId.trim()) return;
+    if (!orgId || !this.inviteEmail.trim()) return;
 
     this.saving.set(true);
     this.inviteError.set(null);
 
     this.#api
-      .createMembership(orgId, {
-        userId: this.inviteUserId.trim(),
+      .inviteMember(orgId, {
+        email: this.inviteEmail.trim(),
         role: this.inviteRole,
       })
       .subscribe({
-        next: (membership) => {
-          this.members.update((list) => [
-            ...list,
-            {
-              id: membership.id,
-              userId: membership.userId,
-              orgId: membership.orgId,
-              role: membership.role as MembershipRole,
-              status: membership.status as 'ACTIVE' | 'INVITED' | 'SUSPENDED',
-              createdAt: membership.createdAt,
-              updatedAt: membership.updatedAt,
-            },
-          ]);
+        next: () => {
           this.inviteVisible = false;
           this.saving.set(false);
           this.#toast.add({
             severity: 'success',
             summary: 'Invited',
-            detail: 'Member added successfully.',
+            detail: `Invitation sent to ${this.inviteEmail.trim()}.`,
             life: 3000,
           });
+          // Reload the members list to reflect any newly created membership
+          this.#loadMembers();
         },
         error: (err) => {
           this.inviteError.set(
-            err?.error?.message ?? 'Failed to invite member.',
+            err?.error?.message ?? 'Failed to send invitation.',
           );
           this.saving.set(false);
         },

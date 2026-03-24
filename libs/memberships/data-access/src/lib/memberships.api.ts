@@ -8,6 +8,8 @@ import type {
   Membership,
   MembershipSummary,
   DeleteMembershipResponse,
+  InviteMemberDto,
+  InviteMemberResponse,
 } from './memberships.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -48,6 +50,16 @@ export class MembershipsApi {
   ): Observable<DeleteMembershipResponse> {
     return this.#http.delete<DeleteMembershipResponse>(
       `${this.#base}/organizations/${orgId}/memberships/${id}`,
+    );
+  }
+
+  inviteMember(
+    orgId: string,
+    dto: InviteMemberDto,
+  ): Observable<InviteMemberResponse> {
+    return this.#http.post<InviteMemberResponse>(
+      `${this.#base}/organizations/${orgId}/memberships/invite`,
+      dto,
     );
   }
 }

@@ -4,3087 +4,3188 @@
  */
 
 export interface paths {
-    "/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Root endpoint
-         * @description Returns a greeting message confirming the API is reachable.
-         */
-        get: operations["AppController_getHello"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+  '/': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/health": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Full health check
-         * @description Returns the health status of the application and its external dependencies (PostgreSQL database and Redis). Each service reports its reachability and response time in milliseconds.
-         */
-        get: operations["HealthController_check"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Root endpoint
+     * @description Returns a greeting message confirming the API is reachable.
+     */
+    get: operations['AppController_getHello'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/health': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/auth/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get the currently authenticated user
-         * @description Syncs the Auth0 identity with the local database (upsert) and returns the resolved user profile. Safe to call on every app load.
-         */
-        get: operations["AuthController_getMe"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Full health check
+     * @description Returns the health status of the application and its external dependencies (PostgreSQL database and Redis). Each service reports its reachability and response time in milliseconds.
+     */
+    get: operations['HealthController_check'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/auth/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List organizations for the current user
-         * @description Returns all organizations the authenticated user belongs to, regardless of their role within each organization.
-         */
-        get: operations["OrganizationsController_findMine"];
-        put?: never;
-        /**
-         * Create a new organization
-         * @description Creates a new organization owned by the authenticated user. The caller is automatically added as a member with the OWNER role.
-         */
-        post: operations["OrganizationsController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get the currently authenticated user
+     * @description Syncs the Auth0 identity with the local database (upsert) and returns the resolved user profile. Safe to call on every app load.
+     */
+    get: operations['AuthController_getMe'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get organization by ID
-         * @description Returns full details of a single organization. Requires ORG_READ permission.
-         */
-        get: operations["OrganizationsController_findOne"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /**
-         * Update an organization
-         * @description Updates mutable fields (name, status) of an organization. Requires ORG_MANAGE permission (OWNER or ADMIN).
-         */
-        patch: operations["OrganizationsController_update"];
-        trace?: never;
+    /**
+     * List organizations for the current user
+     * @description Returns all organizations the authenticated user belongs to, regardless of their role within each organization.
+     */
+    get: operations['OrganizationsController_findMine'];
+    put?: never;
+    /**
+     * Create a new organization
+     * @description Creates a new organization owned by the authenticated user. The caller is automatically added as a member with the OWNER role.
+     */
+    post: operations['OrganizationsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{id}/delete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Request organization deletion
-         * @description Schedules organization deletion with a retention period (default 30 days). The organization status is immediately set to PENDING_DELETION, but actual data deletion happens asynchronously after the retention period. This complies with GDPR Right to Erasure requirements. Only OWNER role can request deletion.
-         */
-        post: operations["OrganizationsController_requestDeletion"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get organization by ID
+     * @description Returns full details of a single organization. Requires ORG_READ permission.
+     */
+    get: operations['OrganizationsController_findOne'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update an organization
+     * @description Updates mutable fields (name, status) of an organization. Requires ORG_MANAGE permission (OWNER or ADMIN).
+     */
+    patch: operations['OrganizationsController_update'];
+    trace?: never;
+  };
+  '/organizations/{id}/delete': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{id}/export": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Request organization data export
-         * @description Requests a data export for the organization (GDPR Right to Data Portability). Creates an export job that will asynchronously generate a compressed JSON file containing all organization data. The export will be available for download via a signed URL for 24 hours. Only OWNER and ADMIN roles can request exports.
-         */
-        post: operations["OrganizationsController_requestExport"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Request organization deletion
+     * @description Schedules organization deletion with a retention period (default 30 days). The organization status is immediately set to PENDING_DELETION, but actual data deletion happens asynchronously after the retention period. This complies with GDPR Right to Erasure requirements. Only OWNER role can request deletion.
+     */
+    post: operations['OrganizationsController_requestDeletion'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{id}/export': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{id}/exports/{exportId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get export status
-         * @description Retrieves the status and details of a specific export. If the export is completed, includes a signed download URL.
-         */
-        get: operations["OrganizationsController_getExport"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Request organization data export
+     * @description Requests a data export for the organization (GDPR Right to Data Portability). Creates an export job that will asynchronously generate a compressed JSON file containing all organization data. The export will be available for download via a signed URL for 24 hours. Only OWNER and ADMIN roles can request exports.
+     */
+    post: operations['OrganizationsController_requestExport'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{id}/exports/{exportId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{id}/exports": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List organization exports
-         * @description Lists all exports for the organization, ordered by creation date (newest first). Supports pagination.
-         */
-        get: operations["OrganizationsController_listExports"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get export status
+     * @description Retrieves the status and details of a specific export. If the export is completed, includes a signed download URL.
+     */
+    get: operations['OrganizationsController_getExport'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{id}/exports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/memberships": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List all members of an organization
-         * @description Returns all membership records for the given organization, including each member's role and status. Requires ORG_READ permission.
-         */
-        get: operations["MembershipsController_findByOrg"];
-        put?: never;
-        /**
-         * Add a member to an organization
-         * @description Invites an existing user into the organization with the specified role. Requires ORG_MEMBERS_INVITE permission (OWNER or ADMIN).
-         */
-        post: operations["MembershipsController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * List organization exports
+     * @description Lists all exports for the organization, ordered by creation date (newest first). Supports pagination.
+     */
+    get: operations['OrganizationsController_listExports'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/memberships': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/memberships/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Remove a member from an organization
-         * @description Permanently removes a membership record, revoking the user's access to the organization. Requires ORG_MEMBERS_REMOVE permission (OWNER or ADMIN). Owners cannot remove themselves.
-         */
-        delete: operations["MembershipsController_delete"];
-        options?: never;
-        head?: never;
-        /**
-         * Update a member's role
-         * @description Changes the role of an existing membership. Requires ORG_MEMBERS_ROLE_UPDATE permission (OWNER or ADMIN). An OWNER cannot demote themselves.
-         */
-        patch: operations["MembershipsController_update"];
-        trace?: never;
+    /**
+     * List all members of an organization
+     * @description Returns all membership records for the given organization, including each member's role and status. Requires ORG_READ permission.
+     */
+    get: operations['MembershipsController_findByOrg'];
+    put?: never;
+    /**
+     * Add a member to an organization
+     * @description Invites an existing user into the organization with the specified role. Requires ORG_MEMBERS_INVITE permission (OWNER or ADMIN).
+     */
+    post: operations['MembershipsController_create'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/memberships/invite': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/health/liveness": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Liveness probe
-         * @description Confirms the process is alive. Used by orchestrators (Kubernetes, ECS) to decide whether to restart the container. This probe never checks external dependencies — it only verifies the Node.js process is responsive.
-         */
-        get: operations["HealthController_liveness"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Invite a new or existing user by email
+     * @description Sends an email invitation to the given address. If the user does not exist they are created in Auth0 and Prisma. Requires ORG_MEMBERS_INVITE permission (OWNER or ADMIN).
+     */
+    post: operations['MembershipsController_invite'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/memberships/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/health/readiness": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Readiness probe
-         * @description Checks whether the application is ready to serve traffic by verifying that PostgreSQL and Redis are reachable. Orchestrators (Kubernetes, ECS) use this to decide whether to route requests to the container.
-         */
-        get: operations["HealthController_readiness"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove a member from an organization
+     * @description Permanently removes a membership record, revoking the user's access to the organization. Requires ORG_MEMBERS_REMOVE permission (OWNER or ADMIN). Owners cannot remove themselves.
+     */
+    delete: operations['MembershipsController_delete'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a member's role
+     * @description Changes the role of an existing membership. Requires ORG_MEMBERS_ROLE_UPDATE permission (OWNER or ADMIN). An OWNER cannot demote themselves.
+     */
+    patch: operations['MembershipsController_update'];
+    trace?: never;
+  };
+  '/health/liveness': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/tasks/heavy-job": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Submit a heavy computation job
-         * @description Persists a PENDING job record and publishes a domain event to SQS for async processing by the worker fleet.  Poll GET /tasks/:jobId or connect to the `/jobs` WebSocket namespace (`job:update` event) for real-time status updates.
-         */
-        post: operations["TasksController_createHeavyJob"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Liveness probe
+     * @description Confirms the process is alive. Used by orchestrators (Kubernetes, ECS) to decide whether to restart the container. This probe never checks external dependencies — it only verifies the Node.js process is responsive.
+     */
+    get: operations['HealthController_liveness'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/health/readiness': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/tasks/{jobId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get job status
-         * @description Returns the current lifecycle status, result (on success), and error message (on failure) of a background job.  Scoped to the caller's tenant to prevent cross-tenant data leakage.  Use as a polling fallback when the `/jobs` WebSocket namespace is not available.
-         */
-        get: operations["TasksController_getJobStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Readiness probe
+     * @description Checks whether the application is ready to serve traffic by verifying that PostgreSQL and Redis are reachable. Orchestrators (Kubernetes, ECS) use this to decide whether to route requests to the container.
+     */
+    get: operations['HealthController_readiness'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tasks/heavy-job': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/activity-log": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List activity logs for an organisation
-         * @description Returns a paginated, newest-first list of activity log entries scoped to the given organisation. Accessible only to members with OWNER or ADMIN role.
-         */
-        get: operations["ActivityLogController_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Submit a heavy computation job
+     * @description Persists a PENDING job record and publishes a domain event to SQS for async processing by the worker fleet.  Poll GET /tasks/:jobId or connect to the `/jobs` WebSocket namespace (`job:update` event) for real-time status updates.
+     */
+    post: operations['TasksController_createHeavyJob'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/tasks/{jobId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/billing/checkout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create a Stripe Checkout session
-         * @description Creates a Stripe Checkout session for purchasing a subscription plan. Returns a redirect URL the user should be sent to. Optionally accepts an Idempotency-Key header to prevent duplicate sessions on retried requests — the key is forwarded directly to the Stripe API.
-         */
-        post: operations["BillingController_createCheckoutSession"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get job status
+     * @description Returns the current lifecycle status, result (on success), and error message (on failure) of a background job.  Scoped to the caller's tenant to prevent cross-tenant data leakage.  Use as a polling fallback when the `/jobs` WebSocket namespace is not available.
+     */
+    get: operations['TasksController_getJobStatus'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/activity-log': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/billing/portal": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create a Stripe Billing Portal session
-         * @description Creates a Stripe Billing Portal session for subscription management. Returns a URL the user should be redirected to.
-         */
-        post: operations["BillingController_createPortalSession"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * List activity logs for an organisation
+     * @description Returns a paginated, newest-first list of activity log entries scoped to the given organisation. Accessible only to members with OWNER or ADMIN role.
+     */
+    get: operations['ActivityLogController_list'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/checkout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/billing/subscription": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get current subscription state
-         * @description Returns the billing subscription state for the specified organization.
-         */
-        get: operations["BillingController_getSubscription"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Create a Stripe Checkout session
+     * @description Creates a Stripe Checkout session for purchasing a subscription plan. Returns a redirect URL the user should be sent to. Optionally accepts an Idempotency-Key header to prevent duplicate sessions on retried requests — the key is forwarded directly to the Stripe API.
+     */
+    post: operations['BillingController_createCheckoutSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/portal': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/billing/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Cancel active subscription
-         * @description Schedules the active subscription for cancellation at the end of the current billing period.
-         */
-        post: operations["BillingController_cancelSubscription"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Create a Stripe Billing Portal session
+     * @description Creates a Stripe Billing Portal session for subscription management. Returns a URL the user should be redirected to.
+     */
+    post: operations['BillingController_createPortalSession'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/subscription': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/billing/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get subscription snapshot history
-         * @description Returns a paginated, newest-first list of immutable SubscriptionSnapshot records for the specified organization. Each entry captures the subscription state at the time a Stripe lifecycle event was processed. Intended for internal audit UI.
-         */
-        get: operations["BillingController_getSubscriptionHistory"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get current subscription state
+     * @description Returns the billing subscription state for the specified organization.
+     */
+    get: operations['BillingController_getSubscription'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/cancel': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/billing/webhook": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Stripe webhook endpoint
-         * @description Receives and processes Stripe webhook events. Security is enforced via HMAC signature verification (stripe-signature header).
-         */
-        post: operations["WebhookController_handleWebhook"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Cancel active subscription
+     * @description Schedules the active subscription for cancellation at the end of the current billing period.
+     */
+    post: operations['BillingController_cancelSubscription'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/history': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/entitlements": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get plan entitlements for an organization
-         * @description Returns the full set of feature flags and the resolved plan tier for the organization. Result is cached in Redis.
-         */
-        get: operations["FeatureFlagsController_getEntitlements"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get subscription snapshot history
+     * @description Returns a paginated, newest-first list of immutable SubscriptionSnapshot records for the specified organization. Each entry captures the subscription state at the time a Stripe lifecycle event was processed. Intended for internal audit UI.
+     */
+    get: operations['BillingController_getSubscriptionHistory'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/billing/webhook': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/organizations/{orgId}/entitlements/invalidate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Invalidate the entitlements cache for an organization
-         * @description Removes the cached entitlements from Redis. The next request to GET /entitlements will re-derive the entitlements from the database. Intended for administrative use or when a plan change must take effect immediately.
-         */
-        post: operations["FeatureFlagsController_invalidateCache"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Stripe webhook endpoint
+     * @description Receives and processes Stripe webhook events. Security is enforced via HMAC signature verification (stripe-signature header).
+     */
+    post: operations['WebhookController_handleWebhook'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/entitlements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List notifications for the authenticated user */
-        get: operations["NotificationsController_getNotifications"];
-        put?: never;
-        /** Create a notification (internal / admin use) */
-        post: operations["NotificationsController_createNotification"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Get plan entitlements for an organization
+     * @description Returns the full set of feature flags and the resolved plan tier for the organization. Result is cached in Redis.
+     */
+    get: operations['FeatureFlagsController_getEntitlements'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/organizations/{orgId}/entitlements/invalidate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notifications/unread-count": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get unread notification count for the authenticated user */
-        get: operations["NotificationsController_getUnreadCount"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Invalidate the entitlements cache for an organization
+     * @description Removes the cached entitlements from Redis. The next request to GET /entitlements will re-derive the entitlements from the database. Intended for administrative use or when a plan change must take effect immediately.
+     */
+    post: operations['FeatureFlagsController_invalidateCache'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notifications/{id}/read": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Mark a single notification as read */
-        patch: operations["NotificationsController_markAsRead"];
-        trace?: never;
+    /** List notifications for the authenticated user */
+    get: operations['NotificationsController_getNotifications'];
+    put?: never;
+    /** Create a notification (internal / admin use) */
+    post: operations['NotificationsController_createNotification'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications/unread-count': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notifications/read": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Mark multiple notifications as read */
-        patch: operations["NotificationsController_markManyAsRead"];
-        trace?: never;
+    /** Get unread notification count for the authenticated user */
+    get: operations['NotificationsController_getUnreadCount'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications/{id}/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/notifications/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a notification */
-        delete: operations["NotificationsController_deleteNotification"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Mark a single notification as read */
+    patch: operations['NotificationsController_markAsRead'];
+    trace?: never;
+  };
+  '/notifications/read': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/files/upload-url": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Generate a presigned upload URL
-         * @description Creates a file metadata record and returns a presigned URL for uploading the file directly to S3. The client must upload the file to the returned URL, then call the confirm endpoint.
-         */
-        post: operations["StorageController_generateUploadUrl"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /** Mark multiple notifications as read */
+    patch: operations['NotificationsController_markManyAsRead'];
+    trace?: never;
+  };
+  '/notifications/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/files/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Confirm file upload completion
-         * @description Verifies that the file has been successfully uploaded to storage and marks the file as COMPLETED. This endpoint must be called after uploading the file to the presigned URL.
-         */
-        post: operations["StorageController_confirmUpload"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a notification */
+    delete: operations['NotificationsController_deleteNotification'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/upload-url': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/files/{id}/download": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Generate a presigned download URL
-         * @description Generates a presigned URL for downloading the file directly from S3. The URL expires after a configured duration (default 1 hour).
-         */
-        get: operations["StorageController_generateDownloadUrl"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Generate a presigned upload URL
+     * @description Creates a file metadata record and returns a presigned URL for uploading the file directly to S3. The client must upload the file to the returned URL, then call the confirm endpoint.
+     */
+    post: operations['StorageController_generateUploadUrl'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/confirm': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/files/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get file metadata
-         * @description Returns metadata for a specific file.
-         */
-        get: operations["StorageController_getFile"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete a file
-         * @description Deletes the file from storage and removes its metadata. This operation cannot be undone.
-         */
-        delete: operations["StorageController_deleteFile"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    get?: never;
+    put?: never;
+    /**
+     * Confirm file upload completion
+     * @description Verifies that the file has been successfully uploaded to storage and marks the file as COMPLETED. This endpoint must be called after uploading the file to the presigned URL.
+     */
+    post: operations['StorageController_confirmUpload'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/{id}/download': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    "/files": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List organization files
-         * @description Returns a list of files for the current organization.
-         */
-        get: operations["StorageController_listFiles"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
+    /**
+     * Generate a presigned download URL
+     * @description Generates a presigned URL for downloading the file directly from S3. The URL expires after a configured duration (default 1 hour).
+     */
+    get: operations['StorageController_generateDownloadUrl'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    /**
+     * Get file metadata
+     * @description Returns metadata for a specific file.
+     */
+    get: operations['StorageController_getFile'];
+    put?: never;
+    post?: never;
+    /**
+     * Delete a file
+     * @description Deletes the file from storage and removes its metadata. This operation cannot be undone.
+     */
+    delete: operations['StorageController_deleteFile'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List organization files
+     * @description Returns a list of files for the current organization.
+     */
+    get: operations['StorageController_listFiles'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        CreateOrganizationDto: {
-            /**
-             * @description Organization name
-             * @example Acme Corp
-             */
-            name: string;
-        };
-        UpdateOrganizationDto: {
-            /**
-             * @description Organization name
-             * @example Updated Corp
-             */
-            name?: string;
-            /**
-             * @description Organization status
-             * @example ACTIVE
-             * @enum {string}
-             */
-            status?: "ACTIVE" | "SUSPENDED" | "PENDING_DELETION" | "DELETED";
-        };
-        CreateMembershipDto: {
-            /**
-             * @description ID of the user to add
-             * @example uuid-of-user
-             */
-            userId: string;
-            /**
-             * @description Role to assign
-             * @example MEMBER
-             * @enum {string}
-             */
-            role: "OWNER" | "ADMIN" | "MEMBER" | "READ_ONLY";
-        };
-        /**
-         * @description New role to assign to the member. OWNER has full control; ADMIN can manage members; MEMBER has standard access; READ_ONLY can only view.
-         * @enum {string}
-         */
-        MembershipRole: "OWNER" | "ADMIN" | "MEMBER" | "READ_ONLY";
-        UpdateMembershipDto: {
-            /**
-             * @description New role to assign to the member. OWNER has full control; ADMIN can manage members; MEMBER has standard access; READ_ONLY can only view.
-             * @example ADMIN
-             */
-            role: components["schemas"]["MembershipRole"];
-        };
-        CreateTaskDto: {
-            /**
-             * @description Human-readable name of the task to be processed.
-             * @example Generate monthly report
-             */
-            name?: string;
-            /**
-             * @description Optional free-text description providing context for the worker.
-             * @example Aggregate sales data for Q1 2026 across all regions.
-             */
-            description?: string;
-            /**
-             * @description Arbitrary JSON payload that is forwarded verbatim to the worker. Must be a plain object; arrays and primitives are rejected.
-             * @example {
-             *       "reportType": "monthly",
-             *       "year": 2026,
-             *       "month": 1,
-             *       "region": "EU"
-             *     }
-             */
-            data?: Record<string, never>;
-        };
-        JobStatusDto: {
-            /**
-             * Format: uuid
-             * @description Unique identifier of the job (UUID v4).
-             * @example f47ac10b-58cc-4372-a567-0e02b2c3d479
-             */
-            id: string;
-            /**
-             * Format: uuid
-             * @description Unique identifier of the job (UUID v4). Alias of id.
-             * @example f47ac10b-58cc-4372-a567-0e02b2c3d479
-             */
-            jobId: string;
-            /**
-             * @description Current lifecycle status of the job.
-             * @example PROCESSING
-             * @enum {string}
-             */
-            status: "PENDING" | "PROCESSING" | "DONE" | "FAILED";
-            /**
-             * @description Job type discriminator.
-             * @example heavy_job
-             */
-            type: string;
-            /**
-             * @description Structured output produced by the worker on successful completion.
-             * @example {
-             *       "processed": true,
-             *       "completedAt": "2026-02-27T10:00:00.000Z"
-             *     }
-             */
-            result?: Record<string, never>;
-            /**
-             * @description Human-readable error message. Present only when status = FAILED.
-             * @example Computation exceeded memory limit
-             */
-            error?: string;
-            /**
-             * @description Number of processing attempts made by any worker instance.
-             * @example 1
-             */
-            attempts: number;
-            /**
-             * Format: date-time
-             * @description ISO-8601 timestamp when the first PROCESSING transition occurred.
-             * @example 2026-02-27T10:00:01.000Z
-             */
-            startedAt?: string | null;
-            /**
-             * Format: date-time
-             * @description ISO-8601 timestamp when the job reached a terminal state (DONE or FAILED).
-             * @example 2026-02-27T10:00:03.500Z
-             */
-            finishedAt?: string | null;
-            /**
-             * Format: date-time
-             * @description ISO-8601 timestamp when the job was accepted by the API.
-             * @example 2026-02-27T10:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description ISO-8601 timestamp of the last status update.
-             * @example 2026-02-27T10:00:03.500Z
-             */
-            updatedAt: string;
-        };
-        CreateCheckoutSessionDto: {
-            /**
-             * Format: uuid
-             * @description Organization UUID
-             */
-            orgId: string;
-            /**
-             * @description Stripe Price ID (e.g. price_xxx)
-             * @example price_xxx
-             */
-            priceId: string;
-            /**
-             * Format: uri
-             * @description URL to redirect to after successful payment
-             */
-            successUrl?: string;
-            /**
-             * Format: uri
-             * @description URL to redirect to if the checkout is canceled
-             */
-            cancelUrl?: string;
-        };
-        CheckoutSessionResponseDto: {
-            /**
-             * @description Stripe Checkout redirect URL. Redirect the user to this URL to complete payment.
-             * @example https://checkout.stripe.com/pay/cs_test_xxx
-             */
-            url: string;
-            /**
-             * @description Stripe Checkout Session ID.
-             * @example cs_test_xxx
-             */
-            sessionId: string;
-        };
-        CreatePortalSessionDto: {
-            /**
-             * Format: uuid
-             * @description Organization UUID
-             */
-            orgId: string;
-            /**
-             * Format: uri
-             * @description URL to return to after leaving the portal
-             */
-            returnUrl?: string;
-        };
-        PortalSessionResponseDto: {
-            /**
-             * @description Stripe Billing Portal redirect URL. Redirect the user to this URL to manage their subscription.
-             * @example https://billing.stripe.com/session/xxx
-             */
-            url: string;
-        };
-        SubscriptionResponseDto: {
-            /**
-             * Format: uuid
-             * @description Organization UUID.
-             */
-            orgId: string;
-            /**
-             * @description Stripe Customer ID. Null if no Stripe customer has been created yet.
-             * @example cus_xxx
-             */
-            stripeCustomerId?: string | null;
-            /**
-             * @description Stripe Subscription ID. Null if no active subscription exists.
-             * @example sub_xxx
-             */
-            subscriptionId?: string | null;
-            /**
-             * @description Current billing lifecycle status. Mirrors Stripe subscription statuses.
-             * @example ACTIVE
-             * @enum {string}
-             */
-            billingStatus: "NONE" | "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELED" | "UNPAID" | "INCOMPLETE" | "INCOMPLETE_EXPIRED" | "PAUSED";
-            /**
-             * @description Stripe Price ID of the active plan.
-             * @example price_xxx
-             */
-            planId?: string | null;
-            /**
-             * @description Number of billable seats in the current subscription.
-             * @example 5
-             */
-            seatCount: number;
-            /**
-             * @description Storage quota in bytes. Null means the plan default applies.
-             * @example 107374182400
-             */
-            storageLimit?: number | null;
-            /**
-             * Format: date-time
-             * @description Start of the current billing period (ISO 8601).
-             * @example 2026-03-01T00:00:00.000Z
-             */
-            subscriptionPeriodStart?: string | null;
-            /**
-             * Format: date-time
-             * @description End of the current billing period (ISO 8601).
-             * @example 2026-04-01T00:00:00.000Z
-             */
-            subscriptionPeriodEnd?: string | null;
-            /**
-             * @description If true, the subscription will be canceled at the end of the current billing period.
-             * @example false
-             */
-            cancelAtPeriodEnd: boolean;
-        };
-        CancelSubscriptionDto: {
-            /**
-             * Format: uuid
-             * @description Organization UUID
-             */
-            orgId: string;
-        };
-        CancelSubscriptionResponseDto: {
-            /**
-             * @description Confirmation message.
-             * @example Subscription will be canceled at the end of the current period.
-             */
-            message: string;
-        };
-        SubscriptionSnapshotItemDto: {
-            /**
-             * Format: uuid
-             * @description Snapshot UUID.
-             */
-            id: string;
-            /**
-             * @description Stripe Subscription ID recorded at snapshot time.
-             * @example sub_xxx
-             */
-            stripeSubscriptionId: string;
-            /**
-             * @description Stripe Price ID of the plan recorded at snapshot time.
-             * @example price_xxx
-             */
-            planId?: string | null;
-            /**
-             * @description Stripe subscription status string recorded at snapshot time.
-             * @example active
-             */
-            status: string;
-            /**
-             * @description Number of billable seats recorded at snapshot time.
-             * @example 5
-             */
-            seats?: number | null;
-            /**
-             * @description Maximum seats allowed by the plan at snapshot time.
-             * @example 10
-             */
-            seatLimit?: number | null;
-            /**
-             * Format: date-time
-             * @description Start of the billing period recorded at snapshot time (ISO 8601).
-             * @example 2026-03-01T00:00:00.000Z
-             */
-            periodStart: string;
-            /**
-             * Format: date-time
-             * @description End of the billing period recorded at snapshot time (ISO 8601).
-             * @example 2026-04-01T00:00:00.000Z
-             */
-            periodEnd: string;
-            /**
-             * Format: date-time
-             * @description Timestamp when the snapshot was created (ISO 8601).
-             * @example 2026-03-01T12:34:56.000Z
-             */
-            createdAt: string;
-        };
-        BillingHistoryResponseDto: {
-            /** @description Ordered list of subscription snapshots (newest first). */
-            items: components["schemas"]["SubscriptionSnapshotItemDto"][];
-            /**
-             * @description Total number of snapshots for this organization.
-             * @example 42
-             */
-            total: number;
-            /**
-             * @description Maximum number of items returned in this page.
-             * @example 50
-             */
-            limit: number;
-            /**
-             * @description Number of items skipped.
-             * @example 0
-             */
-            offset: number;
-        };
-        CreateNotificationDto: {
-            /**
-             * Format: uuid
-             * @description Target organisation ID.
-             */
-            orgId: string;
-            /**
-             * Format: uuid
-             * @description Recipient user ID.
-             */
-            userId: string;
-            /**
-             * @description Notification category (e.g. "invite", "billing").
-             * @example billing
-             */
-            type: string;
-            /**
-             * @description Short notification title.
-             * @example Invoice paid
-             */
-            title: string;
-            /**
-             * @description Full notification body text.
-             * @example Your invoice #1234 has been paid successfully.
-             */
-            body: string;
-            /**
-             * @description Arbitrary JSON metadata (action links, entity ids, …).
-             * @example {
-             *       "invoiceId": "inv_abc",
-             *       "amount": 9900
-             *     }
-             */
-            metadata?: Record<string, never>;
-        };
-        MarkManyReadDto: {
-            /** @description IDs of notifications to mark as read. */
-            ids: string[];
-        };
-        GenerateUploadUrlDto: {
-            /**
-             * @description Original filename
-             * @example document.pdf
-             */
-            filename: string;
-            /**
-             * @description MIME type of the file
-             * @example application/pdf
-             */
-            mimeType: string;
-            /**
-             * @description File size in bytes
-             * @example 1048576
-             */
-            size: number;
-        };
-        UploadUrlResponseDto: {
-            /**
-             * @description Unique file identifier
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            fileId: string;
-            /**
-             * @description Presigned upload URL (PUT request)
-             * @example https://s3.amazonaws.com/bucket/path?signature=...
-             */
-            uploadUrl: string;
-            /**
-             * @description Storage key for the file
-             * @example org/org-uuid/file-uuid
-             */
-            storageKey: string;
-            /**
-             * Format: date-time
-             * @description Upload URL expiration timestamp
-             * @example 2026-03-12T13:00:00.000Z
-             */
-            expiresAt: string;
-        };
-        ConfirmUploadDto: {
-            /**
-             * Format: uuid
-             * @description File identifier returned from upload URL generation
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            fileId: string;
-        };
-        ConfirmUploadResponseDto: {
-            /**
-             * @description File identifier
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            fileId: string;
-            /**
-             * @description File status after confirmation
-             * @example COMPLETED
-             * @enum {string}
-             */
-            status: "PENDING" | "COMPLETED" | "EXPIRED" | "ABORTED";
-            /**
-             * Format: date-time
-             * @description Timestamp when upload was confirmed
-             * @example 2026-03-12T12:30:00.000Z
-             */
-            confirmedAt: string;
-        };
-        DownloadUrlResponseDto: {
-            /**
-             * @description Presigned download URL (GET request)
-             * @example https://s3.amazonaws.com/bucket/path?signature=...
-             */
-            downloadUrl: string;
-            /**
-             * Format: date-time
-             * @description Download URL expiration timestamp
-             * @example 2026-03-12T13:00:00.000Z
-             */
-            expiresAt: string;
-            /**
-             * @description Original filename
-             * @example document.pdf
-             */
-            filename: string;
-            /**
-             * @description File MIME type
-             * @example application/pdf
-             */
-            mimeType: string | null;
-            /**
-             * @description File size in bytes
-             * @example 1048576
-             */
-            size: string | null;
-        };
-        FileMetadataResponseDto: {
-            /**
-             * @description File identifier
-             * @example 550e8400-e29b-41d4-a716-446655440000
-             */
-            id: string;
-            /**
-             * @description Organization identifier
-             * @example 123e4567-e89b-12d3-a456-426614174000
-             */
-            orgId: string;
-            /**
-             * @description User who uploaded the file
-             * @example 456e7890-e89b-12d3-a456-426614174111
-             */
-            uploadedBy: string;
-            /**
-             * @description Storage key (path in object storage)
-             * @example org/org-uuid/file-uuid
-             */
-            storageKey: string;
-            /**
-             * @description Storage provider
-             * @example S3
-             * @enum {string}
-             */
-            provider: "S3" | "AZURE";
-            /**
-             * @description Original filename
-             * @example document.pdf
-             */
-            filename: string;
-            /**
-             * @description File size in bytes
-             * @example 1048576
-             */
-            size: string | null;
-            /**
-             * @description File MIME type
-             * @example application/pdf
-             */
-            mimeType: string | null;
-            /**
-             * @description File status
-             * @example COMPLETED
-             * @enum {string}
-             */
-            status: "PENDING" | "COMPLETED" | "EXPIRED" | "ABORTED";
-            /**
-             * Format: date-time
-             * @description Upload URL expiration timestamp
-             * @example 2026-03-12T13:00:00.000Z
-             */
-            expiresAt: string | null;
-            /**
-             * Format: date-time
-             * @description Timestamp when upload was confirmed
-             * @example 2026-03-12T12:30:00.000Z
-             */
-            confirmedAt: string | null;
-            /**
-             * Format: date-time
-             * @description File creation timestamp
-             * @example 2026-03-12T12:00:00.000Z
-             */
-            createdAt: string;
-            /**
-             * Format: date-time
-             * @description Last update timestamp
-             * @example 2026-03-12T12:30:00.000Z
-             */
-            updatedAt: string;
-        };
+  schemas: {
+    CreateOrganizationDto: {
+      /**
+       * @description Organization name
+       * @example Acme Corp
+       */
+      name: string;
     };
-    responses: never;
-    parameters: never;
-    requestBodies: never;
-    headers: never;
-    pathItems: never;
+    UpdateOrganizationDto: {
+      /**
+       * @description Organization name
+       * @example Updated Corp
+       */
+      name?: string;
+      /**
+       * @description Organization status
+       * @example ACTIVE
+       * @enum {string}
+       */
+      status?: 'ACTIVE' | 'SUSPENDED' | 'PENDING_DELETION' | 'DELETED';
+    };
+    CreateMembershipDto: {
+      /**
+       * @description ID of the user to add
+       * @example uuid-of-user
+       */
+      userId: string;
+      /**
+       * @description Role to assign
+       * @example MEMBER
+       * @enum {string}
+       */
+      role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+    };
+    /**
+     * @description New role to assign to the member. OWNER has full control; ADMIN can manage members; MEMBER has standard access; READ_ONLY can only view.
+     * @enum {string}
+     */
+    MembershipRole: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+    UpdateMembershipDto: {
+      /**
+       * @description New role to assign to the member. OWNER has full control; ADMIN can manage members; MEMBER has standard access; READ_ONLY can only view.
+       * @example ADMIN
+       */
+      role: components['schemas']['MembershipRole'];
+    };
+    InviteMemberDto: {
+      /**
+       * @description Email address of the user to invite
+       * @example alice@example.com
+       */
+      email: string;
+      /**
+       * @description Role to assign to the invited user
+       * @example MEMBER
+       * @enum {string}
+       */
+      role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+    };
+    CreateTaskDto: {
+      /**
+       * @description Human-readable name of the task to be processed.
+       * @example Generate monthly report
+       */
+      name?: string;
+      /**
+       * @description Optional free-text description providing context for the worker.
+       * @example Aggregate sales data for Q1 2026 across all regions.
+       */
+      description?: string;
+      /**
+       * @description Arbitrary JSON payload that is forwarded verbatim to the worker. Must be a plain object; arrays and primitives are rejected.
+       * @example {
+       *       "reportType": "monthly",
+       *       "year": 2026,
+       *       "month": 1,
+       *       "region": "EU"
+       *     }
+       */
+      data?: Record<string, never>;
+    };
+    JobStatusDto: {
+      /**
+       * Format: uuid
+       * @description Unique identifier of the job (UUID v4).
+       * @example f47ac10b-58cc-4372-a567-0e02b2c3d479
+       */
+      id: string;
+      /**
+       * Format: uuid
+       * @description Unique identifier of the job (UUID v4). Alias of id.
+       * @example f47ac10b-58cc-4372-a567-0e02b2c3d479
+       */
+      jobId: string;
+      /**
+       * @description Current lifecycle status of the job.
+       * @example PROCESSING
+       * @enum {string}
+       */
+      status: 'PENDING' | 'PROCESSING' | 'DONE' | 'FAILED';
+      /**
+       * @description Job type discriminator.
+       * @example heavy_job
+       */
+      type: string;
+      /**
+       * @description Structured output produced by the worker on successful completion.
+       * @example {
+       *       "processed": true,
+       *       "completedAt": "2026-02-27T10:00:00.000Z"
+       *     }
+       */
+      result?: Record<string, never>;
+      /**
+       * @description Human-readable error message. Present only when status = FAILED.
+       * @example Computation exceeded memory limit
+       */
+      error?: string;
+      /**
+       * @description Number of processing attempts made by any worker instance.
+       * @example 1
+       */
+      attempts: number;
+      /**
+       * Format: date-time
+       * @description ISO-8601 timestamp when the first PROCESSING transition occurred.
+       * @example 2026-02-27T10:00:01.000Z
+       */
+      startedAt?: string | null;
+      /**
+       * Format: date-time
+       * @description ISO-8601 timestamp when the job reached a terminal state (DONE or FAILED).
+       * @example 2026-02-27T10:00:03.500Z
+       */
+      finishedAt?: string | null;
+      /**
+       * Format: date-time
+       * @description ISO-8601 timestamp when the job was accepted by the API.
+       * @example 2026-02-27T10:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description ISO-8601 timestamp of the last status update.
+       * @example 2026-02-27T10:00:03.500Z
+       */
+      updatedAt: string;
+    };
+    CreateCheckoutSessionDto: {
+      /**
+       * Format: uuid
+       * @description Organization UUID
+       */
+      orgId: string;
+      /**
+       * @description Stripe Price ID (e.g. price_xxx)
+       * @example price_xxx
+       */
+      priceId: string;
+      /**
+       * Format: uri
+       * @description URL to redirect to after successful payment
+       */
+      successUrl?: string;
+      /**
+       * Format: uri
+       * @description URL to redirect to if the checkout is canceled
+       */
+      cancelUrl?: string;
+    };
+    CheckoutSessionResponseDto: {
+      /**
+       * @description Stripe Checkout redirect URL. Redirect the user to this URL to complete payment.
+       * @example https://checkout.stripe.com/pay/cs_test_xxx
+       */
+      url: string;
+      /**
+       * @description Stripe Checkout Session ID.
+       * @example cs_test_xxx
+       */
+      sessionId: string;
+    };
+    CreatePortalSessionDto: {
+      /**
+       * Format: uuid
+       * @description Organization UUID
+       */
+      orgId: string;
+      /**
+       * Format: uri
+       * @description URL to return to after leaving the portal
+       */
+      returnUrl?: string;
+    };
+    PortalSessionResponseDto: {
+      /**
+       * @description Stripe Billing Portal redirect URL. Redirect the user to this URL to manage their subscription.
+       * @example https://billing.stripe.com/session/xxx
+       */
+      url: string;
+    };
+    SubscriptionResponseDto: {
+      /**
+       * Format: uuid
+       * @description Organization UUID.
+       */
+      orgId: string;
+      /**
+       * @description Stripe Customer ID. Null if no Stripe customer has been created yet.
+       * @example cus_xxx
+       */
+      stripeCustomerId?: string | null;
+      /**
+       * @description Stripe Subscription ID. Null if no active subscription exists.
+       * @example sub_xxx
+       */
+      subscriptionId?: string | null;
+      /**
+       * @description Current billing lifecycle status. Mirrors Stripe subscription statuses.
+       * @example ACTIVE
+       * @enum {string}
+       */
+      billingStatus:
+        | 'NONE'
+        | 'TRIALING'
+        | 'ACTIVE'
+        | 'PAST_DUE'
+        | 'CANCELED'
+        | 'UNPAID'
+        | 'INCOMPLETE'
+        | 'INCOMPLETE_EXPIRED'
+        | 'PAUSED';
+      /**
+       * @description Stripe Price ID of the active plan.
+       * @example price_xxx
+       */
+      planId?: string | null;
+      /**
+       * @description Number of billable seats in the current subscription.
+       * @example 5
+       */
+      seatCount: number;
+      /**
+       * @description Storage quota in bytes. Null means the plan default applies.
+       * @example 107374182400
+       */
+      storageLimit?: number | null;
+      /**
+       * Format: date-time
+       * @description Start of the current billing period (ISO 8601).
+       * @example 2026-03-01T00:00:00.000Z
+       */
+      subscriptionPeriodStart?: string | null;
+      /**
+       * Format: date-time
+       * @description End of the current billing period (ISO 8601).
+       * @example 2026-04-01T00:00:00.000Z
+       */
+      subscriptionPeriodEnd?: string | null;
+      /**
+       * @description If true, the subscription will be canceled at the end of the current billing period.
+       * @example false
+       */
+      cancelAtPeriodEnd: boolean;
+    };
+    CancelSubscriptionDto: {
+      /**
+       * Format: uuid
+       * @description Organization UUID
+       */
+      orgId: string;
+    };
+    CancelSubscriptionResponseDto: {
+      /**
+       * @description Confirmation message.
+       * @example Subscription will be canceled at the end of the current period.
+       */
+      message: string;
+    };
+    SubscriptionSnapshotItemDto: {
+      /**
+       * Format: uuid
+       * @description Snapshot UUID.
+       */
+      id: string;
+      /**
+       * @description Stripe Subscription ID recorded at snapshot time.
+       * @example sub_xxx
+       */
+      stripeSubscriptionId: string;
+      /**
+       * @description Stripe Price ID of the plan recorded at snapshot time.
+       * @example price_xxx
+       */
+      planId?: string | null;
+      /**
+       * @description Stripe subscription status string recorded at snapshot time.
+       * @example active
+       */
+      status: string;
+      /**
+       * @description Number of billable seats recorded at snapshot time.
+       * @example 5
+       */
+      seats?: number | null;
+      /**
+       * @description Maximum seats allowed by the plan at snapshot time.
+       * @example 10
+       */
+      seatLimit?: number | null;
+      /**
+       * Format: date-time
+       * @description Start of the billing period recorded at snapshot time (ISO 8601).
+       * @example 2026-03-01T00:00:00.000Z
+       */
+      periodStart: string;
+      /**
+       * Format: date-time
+       * @description End of the billing period recorded at snapshot time (ISO 8601).
+       * @example 2026-04-01T00:00:00.000Z
+       */
+      periodEnd: string;
+      /**
+       * Format: date-time
+       * @description Timestamp when the snapshot was created (ISO 8601).
+       * @example 2026-03-01T12:34:56.000Z
+       */
+      createdAt: string;
+    };
+    BillingHistoryResponseDto: {
+      /** @description Ordered list of subscription snapshots (newest first). */
+      items: components['schemas']['SubscriptionSnapshotItemDto'][];
+      /**
+       * @description Total number of snapshots for this organization.
+       * @example 42
+       */
+      total: number;
+      /**
+       * @description Maximum number of items returned in this page.
+       * @example 50
+       */
+      limit: number;
+      /**
+       * @description Number of items skipped.
+       * @example 0
+       */
+      offset: number;
+    };
+    CreateNotificationDto: {
+      /**
+       * Format: uuid
+       * @description Target organisation ID.
+       */
+      orgId: string;
+      /**
+       * Format: uuid
+       * @description Recipient user ID.
+       */
+      userId: string;
+      /**
+       * @description Notification category (e.g. "invite", "billing").
+       * @example billing
+       */
+      type: string;
+      /**
+       * @description Short notification title.
+       * @example Invoice paid
+       */
+      title: string;
+      /**
+       * @description Full notification body text.
+       * @example Your invoice #1234 has been paid successfully.
+       */
+      body: string;
+      /**
+       * @description Arbitrary JSON metadata (action links, entity ids, …).
+       * @example {
+       *       "invoiceId": "inv_abc",
+       *       "amount": 9900
+       *     }
+       */
+      metadata?: Record<string, never>;
+    };
+    MarkManyReadDto: {
+      /** @description IDs of notifications to mark as read. */
+      ids: string[];
+    };
+    GenerateUploadUrlDto: {
+      /**
+       * @description Original filename
+       * @example document.pdf
+       */
+      filename: string;
+      /**
+       * @description MIME type of the file
+       * @example application/pdf
+       */
+      mimeType: string;
+      /**
+       * @description File size in bytes
+       * @example 1048576
+       */
+      size: number;
+    };
+    UploadUrlResponseDto: {
+      /**
+       * @description Unique file identifier
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      fileId: string;
+      /**
+       * @description Presigned upload URL (PUT request)
+       * @example https://s3.amazonaws.com/bucket/path?signature=...
+       */
+      uploadUrl: string;
+      /**
+       * @description Storage key for the file
+       * @example org/org-uuid/file-uuid
+       */
+      storageKey: string;
+      /**
+       * Format: date-time
+       * @description Upload URL expiration timestamp
+       * @example 2026-03-12T13:00:00.000Z
+       */
+      expiresAt: string;
+    };
+    ConfirmUploadDto: {
+      /**
+       * Format: uuid
+       * @description File identifier returned from upload URL generation
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      fileId: string;
+    };
+    ConfirmUploadResponseDto: {
+      /**
+       * @description File identifier
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      fileId: string;
+      /**
+       * @description File status after confirmation
+       * @example COMPLETED
+       * @enum {string}
+       */
+      status: 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'ABORTED';
+      /**
+       * Format: date-time
+       * @description Timestamp when upload was confirmed
+       * @example 2026-03-12T12:30:00.000Z
+       */
+      confirmedAt: string;
+    };
+    DownloadUrlResponseDto: {
+      /**
+       * @description Presigned download URL (GET request)
+       * @example https://s3.amazonaws.com/bucket/path?signature=...
+       */
+      downloadUrl: string;
+      /**
+       * Format: date-time
+       * @description Download URL expiration timestamp
+       * @example 2026-03-12T13:00:00.000Z
+       */
+      expiresAt: string;
+      /**
+       * @description Original filename
+       * @example document.pdf
+       */
+      filename: string;
+      /**
+       * @description File MIME type
+       * @example application/pdf
+       */
+      mimeType: string | null;
+      /**
+       * @description File size in bytes
+       * @example 1048576
+       */
+      size: string | null;
+    };
+    FileMetadataResponseDto: {
+      /**
+       * @description File identifier
+       * @example 550e8400-e29b-41d4-a716-446655440000
+       */
+      id: string;
+      /**
+       * @description Organization identifier
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      orgId: string;
+      /**
+       * @description User who uploaded the file
+       * @example 456e7890-e89b-12d3-a456-426614174111
+       */
+      uploadedBy: string;
+      /**
+       * @description Storage key (path in object storage)
+       * @example org/org-uuid/file-uuid
+       */
+      storageKey: string;
+      /**
+       * @description Storage provider
+       * @example S3
+       * @enum {string}
+       */
+      provider: 'S3' | 'AZURE';
+      /**
+       * @description Original filename
+       * @example document.pdf
+       */
+      filename: string;
+      /**
+       * @description File size in bytes
+       * @example 1048576
+       */
+      size: string | null;
+      /**
+       * @description File MIME type
+       * @example application/pdf
+       */
+      mimeType: string | null;
+      /**
+       * @description File status
+       * @example COMPLETED
+       * @enum {string}
+       */
+      status: 'PENDING' | 'COMPLETED' | 'EXPIRED' | 'ABORTED';
+      /**
+       * Format: date-time
+       * @description Upload URL expiration timestamp
+       * @example 2026-03-12T13:00:00.000Z
+       */
+      expiresAt: string | null;
+      /**
+       * Format: date-time
+       * @description Timestamp when upload was confirmed
+       * @example 2026-03-12T12:30:00.000Z
+       */
+      confirmedAt: string | null;
+      /**
+       * Format: date-time
+       * @description File creation timestamp
+       * @example 2026-03-12T12:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * Format: date-time
+       * @description Last update timestamp
+       * @example 2026-03-12T12:30:00.000Z
+       */
+      updatedAt: string;
+    };
+  };
+  responses: never;
+  parameters: never;
+  requestBodies: never;
+  headers: never;
+  pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    AppController_getHello: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description API is up and returning a greeting. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string;
-                };
-            };
-        };
+  AppController_getHello: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    HealthController_check: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description API is up and returning a greeting. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Health check result with per-dependency status. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * @example ok
-                         * @enum {string}
-                         */
-                        status: "ok" | "degraded" | "error";
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        timestamp: string;
-                        services: {
-                            database: {
-                                /**
-                                 * @example ok
-                                 * @enum {string}
-                                 */
-                                status: "ok" | "error";
-                                /**
-                                 * @description Round-trip latency in ms.
-                                 * @example 4
-                                 */
-                                responseTime?: number;
-                            };
-                            redis: {
-                                /**
-                                 * @example ok
-                                 * @enum {string}
-                                 */
-                                status: "ok" | "error";
-                                /**
-                                 * @description Round-trip latency in ms.
-                                 * @example 1
-                                 */
-                                responseTime?: number;
-                            };
-                            stripe: {
-                                /**
-                                 * @example ok
-                                 * @enum {string}
-                                 */
-                                status: "ok" | "error" | "misconfigured";
-                                /**
-                                 * @description Round-trip latency to Stripe API in ms.
-                                 * @example 120
-                                 */
-                                responseTime?: number;
-                            };
-                        };
-                    };
-                };
-            };
+        content: {
+          'application/json': string;
         };
+      };
     };
-    AuthController_getMe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Authenticated user profile. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @description Internal database UUID of the user.
-                         * @example c7b3e1a2-45d6-4f89-9012-3456789abcde
-                         */
-                        id: string;
-                        /**
-                         * @description Auth0 subject identifier ("sub" JWT claim).
-                         * @example auth0|64a1b2c3d4e5f6a7b8c9d0e1
-                         */
-                        auth0Id: string;
-                        /**
-                         * Format: email
-                         * @description Email address from the Auth0 token.
-                         * @example alice@example.com
-                         */
-                        email: string;
-                    };
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 401 */
-                        statusCode?: number;
-                        /** @example Unauthorized */
-                        message?: string;
-                    };
-                };
-            };
-        };
+  };
+  HealthController_check: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    OrganizationsController_findMine: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Health check result with per-dependency status. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Array of organizations the caller is a member of. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
-                         */
-                        id?: string;
-                        /** @example Acme Corp */
-                        name?: string;
-                        /**
-                         * @example ACTIVE
-                         * @enum {string}
-                         */
-                        status?: "ACTIVE" | "SUSPENDED";
-                        /** @example null */
-                        stripeCustomerId?: string | null;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        createdAt?: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        updatedAt?: string;
-                    }[];
-                };
+        content: {
+          'application/json': {
+            /**
+             * @example ok
+             * @enum {string}
+             */
+            status: 'ok' | 'degraded' | 'error';
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            timestamp: string;
+            services: {
+              database: {
+                /**
+                 * @example ok
+                 * @enum {string}
+                 */
+                status: 'ok' | 'error';
+                /**
+                 * @description Round-trip latency in ms.
+                 * @example 4
+                 */
+                responseTime?: number;
+              };
+              redis: {
+                /**
+                 * @example ok
+                 * @enum {string}
+                 */
+                status: 'ok' | 'error';
+                /**
+                 * @description Round-trip latency in ms.
+                 * @example 1
+                 */
+                responseTime?: number;
+              };
+              stripe: {
+                /**
+                 * @example ok
+                 * @enum {string}
+                 */
+                status: 'ok' | 'error' | 'misconfigured';
+                /**
+                 * @description Round-trip latency to Stripe API in ms.
+                 * @example 120
+                 */
+                responseTime?: number;
+              };
             };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+          };
         };
+      };
     };
-    OrganizationsController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateOrganizationDto"];
-            };
-        };
-        responses: {
-            /** @description Organization created successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
-                         */
-                        id: string;
-                        /** @example Acme Corp */
-                        name: string;
-                        /**
-                         * @example ACTIVE
-                         * @enum {string}
-                         */
-                        status: "ACTIVE" | "SUSPENDED";
-                        /** @example null */
-                        stripeCustomerId?: string | null;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        createdAt: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        updatedAt: string;
-                    };
-                };
-            };
-            /** @description Validation failed — name must be at least 3 characters. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  AuthController_getMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    OrganizationsController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Authenticated user profile. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Organization details. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
-                         */
-                        id?: string;
-                        /** @example Acme Corp */
-                        name?: string;
-                        /**
-                         * @example ACTIVE
-                         * @enum {string}
-                         */
-                        status?: "ACTIVE" | "SUSPENDED";
-                        /** @example null */
-                        stripeCustomerId?: string | null;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        createdAt?: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        updatedAt?: string;
-                    };
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller does not belong to this organization or lacks ORG_READ permission. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Organization not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @description Internal database UUID of the user.
+             * @example c7b3e1a2-45d6-4f89-9012-3456789abcde
+             */
+            id: string;
+            /**
+             * @description Auth0 subject identifier ("sub" JWT claim).
+             * @example auth0|64a1b2c3d4e5f6a7b8c9d0e1
+             */
+            auth0Id: string;
+            /**
+             * Format: email
+             * @description Email address from the Auth0 token.
+             * @example alice@example.com
+             */
+            email: string;
+          };
         };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example 401 */
+            statusCode?: number;
+            /** @example Unauthorized */
+            message?: string;
+          };
+        };
+      };
     };
-    OrganizationsController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateOrganizationDto"];
-            };
-        };
-        responses: {
-            /** @description Updated organization object. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
-                         */
-                        id?: string;
-                        /** @example Acme Corp Renamed */
-                        name?: string;
-                        /**
-                         * @example ACTIVE
-                         * @enum {string}
-                         */
-                        status?: "ACTIVE" | "SUSPENDED";
-                        /** @example null */
-                        stripeCustomerId?: string | null;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        createdAt?: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T13:00:00.000Z
-                         */
-                        updatedAt?: string;
-                    };
-                };
-            };
-            /** @description Validation failed — check the request body. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller lacks ORG_MANAGE permission. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Organization not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  OrganizationsController_findMine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    OrganizationsController_requestDeletion: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Array of organizations the caller is a member of. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Deletion request accepted and scheduled. */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Organization deletion requested successfully */
-                        message: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-04-13T14:06:00.000Z
-                         */
-                        scheduledAt: string;
-                    };
-                };
-            };
-            /** @description Organization is already being deleted or has been deleted. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Only OWNER role can request organization deletion. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Organization not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
+             */
+            id?: string;
+            /** @example Acme Corp */
+            name?: string;
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: 'ACTIVE' | 'SUSPENDED';
+            /** @example null */
+            stripeCustomerId?: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            createdAt?: string;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            updatedAt?: string;
+          }[];
         };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    OrganizationsController_requestExport: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Export request accepted and queued for processing. */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @example b2c3d4e5-f6g7-5890-bc12-de3456gh7890
-                         */
-                        exportId: string;
-                        /** @example Export request accepted */
-                        message: string;
-                    };
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Only OWNER and ADMIN roles can request exports. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Organization not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  OrganizationsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    OrganizationsController_getExport: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                id: string;
-                /** @description Export UUID */
-                exportId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Export details retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Only OWNER and ADMIN roles can view exports. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Export not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateOrganizationDto'];
+      };
     };
-    OrganizationsController_listExports: {
-        parameters: {
-            query: {
-                limit: string;
-                offset: string;
-            };
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Organization created successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Export list retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Only OWNER and ADMIN roles can view exports. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
+             */
+            id: string;
+            /** @example Acme Corp */
+            name: string;
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status: 'ACTIVE' | 'SUSPENDED';
+            /** @example null */
+            stripeCustomerId?: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            updatedAt: string;
+          };
         };
+      };
+      /** @description Validation failed — name must be at least 3 characters. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    MembershipsController_findByOrg: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                orgId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Array of membership records. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @example d4e5f6a7-b8c9-4012-a345-678901bcdef2
-                         */
-                        id?: string;
-                        /**
-                         * Format: uuid
-                         * @example c7b3e1a2-45d6-4f89-9012-3456789abcde
-                         */
-                        userId?: string;
-                        /**
-                         * Format: uuid
-                         * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
-                         */
-                        orgId?: string;
-                        /**
-                         * @example ADMIN
-                         * @enum {string}
-                         */
-                        role?: "OWNER" | "ADMIN" | "MEMBER" | "READ_ONLY";
-                        /**
-                         * @example ACTIVE
-                         * @enum {string}
-                         */
-                        status?: "ACTIVE" | "INVITED" | "SUSPENDED";
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        createdAt?: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        updatedAt?: string;
-                    }[];
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller lacks ORG_READ permission. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  OrganizationsController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        id: string;
+      };
+      cookie?: never;
     };
-    MembershipsController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                orgId: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Organization details. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateMembershipDto"];
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
+             */
+            id?: string;
+            /** @example Acme Corp */
+            name?: string;
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: 'ACTIVE' | 'SUSPENDED';
+            /** @example null */
+            stripeCustomerId?: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            createdAt?: string;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            updatedAt?: string;
+          };
         };
-        responses: {
-            /** @description Membership record created. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @example d4e5f6a7-b8c9-4012-a345-678901bcdef2
-                         */
-                        id: string;
-                        /**
-                         * Format: uuid
-                         * @example c7b3e1a2-45d6-4f89-9012-3456789abcde
-                         */
-                        userId: string;
-                        /**
-                         * Format: uuid
-                         * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
-                         */
-                        orgId: string;
-                        /**
-                         * @example MEMBER
-                         * @enum {string}
-                         */
-                        role: "OWNER" | "ADMIN" | "MEMBER" | "READ_ONLY";
-                        /**
-                         * @example ACTIVE
-                         * @enum {string}
-                         */
-                        status: "ACTIVE" | "INVITED" | "SUSPENDED";
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        createdAt: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        updatedAt: string;
-                    };
-                };
-            };
-            /** @description Validation failed — userId must be a string; role must be a valid MembershipRole. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller lacks ORG_MEMBERS_INVITE permission, or the organization has reached its seat limit. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Caller does not belong to this organization or lacks ORG_READ permission. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Organization not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    MembershipsController_delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                orgId: string;
-                /** @description Membership UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Member removed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Membership deleted successfully */
-                        message: string;
-                    };
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller lacks ORG_MEMBERS_REMOVE permission. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Membership not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  OrganizationsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        id: string;
+      };
+      cookie?: never;
     };
-    MembershipsController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                orgId: string;
-                /** @description Membership UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateMembershipDto"];
-            };
-        };
-        responses: {
-            /** @description Updated membership record. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @example d4e5f6a7-b8c9-4012-a345-678901bcdef2
-                         */
-                        id?: string;
-                        /**
-                         * Format: uuid
-                         * @example c7b3e1a2-45d6-4f89-9012-3456789abcde
-                         */
-                        userId?: string;
-                        /**
-                         * Format: uuid
-                         * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
-                         */
-                        orgId?: string;
-                        /**
-                         * @example ADMIN
-                         * @enum {string}
-                         */
-                        role?: "OWNER" | "ADMIN" | "MEMBER" | "READ_ONLY";
-                        /**
-                         * @example ACTIVE
-                         * @enum {string}
-                         */
-                        status?: "ACTIVE" | "INVITED" | "SUSPENDED";
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T12:34:56.789Z
-                         */
-                        createdAt?: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-26T13:00:00.000Z
-                         */
-                        updatedAt?: string;
-                    };
-                };
-            };
-            /** @description Validation failed — role must be a valid MembershipRole enum value. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller lacks ORG_MEMBERS_ROLE_UPDATE permission. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Membership not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateOrganizationDto'];
+      };
     };
-    HealthController_liveness: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Updated organization object. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Process is alive. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example ok */
-                        status: string;
-                    };
-                };
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
+             */
+            id?: string;
+            /** @example Acme Corp Renamed */
+            name?: string;
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: 'ACTIVE' | 'SUSPENDED';
+            /** @example null */
+            stripeCustomerId?: string | null;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            createdAt?: string;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T13:00:00.000Z
+             */
+            updatedAt?: string;
+          };
         };
+      };
+      /** @description Validation failed — check the request body. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller lacks ORG_MANAGE permission. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Organization not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    HealthController_readiness: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Readiness status — ready: false means the app is still warming up. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * @example ok
-                         * @enum {string}
-                         */
-                        status: "ok" | "not ready";
-                        /** @example true */
-                        ready: boolean;
-                    };
-                };
-            };
-        };
+  };
+  OrganizationsController_requestDeletion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        id: string;
+      };
+      cookie?: never;
     };
-    TasksController_createHeavyJob: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Deletion request accepted and scheduled. */
+      202: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateTaskDto"];
-            };
+        content: {
+          'application/json': {
+            /** @example Organization deletion requested successfully */
+            message: string;
+            /**
+             * Format: date-time
+             * @example 2026-04-13T14:06:00.000Z
+             */
+            scheduledAt: string;
+          };
         };
-        responses: {
-            /** @description Job accepted and queued for processing. */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /**
-                         * Format: uuid
-                         * @description Unique identifier of the enqueued job.
-                         * @example f47ac10b-58cc-4372-a567-0e02b2c3d479
-                         */
-                        jobId: string;
-                        /** @example accepted */
-                        status: string;
-                        /** @example Job submitted for processing */
-                        message: string;
-                        /**
-                         * Format: date-time
-                         * @example 2026-02-27T10:00:00.000Z
-                         */
-                        timestamp: string;
-                    };
-                };
-            };
-            /** @description Validation failed — check request body against the schema. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 400 */
-                        statusCode?: number;
-                        /**
-                         * @example [
-                         *       "name should not be empty"
-                         *     ]
-                         */
-                        message?: string[];
-                        /** @example Bad Request */
-                        error?: string;
-                    };
-                };
-            };
-            /** @description Missing or invalid JWT token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 401 */
-                        statusCode?: number;
-                        /** @example Unauthorized */
-                        message?: string;
-                    };
-                };
-            };
+      };
+      /** @description Organization is already being deleted or has been deleted. */
+      400: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only OWNER role can request organization deletion. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Organization not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    TasksController_getJobStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description UUID of the job returned by POST /tasks/heavy-job. */
-                jobId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Current job status and metadata. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["JobStatusDto"];
-                };
-            };
-            /** @description Missing or invalid JWT token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Job not found or belongs to a different tenant. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example 404 */
-                        statusCode?: number;
-                        /** @example Job <id> not found */
-                        message?: string;
-                    };
-                };
-            };
-        };
+  };
+  OrganizationsController_requestExport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        id: string;
+      };
+      cookie?: never;
     };
-    ActivityLogController_list: {
-        parameters: {
-            query?: {
-                action?: string;
-                fromDate?: string;
-                toDate?: string;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                /** @description Organisation UUID */
-                orgId: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Export request accepted and queued for processing. */
+      202: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated activity logs returned successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller does not belong to this organisation or has insufficient role. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @example b2c3d4e5-f6g7-5890-bc12-de3456gh7890
+             */
+            exportId: string;
+            /** @example Export request accepted */
+            message: string;
+          };
         };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Only OWNER and ADMIN roles can request exports. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Organization not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    BillingController_createCheckoutSession: {
-        parameters: {
-            query?: never;
-            header: {
-                "idempotency-key": string;
-                /** @description Optional client-generated UUID to prevent duplicate Checkout sessions on retried requests. Forwarded verbatim to Stripe. Must be unique per logical checkout attempt. */
-                "Idempotency-Key"?: string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateCheckoutSessionDto"];
-            };
-        };
-        responses: {
-            /** @description Checkout session created. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CheckoutSessionResponseDto"];
-                };
-            };
-            /** @description Validation failed — missing or invalid request body fields. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  OrganizationsController_getExport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        id: string;
+        /** @description Export UUID */
+        exportId: string;
+      };
+      cookie?: never;
     };
-    BillingController_createPortalSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Export details retrieved successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePortalSessionDto"];
-            };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
         };
-        responses: {
-            /** @description Billing portal session created. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PortalSessionResponseDto"];
-                };
-            };
-            /** @description Validation failed — missing or invalid request body fields. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content?: never;
+      };
+      /** @description Only OWNER and ADMIN roles can view exports. */
+      403: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
+      /** @description Export not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    BillingController_getSubscription: {
-        parameters: {
-            query: {
-                /** @description Organization UUID */
-                orgId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Subscription state returned. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubscriptionResponseDto"];
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  OrganizationsController_listExports: {
+    parameters: {
+      query: {
+        limit: string;
+        offset: string;
+      };
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        id: string;
+      };
+      cookie?: never;
     };
-    BillingController_cancelSubscription: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Export list retrieved successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CancelSubscriptionDto"];
-            };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
         };
-        responses: {
-            /** @description Subscription scheduled for cancellation. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CancelSubscriptionResponseDto"];
-                };
-            };
-            /** @description Validation failed — missing or invalid request body fields. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content?: never;
+      };
+      /** @description Only OWNER and ADMIN roles can view exports. */
+      403: {
+        headers: {
+          [name: string]: unknown;
         };
+        content?: never;
+      };
     };
-    BillingController_getSubscriptionHistory: {
-        parameters: {
-            query: {
-                /** @description Organization UUID */
-                orgId: string;
-                /** @description Maximum items to return (1–200, default 50) */
-                limit?: string;
-                /** @description Number of items to skip for pagination (default 0) */
-                offset?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated subscription snapshot history returned. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BillingHistoryResponseDto"];
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  MembershipsController_findByOrg: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        orgId: string;
+      };
+      cookie?: never;
     };
-    WebhookController_handleWebhook: {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description Stripe webhook signature for HMAC verification */
-                "stripe-signature": string;
-            };
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Array of membership records. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Event received and queued for processing. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid or missing signature. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @example d4e5f6a7-b8c9-4012-a345-678901bcdef2
+             */
+            id?: string;
+            /**
+             * Format: uuid
+             * @example c7b3e1a2-45d6-4f89-9012-3456789abcde
+             */
+            userId?: string;
+            /**
+             * Format: uuid
+             * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
+             */
+            orgId?: string;
+            /**
+             * @example ADMIN
+             * @enum {string}
+             */
+            role?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            createdAt?: string;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            updatedAt?: string;
+          }[];
         };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller lacks ORG_READ permission. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    FeatureFlagsController_getEntitlements: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                orgId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Entitlements for the organization. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** Format: uuid */
-                        organizationId: string;
-                        /**
-                         * @example PRO
-                         * @enum {string}
-                         */
-                        plan: "FREE" | "PRO" | "ENTERPRISE";
-                        /**
-                         * @example ACTIVE
-                         * @enum {string}
-                         */
-                        subscriptionStatus: "NONE" | "TRIALING" | "ACTIVE" | "PAST_DUE" | "CANCELED" | "UNPAID" | "INCOMPLETE" | "INCOMPLETE_EXPIRED" | "PAUSED";
-                        /** @example true */
-                        advancedAnalytics: boolean;
-                        /** @example true */
-                        customReports: boolean;
-                        /** @example true */
-                        apiAccess: boolean;
-                        /** @example false */
-                        ssoEnabled: boolean;
-                        /** @example false */
-                        prioritySupport: boolean;
-                    };
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller has no active membership in the specified organization. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  MembershipsController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        orgId: string;
+      };
+      cookie?: never;
     };
-    FeatureFlagsController_invalidateCache: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Organization UUID */
-                orgId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Cache invalidated successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        message?: string;
-                    };
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Caller has no active membership in the specified organization. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateMembershipDto'];
+      };
     };
-    NotificationsController_getNotifications: {
-        parameters: {
-            query?: {
-                /** @description Filter by organisation. */
-                orgId?: string;
-                /** @description Return only unread notifications. */
-                unreadOnly?: boolean;
-                /** @description Max results to return. */
-                limit?: number;
-                /** @description Number of results to skip. */
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
+    responses: {
+      /** @description Membership record created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Paginated notification list. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @example d4e5f6a7-b8c9-4012-a345-678901bcdef2
+             */
+            id: string;
+            /**
+             * Format: uuid
+             * @example c7b3e1a2-45d6-4f89-9012-3456789abcde
+             */
+            userId: string;
+            /**
+             * Format: uuid
+             * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
+             */
+            orgId: string;
+            /**
+             * @example MEMBER
+             * @enum {string}
+             */
+            role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            updatedAt: string;
+          };
         };
+      };
+      /** @description Validation failed — userId must be a string; role must be a valid MembershipRole. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller lacks ORG_MEMBERS_INVITE permission, or the organization has reached its seat limit. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    NotificationsController_createNotification: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateNotificationDto"];
-            };
-        };
-        responses: {
-            /** @description Notification created. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation failed — missing or invalid request body fields. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  MembershipsController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        orgId: string;
+        /** @description Membership UUID */
+        id: string;
+      };
+      cookie?: never;
     };
-    NotificationsController_getUnreadCount: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Member removed successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Unread count. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        count?: number;
-                    };
-                };
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /** @example Membership deleted successfully */
+            message: string;
+          };
         };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller lacks ORG_MEMBERS_REMOVE permission. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Membership not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    NotificationsController_markAsRead: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Notification UUID */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Notification marked as read. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Notification not found or does not belong to the caller. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  MembershipsController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        orgId: string;
+        /** @description Membership UUID */
+        id: string;
+      };
+      cookie?: never;
     };
-    NotificationsController_markManyAsRead: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MarkManyReadDto"];
-            };
-        };
-        responses: {
-            /** @description Notifications marked as read. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation failed — ids must be an array of UUIDs. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateMembershipDto'];
+      };
     };
-    NotificationsController_deleteNotification: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Notification UUID */
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Updated membership record. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Notification deleted. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid JWT bearer token. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Notification not found or does not belong to the caller. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @example d4e5f6a7-b8c9-4012-a345-678901bcdef2
+             */
+            id?: string;
+            /**
+             * Format: uuid
+             * @example c7b3e1a2-45d6-4f89-9012-3456789abcde
+             */
+            userId?: string;
+            /**
+             * Format: uuid
+             * @example a1b2c3d4-e5f6-4789-ab01-cd2345ef6789
+             */
+            orgId?: string;
+            /**
+             * @example ADMIN
+             * @enum {string}
+             */
+            role?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            status?: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+            /**
+             * Format: date-time
+             * @example 2026-02-26T12:34:56.789Z
+             */
+            createdAt?: string;
+            /**
+             * Format: date-time
+             * @example 2026-02-26T13:00:00.000Z
+             */
+            updatedAt?: string;
+          };
         };
+      };
+      /** @description Validation failed — role must be a valid MembershipRole enum value. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller lacks ORG_MEMBERS_ROLE_UPDATE permission. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Membership not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
-    StorageController_generateUploadUrl: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GenerateUploadUrlDto"];
-            };
-        };
-        responses: {
-            /** @description Upload URL generated successfully. */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UploadUrlResponseDto"];
-                };
-            };
-            /** @description Validation failed — invalid file size or MIME type. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Storage quota exceeded or file count limit reached. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  MembershipsController_invite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        orgId: string;
+      };
+      cookie?: never;
     };
-    StorageController_confirmUpload: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConfirmUploadDto"];
-            };
-        };
-        responses: {
-            /** @description Upload confirmed successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConfirmUploadResponseDto"];
-                };
-            };
-            /** @description File not uploaded, expired, or already confirmed. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description File not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InviteMemberDto'];
+      };
     };
-    StorageController_generateDownloadUrl: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description File identifier */
-                id: string;
-            };
-            cookie?: never;
+    responses: {
+      /** @description Invitation sent successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description Download URL generated successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DownloadUrlResponseDto"];
-                };
-            };
-            /** @description File is not available for download (not in COMPLETED status). */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description File not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /** @example Invitation sent successfully. */
+            message: string;
+          };
         };
+      };
+      /** @description Validation failed — email must be valid; role must be a valid MembershipRole. */
+      400: {
+        headers: { [name: string]: unknown };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: { [name: string]: unknown };
+        content?: never;
+      };
+      /** @description Caller lacks ORG_MEMBERS_INVITE permission or seat limit reached. */
+      403: {
+        headers: { [name: string]: unknown };
+        content?: never;
+      };
+      /** @description The user is already a member of this organization. */
+      409: {
+        headers: { [name: string]: unknown };
+        content?: never;
+      };
     };
-    StorageController_getFile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description File identifier */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description File metadata retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FileMetadataResponseDto"];
-                };
-            };
-            /** @description File not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
+  };
+  HealthController_liveness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
-    StorageController_deleteFile: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description File identifier */
-                id: string;
-            };
-            cookie?: never;
+    requestBody?: never;
+    responses: {
+      /** @description Process is alive. */
+      200: {
+        headers: {
+          [name: string]: unknown;
         };
-        requestBody?: never;
-        responses: {
-            /** @description File deleted successfully. */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description File not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
+        content: {
+          'application/json': {
+            /** @example ok */
+            status: string;
+          };
         };
+      };
     };
-    StorageController_listFiles: {
-        parameters: {
-            query?: {
-                /** @description Maximum number of files to return */
-                limit?: number;
-                /** @description Number of files to skip */
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Files retrieved successfully. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FileMetadataResponseDto"][];
-                };
-            };
-        };
+  };
+  HealthController_readiness: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
     };
+    requestBody?: never;
+    responses: {
+      /** @description Readiness status — ready: false means the app is still warming up. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /**
+             * @example ok
+             * @enum {string}
+             */
+            status: 'ok' | 'not ready';
+            /** @example true */
+            ready: boolean;
+          };
+        };
+      };
+    };
+  };
+  TasksController_createHeavyJob: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateTaskDto'];
+      };
+    };
+    responses: {
+      /** @description Job accepted and queued for processing. */
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /**
+             * Format: uuid
+             * @description Unique identifier of the enqueued job.
+             * @example f47ac10b-58cc-4372-a567-0e02b2c3d479
+             */
+            jobId: string;
+            /** @example accepted */
+            status: string;
+            /** @example Job submitted for processing */
+            message: string;
+            /**
+             * Format: date-time
+             * @example 2026-02-27T10:00:00.000Z
+             */
+            timestamp: string;
+          };
+        };
+      };
+      /** @description Validation failed — check request body against the schema. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example 400 */
+            statusCode?: number;
+            /**
+             * @example [
+             *       "name should not be empty"
+             *     ]
+             */
+            message?: string[];
+            /** @example Bad Request */
+            error?: string;
+          };
+        };
+      };
+      /** @description Missing or invalid JWT token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example 401 */
+            statusCode?: number;
+            /** @example Unauthorized */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
+  TasksController_getJobStatus: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description UUID of the job returned by POST /tasks/heavy-job. */
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Current job status and metadata. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JobStatusDto'];
+        };
+      };
+      /** @description Missing or invalid JWT token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Job not found or belongs to a different tenant. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example 404 */
+            statusCode?: number;
+            /** @example Job <id> not found */
+            message?: string;
+          };
+        };
+      };
+    };
+  };
+  ActivityLogController_list: {
+    parameters: {
+      query?: {
+        action?: string;
+        fromDate?: string;
+        toDate?: string;
+        limit?: number;
+        offset?: number;
+      };
+      header?: never;
+      path: {
+        /** @description Organisation UUID */
+        orgId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated activity logs returned successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller does not belong to this organisation or has insufficient role. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BillingController_createCheckoutSession: {
+    parameters: {
+      query?: never;
+      header: {
+        'idempotency-key': string;
+        /** @description Optional client-generated UUID to prevent duplicate Checkout sessions on retried requests. Forwarded verbatim to Stripe. Must be unique per logical checkout attempt. */
+        'Idempotency-Key'?: string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateCheckoutSessionDto'];
+      };
+    };
+    responses: {
+      /** @description Checkout session created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CheckoutSessionResponseDto'];
+        };
+      };
+      /** @description Validation failed — missing or invalid request body fields. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BillingController_createPortalSession: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreatePortalSessionDto'];
+      };
+    };
+    responses: {
+      /** @description Billing portal session created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PortalSessionResponseDto'];
+        };
+      };
+      /** @description Validation failed — missing or invalid request body fields. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BillingController_getSubscription: {
+    parameters: {
+      query: {
+        /** @description Organization UUID */
+        orgId: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Subscription state returned. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SubscriptionResponseDto'];
+        };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BillingController_cancelSubscription: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CancelSubscriptionDto'];
+      };
+    };
+    responses: {
+      /** @description Subscription scheduled for cancellation. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CancelSubscriptionResponseDto'];
+        };
+      };
+      /** @description Validation failed — missing or invalid request body fields. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  BillingController_getSubscriptionHistory: {
+    parameters: {
+      query: {
+        /** @description Organization UUID */
+        orgId: string;
+        /** @description Maximum items to return (1–200, default 50) */
+        limit?: string;
+        /** @description Number of items to skip for pagination (default 0) */
+        offset?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated subscription snapshot history returned. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BillingHistoryResponseDto'];
+        };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller has no active membership in the org or lacks OWNER/ADMIN role. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  WebhookController_handleWebhook: {
+    parameters: {
+      query?: never;
+      header: {
+        /** @description Stripe webhook signature for HMAC verification */
+        'stripe-signature': string;
+      };
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Event received and queued for processing. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid or missing signature. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  FeatureFlagsController_getEntitlements: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        orgId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Entitlements for the organization. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** Format: uuid */
+            organizationId: string;
+            /**
+             * @example PRO
+             * @enum {string}
+             */
+            plan: 'FREE' | 'PRO' | 'ENTERPRISE';
+            /**
+             * @example ACTIVE
+             * @enum {string}
+             */
+            subscriptionStatus:
+              | 'NONE'
+              | 'TRIALING'
+              | 'ACTIVE'
+              | 'PAST_DUE'
+              | 'CANCELED'
+              | 'UNPAID'
+              | 'INCOMPLETE'
+              | 'INCOMPLETE_EXPIRED'
+              | 'PAUSED';
+            /** @example true */
+            advancedAnalytics: boolean;
+            /** @example true */
+            customReports: boolean;
+            /** @example true */
+            apiAccess: boolean;
+            /** @example false */
+            ssoEnabled: boolean;
+            /** @example false */
+            prioritySupport: boolean;
+          };
+        };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller has no active membership in the specified organization. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  FeatureFlagsController_invalidateCache: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Organization UUID */
+        orgId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cache invalidated successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            message?: string;
+          };
+        };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller has no active membership in the specified organization. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_getNotifications: {
+    parameters: {
+      query?: {
+        /** @description Filter by organisation. */
+        orgId?: string;
+        /** @description Return only unread notifications. */
+        unreadOnly?: boolean;
+        /** @description Max results to return. */
+        limit?: number;
+        /** @description Number of results to skip. */
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated notification list. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_createNotification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateNotificationDto'];
+      };
+    };
+    responses: {
+      /** @description Notification created. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation failed — missing or invalid request body fields. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_getUnreadCount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Unread count. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            count?: number;
+          };
+        };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_markAsRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Notification UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification marked as read. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Notification not found or does not belong to the caller. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_markManyAsRead: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MarkManyReadDto'];
+      };
+    };
+    responses: {
+      /** @description Notifications marked as read. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation failed — ids must be an array of UUIDs. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  NotificationsController_deleteNotification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Notification UUID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification deleted. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Notification not found or does not belong to the caller. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StorageController_generateUploadUrl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GenerateUploadUrlDto'];
+      };
+    };
+    responses: {
+      /** @description Upload URL generated successfully. */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UploadUrlResponseDto'];
+        };
+      };
+      /** @description Validation failed — invalid file size or MIME type. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Storage quota exceeded or file count limit reached. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StorageController_confirmUpload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConfirmUploadDto'];
+      };
+    };
+    responses: {
+      /** @description Upload confirmed successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConfirmUploadResponseDto'];
+        };
+      };
+      /** @description File not uploaded, expired, or already confirmed. */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StorageController_generateDownloadUrl: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description File identifier */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Download URL generated successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DownloadUrlResponseDto'];
+        };
+      };
+      /** @description File is not available for download (not in COMPLETED status). */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StorageController_getFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description File identifier */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File metadata retrieved successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FileMetadataResponseDto'];
+        };
+      };
+      /** @description File not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StorageController_deleteFile: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description File identifier */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File deleted successfully. */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File not found. */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StorageController_listFiles: {
+    parameters: {
+      query?: {
+        /** @description Maximum number of files to return */
+        limit?: number;
+        /** @description Number of files to skip */
+        offset?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Files retrieved successfully. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FileMetadataResponseDto'][];
+        };
+      };
+    };
+  };
 }
