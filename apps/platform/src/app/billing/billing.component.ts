@@ -18,6 +18,7 @@ import { AuthStore } from '@org/auth/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { BillingApi } from '@org/billing/data-access';
 import type { SubscriptionResponse } from '@org/billing/data-access';
+import { EntitlementsStore } from '@org/entitlements/data-access';
 import { environment } from 'src/environments/environment';
 
 type TagSeverity =
@@ -102,7 +103,7 @@ const STATUS_SEVERITY: Record<string, TagSeverity> = {
                 <i class="pi pi-credit-card text-2xl text-primary"></i>
                 <div>
                   <div class="font-semibold text-surface-900 text-lg">
-                    {{ isActive() ? 'Pro Plan' : 'Free Plan' }}
+                    {{ planTitle() }}
                   </div>
                   @if (sub()!.planId) {
                     <div class="text-surface-400 text-xs font-mono">
@@ -244,8 +245,16 @@ export class BillingComponent implements OnInit {
   readonly #authStore = inject(AuthStore);
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #billingApi = inject(BillingApi);
+  readonly #ent = inject(EntitlementsStore);
   readonly #confirmationService = inject(ConfirmationService);
   readonly #messageService = inject(MessageService);
+
+  readonly planTitle = computed(() => {
+    const p = this.#ent.plan();
+    if (p === 'ENTERPRISE') return 'Enterprise Plan';
+    if (p === 'PRO') return 'Pro Plan';
+    return 'Free Plan';
+  });
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
@@ -293,10 +302,12 @@ export class BillingComponent implements OnInit {
     if (!orgId) return;
     this.loading.set(true);
     this.error.set(null);
+    void this.#ent.loadEntitlements(orgId);
     this.#billingApi.getSubscription(orgId).subscribe({
       next: (data) => {
         this.sub.set(data);
         this.loading.set(false);
+        void this.#ent.invalidateCache(orgId);
       },
       error: () => {
         this.error.set('Failed to load billing information.');

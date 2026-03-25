@@ -102,7 +102,9 @@ export class DashboardComponent implements OnInit {
     if (!sub) return '—';
     const status = sub.billingStatus;
     if (status === 'NONE') return 'Free';
-    return status.charAt(0) + status.slice(1).toLowerCase().replace('_', ' ');
+    if (status === 'ACTIVE' || status === 'TRIALING') return 'Pro';
+    if (status === 'CANCELED' || status === 'PAUSED') return 'Free';
+    return status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, ' ');
   };
 
   readonly seatCount = () => this.subscription()?.seatCount ?? '—';
