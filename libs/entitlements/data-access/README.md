@@ -78,6 +78,7 @@ Root-level singleton. Wraps `EntitlementsApi` with Angular Signals and async lif
 | `canUseApiAccess`         | `boolean`    | Reflects `entitlements.apiAccess`         |
 | `ssoEnabled`              | `boolean`    | Reflects `entitlements.ssoEnabled`        |
 | `prioritySupport`         | `boolean`    | Reflects `entitlements.prioritySupport`   |
+| `maxSeats`                | `number`     | Plan seat cap (FREE=3, PRO=10, ENTERPRISE=999999); falls back to 3 |
 
 ### Methods
 

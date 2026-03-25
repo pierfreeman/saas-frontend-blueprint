@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -49,6 +50,7 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
+    RouterLink,
     CardModule,
     TagModule,
     SkeletonModule,
@@ -73,12 +75,21 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
             People with access to this organization.
           </p>
         </div>
-        @if (canInvite()) {
-          <p-button
-            label="Invite member"
-            icon="pi pi-user-plus"
-            (onClick)="openInviteDialog()"
-          />
+        @if (canInviteByPermission()) {
+          <div class="flex flex-col items-end gap-1">
+            <p-button
+              label="Invite member"
+              icon="pi pi-user-plus"
+              [disabled]="atSeatLimit()"
+              (onClick)="openInviteDialog()"
+            />
+            @if (atSeatLimit()) {
+              <p class="text-xs text-orange-600 m-0">
+                Seat limit reached ({{ members().length }}/{{ maxSeats() }}).
+                <a routerLink="/billing" class="underline text-orange-600">Upgrade</a> to add more.
+              </p>
+            }
+          </div>
         }
       </div>
 
@@ -237,13 +248,22 @@ export class MembersComponent implements OnInit {
   readonly error = computed(() => this.#store.error() !== null);
 
   // ── RBAC computed signals ─────────────────────────────────────────────────
-  readonly canInvite = computed(
-    () =>
-      this.#permissions
-        .currentUserPermissions()
-        .has(PERMISSIONS.ORG_MEMBERS_INVITE) &&
-      this.members().length < this.#ent.maxSeats(),
+  readonly maxSeats = this.#ent.maxSeats;
+
+  readonly canInviteByPermission = computed(() =>
+    this.#permissions
+      .currentUserPermissions()
+      .has(PERMISSIONS.ORG_MEMBERS_INVITE),
   );
+
+  readonly atSeatLimit = computed(
+    () => this.members().length >= this.#ent.maxSeats(),
+  );
+
+  readonly canInvite = computed(
+    () => this.canInviteByPermission() && !this.atSeatLimit(),
+  );
+
   readonly canEditRoles = computed(() =>
     this.#permissions
       .currentUserPermissions()

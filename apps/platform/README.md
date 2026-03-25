@@ -65,16 +65,19 @@ export const PLATFORM_ROUTES: Route[] = [
 ### `DashboardComponent`
 
 - Loads `MembershipsApi.getMemberships()` and `BillingApi.getSubscription()` in parallel on `OnInit`
+- Reads seat cap from `EntitlementsStore.maxSeats()` (displayed as the "Seats" stat card)
 - Displays PrimeNG `p-skeleton` while loading; transitions to data cards on completion
 - Reads `OrganizationsStore.activeOrgId()` for scoped API calls
 
 ### `MembersComponent`
 
-- Signal-based member list with `signal<MembershipSummary[]>([])` and `signal<boolean>(false)` for loading state
+- Backed by `MembershipsStore` and `EntitlementsStore`; RBAC gates from `PermissionsService`
 - **Invite**: dialog with email + role selector → `inviteMember()` → list refresh
-- **Update role**: inline dropdown → `updateMembership()` → optimistic local update
-- **Remove**: confirm dialog → `deleteMembership()` → splice from list
-- `ChangeDetectionStrategy.OnPush` throughout
+  - Button is always visible to users with `ORG_MEMBERS_INVITE` but **disabled** when the plan seat limit is reached
+  - Inline message: _"Seat limit reached (N/N). [Upgrade](/billing) to add more."_
+- **Update role**: inline dropdown → `updateMemberRole()` → toast feedback
+- **Remove**: confirm dialog → `removeMember()` → toast feedback
+- `ChangeDetectionStrategy.OnPush` throughout; all state held in store signals
 
 ### `SettingsComponent`
 
@@ -129,12 +132,16 @@ src/app/
     entry.spec.ts
   dashboard/
     dashboard.component.ts
+    dashboard.component.spec.ts
   members/
     members.component.ts
+    members.component.spec.ts
   settings/
     settings.component.ts
+    settings.component.spec.ts
   billing/
     billing.component.ts
+    billing.component.spec.ts
 src/environments/
   environment.ts
   environment.prod.ts
