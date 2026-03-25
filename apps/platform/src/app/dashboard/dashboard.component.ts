@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -8,6 +8,17 @@ import { OrganizationsStore } from '@org/organizations/data-access';
 import { MembershipsApi } from '@org/memberships/data-access';
 import { BillingApi, SubscriptionResponse } from '@org/billing/data-access';
 import { EntitlementsStore } from '@org/entitlements/data-access';
+import { StorageApi, StorageQuotaResponse } from '@org/storage/data-access';
+
+function formatStorageBytes(bytes: string | null | undefined): string {
+  if (!bytes) return '—';
+  const n = parseInt(bytes, 10);
+  if (isNaN(n)) return '—';
+  if (n < 1024) return `${n} B`;
+  if (n < 1_048_576) return `${(n / 1024).toFixed(1)} KB`;
+  if (n < 1_073_741_824) return `${(n / 1_048_576).toFixed(1)} MB`;
+  return `${(n / 1_073_741_824).toFixed(2)} GB`;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -24,7 +35,7 @@ import { EntitlementsStore } from '@org/entitlements/data-access';
       </div>
 
       <!-- Stat cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Members -->
         <a routerLink="/members" class="no-underline">
           <p-card
@@ -74,6 +85,31 @@ import { EntitlementsStore } from '@org/entitlements/data-access';
           }
           <div class="text-surface-500 text-sm mt-1">Seats</div>
         </p-card>
+
+        <!-- Storage -->
+        <a routerLink="/storage" class="no-underline">
+          <p-card
+            styleClass="text-center hover:shadow-md transition-shadow cursor-pointer"
+          >
+            @if (loadingStorage()) {
+              <p-skeleton
+                height="2.25rem"
+                width="6rem"
+                styleClass="mx-auto mb-1"
+              />
+            } @else {
+              <div class="text-3xl font-bold text-primary">
+                {{ storageUsedLabel() }}
+              </div>
+            }
+            <div class="text-surface-500 text-sm mt-1">
+              Storage
+              @if (storageLimitLabel()) {
+                <span class="text-surface-400"> / {{ storageLimitLabel() }}</span>
+              }
+            </div>
+          </p-card>
+        </a>
       </div>
 
       <!-- Recent activity placeholder -->
@@ -89,11 +125,14 @@ export class DashboardComponent implements OnInit {
   readonly #membershipsApi = inject(MembershipsApi);
   readonly #billingApi = inject(BillingApi);
   readonly #entsStore = inject(EntitlementsStore);
+  readonly #storageApi = inject(StorageApi);
 
   readonly memberCount = signal<number | null>(null);
   readonly subscription = signal<SubscriptionResponse | null>(null);
+  readonly storageQuota = signal<StorageQuotaResponse | null>(null);
   readonly loadingMembers = signal(true);
   readonly loadingBilling = signal(true);
+  readonly loadingStorage = signal(true);
 
   readonly email = () => this.#authStore.currentUser()?.email ?? '';
   readonly name = () =>
@@ -111,11 +150,19 @@ export class DashboardComponent implements OnInit {
 
   readonly seatCount = () => this.#entsStore.maxSeats();
 
+  readonly storageUsedLabel = computed(() =>
+    formatStorageBytes(this.storageQuota()?.storageUsedBytes ?? null),
+  );
+  readonly storageLimitLabel = computed(() =>
+    formatStorageBytes(this.storageQuota()?.storageLimitBytes ?? null),
+  );
+
   ngOnInit(): void {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId) {
       this.loadingMembers.set(false);
       this.loadingBilling.set(false);
+      this.loadingStorage.set(false);
       return;
     }
 
@@ -133,6 +180,14 @@ export class DashboardComponent implements OnInit {
         this.loadingBilling.set(false);
       },
       error: () => this.loadingBilling.set(false),
+    });
+
+    this.#storageApi.getStorageQuota().subscribe({
+      next: (quota) => {
+        this.storageQuota.set(quota);
+        this.loadingStorage.set(false);
+      },
+      error: () => this.loadingStorage.set(false),
     });
   }
 }

@@ -10,6 +10,7 @@ import type {
   ConfirmUploadResponse,
   DownloadUrlResponse,
   FileMetadata,
+  StorageQuotaResponse,
 } from './storage.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -51,5 +52,9 @@ export class StorageApi {
 
   deleteFile(id: string): Observable<void> {
     return this.#http.delete<void>(`${this.#base}/files/${id}`);
+  }
+
+  getStorageQuota(): Observable<StorageQuotaResponse> {
+    return this.#http.get<StorageQuotaResponse>(`${this.#base}/files/quota`);
   }
 }

@@ -9,6 +9,7 @@ import { OrganizationsStore } from '@org/organizations/data-access';
 import { MembershipsApi } from '@org/memberships/data-access';
 import { BillingApi, SubscriptionResponse } from '@org/billing/data-access';
 import { EntitlementsStore } from '@org/entitlements/data-access';
+import { StorageApi, StorageQuotaResponse } from '@org/storage/data-access';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,19 @@ function makeSubscription(
   };
 }
 
+function makeQuota(
+  overrides: Partial<StorageQuotaResponse> = {},
+): StorageQuotaResponse {
+  return {
+    storageLimitBytes: '107374182',
+    storageUsedBytes: '0',
+    fileCount: 0,
+    fileCountLimit: 100,
+    maxFileSizeBytes: '52428800',
+    ...overrides,
+  };
+}
+
 function setup(opts: {
   email?: string;
   memberCount?: number;
@@ -34,6 +48,7 @@ function setup(opts: {
   maxSeats?: number;
   membersError?: boolean;
   billingError?: boolean;
+  storageError?: boolean;
 }) {
   const {
     email = 'alice@example.com',
@@ -42,6 +57,7 @@ function setup(opts: {
     maxSeats = 10,
     membersError = false,
     billingError = false,
+    storageError = false,
   } = opts;
 
   const mockAuth = {
@@ -70,6 +86,12 @@ function setup(opts: {
     maxSeats: signal(maxSeats),
   } as unknown as EntitlementsStore;
 
+  const mockStorageApi = {
+    getStorageQuota: vi.fn(() =>
+      storageError ? throwError(() => new Error('fail')) : of(makeQuota()),
+    ),
+  } as unknown as StorageApi;
+
   TestBed.configureTestingModule({
     imports: [DashboardComponent],
     providers: [
@@ -79,6 +101,7 @@ function setup(opts: {
       { provide: MembershipsApi, useValue: mockMembershipsApi },
       { provide: BillingApi, useValue: mockBillingApi },
       { provide: EntitlementsStore, useValue: mockEnt },
+      { provide: StorageApi, useValue: mockStorageApi },
     ],
   });
 
@@ -86,7 +109,13 @@ function setup(opts: {
   const component = fixture.componentInstance;
   fixture.detectChanges();
 
-  return { fixture, component, mockMembershipsApi, mockBillingApi };
+  return {
+    fixture,
+    component,
+    mockMembershipsApi,
+    mockBillingApi,
+    mockStorageApi,
+  };
 }
 
 // ── Suite ─────────────────────────────────────────────────────────────────────
@@ -129,11 +158,22 @@ describe('DashboardComponent', () => {
     });
 
     it('does not call APIs when no orgId', () => {
-      const mockAuth = { currentUser: signal({ email: 'x@x.com' }) } as unknown as AuthStore;
-      const mockOrgs = { activeOrgId: signal<string | null>(null) } as unknown as OrganizationsStore;
-      const mockMembershipsApi = { getMemberships: vi.fn() } as unknown as MembershipsApi;
-      const mockBillingApi = { getSubscription: vi.fn() } as unknown as BillingApi;
+      const mockAuth = {
+        currentUser: signal({ email: 'x@x.com' }),
+      } as unknown as AuthStore;
+      const mockOrgs = {
+        activeOrgId: signal<string | null>(null),
+      } as unknown as OrganizationsStore;
+      const mockMembershipsApi = {
+        getMemberships: vi.fn(),
+      } as unknown as MembershipsApi;
+      const mockBillingApi = {
+        getSubscription: vi.fn(),
+      } as unknown as BillingApi;
       const mockEnt = { maxSeats: signal(10) } as unknown as EntitlementsStore;
+      const mockStorageApi = {
+        getStorageQuota: vi.fn(() => of(makeQuota())),
+      } as unknown as StorageApi;
 
       TestBed.configureTestingModule({
         imports: [DashboardComponent],
@@ -144,6 +184,7 @@ describe('DashboardComponent', () => {
           { provide: MembershipsApi, useValue: mockMembershipsApi },
           { provide: BillingApi, useValue: mockBillingApi },
           { provide: EntitlementsStore, useValue: mockEnt },
+          { provide: StorageApi, useValue: mockStorageApi },
         ],
       });
 

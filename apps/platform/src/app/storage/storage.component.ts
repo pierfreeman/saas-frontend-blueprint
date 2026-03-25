@@ -1,15 +1,18 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { StorageApi, FileMetadata } from '@org/storage/data-access';
+import { StorageApi, FileMetadata, StorageQuotaResponse } from '@org/storage/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
@@ -66,7 +69,7 @@ function statusSeverity(
   selector: 'app-storage',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ButtonModule, SkeletonModule, TagModule, TooltipModule, DatePipe],
+  imports: [ButtonModule, ProgressBarModule, SkeletonModule, TagModule, TooltipModule, DatePipe, RouterLink],
   template: `
     <div class="flex flex-col gap-6">
       <!-- Page header -->
@@ -77,6 +80,7 @@ function statusSeverity(
           icon="pi pi-upload"
           size="small"
           [loading]="uploading()"
+          [disabled]="isAtLimit()"
           (onClick)="fileInput.click()"
         />
         <input
@@ -86,6 +90,40 @@ function statusSeverity(
           (change)="onFileSelected(fileInput)"
         />
       </div>
+
+      <!-- Storage quota bar -->
+      @if (quota(); as q) {
+        <div class="p-4 rounded border bg-surface-0"
+             [class.border-surface-200]="!isNearLimit()"
+             [class.border-orange-300]="isNearLimit() && !isAtLimit()"
+             [class.border-red-400]="isAtLimit()">
+          <div class="flex items-center justify-between mb-2 text-sm">
+            <span class="font-medium text-surface-700">Storage used</span>
+            <span class="text-surface-500">{{ formattedUsed() }} / {{ formattedLimit() }}</span>
+          </div>
+          <p-progressBar
+            [value]="usagePercent()"
+            [showValue]="false"
+            styleClass="h-2"
+            [style]="{ height: '8px' }"
+          />
+          @if (isAtLimit()) {
+            <div class="mt-2 text-sm text-red-600 flex items-center gap-2">
+              <i class="pi pi-exclamation-circle"></i>
+              Storage limit reached.
+              <a routerLink="/billing" class="underline font-medium">Upgrade your plan</a>
+              to upload more files.
+            </div>
+          } @else if (isNearLimit()) {
+            <div class="mt-2 text-sm text-orange-600 flex items-center gap-2">
+              <i class="pi pi-exclamation-triangle"></i>
+              You're using over 80% of your storage quota.
+            </div>
+          }
+        </div>
+      } @else if (loadingQuota()) {
+        <p-skeleton width="100%" height="4rem" borderRadius="8px" />
+      }
 
       <!-- Upload error -->
       @if (uploadError()) {
@@ -232,11 +270,30 @@ export class StorageComponent {
 
   readonly loading = signal(true);
   readonly loadingMore = signal(false);
+  readonly loadingQuota = signal(true);
   readonly uploading = signal(false);
   readonly uploadError = signal<string | null>(null);
   readonly files = signal<FileMetadata[]>([]);
+  readonly quota = signal<StorageQuotaResponse | null>(null);
   readonly hasMore = signal(false);
   readonly deletingIds = signal<Set<string>>(new Set());
+
+  // ── Quota computed ─────────────────────────────────────────────────────────
+  readonly usagePercent = computed<number>(() => {
+    const q = this.quota();
+    if (!q || !q.storageLimitBytes) return 0;
+    const used = Number(q.storageUsedBytes);
+    const limit = Number(q.storageLimitBytes);
+    return limit > 0 ? Math.min(Math.round((used / limit) * 100), 100) : 0;
+  });
+  readonly isNearLimit = computed(() => this.usagePercent() >= 80);
+  readonly isAtLimit = computed(() => this.usagePercent() >= 100);
+  readonly formattedUsed = computed(() =>
+    formatBytes(this.quota()?.storageUsedBytes ?? null),
+  );
+  readonly formattedLimit = computed(() =>
+    formatBytes(this.quota()?.storageLimitBytes ?? null),
+  );
 
   readonly skeletonRows = Array(5);
 
@@ -286,7 +343,7 @@ export class StorageComponent {
         this.#storageApi.confirmUpload({ fileId: res.fileId }),
       );
 
-      // 4. Refresh the list.
+      // 4. Refresh the list and quota.
       await this.#resetAndLoad();
     } catch (err) {
       this.uploadError.set(
@@ -315,6 +372,8 @@ export class StorageComponent {
     try {
       await firstValueFrom(this.#storageApi.deleteFile(file.id));
       this.files.update((list) => list.filter((f) => f.id !== file.id));
+      // Refresh quota to reflect freed storage.
+      void this.#loadQuota();
     } catch {
       // Keep the file in the list on error.
     } finally {
@@ -348,9 +407,12 @@ export class StorageComponent {
     this.loading.set(true);
     this.files.set([]);
     try {
-      const result = await firstValueFrom(
-        this.#storageApi.listFiles({ limit: PAGE_SIZE, offset: 0 }),
-      );
+      const [result] = await Promise.all([
+        firstValueFrom(
+          this.#storageApi.listFiles({ limit: PAGE_SIZE, offset: 0 }),
+        ),
+        this.#loadQuota(),
+      ]);
       this.hasMore.set(result.length === PAGE_SIZE);
       this.files.set(result);
       this.#offset = result.length;
@@ -358,6 +420,18 @@ export class StorageComponent {
       // Silently ignore.
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async #loadQuota(): Promise<void> {
+    this.loadingQuota.set(true);
+    try {
+      const q = await firstValueFrom(this.#storageApi.getStorageQuota());
+      this.quota.set(q);
+    } catch {
+      // Quota is informational; silently ignore errors.
+    } finally {
+      this.loadingQuota.set(false);
     }
   }
 }

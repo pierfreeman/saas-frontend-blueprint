@@ -7,4 +7,5 @@ export type {
   ConfirmUploadResponse,
   DownloadUrlResponse,
   FileMetadata,
+  StorageQuotaResponse,
 } from './lib/storage.api.types';

@@ -41,6 +41,10 @@ export class EntitlementsStore {
   readonly maxSeats = computed<number>(
     () => this.entitlements()?.maxSeats ?? 3,
   );
+  /** Storage quota in bytes for informational display. Falls back to 100 MiB (FREE default). */
+  readonly storageLimitBytes = computed<number>(
+    () => this.entitlements()?.storageLimitBytes ?? 100 * 1024 * 1024,
+  );
 
   // ── Methods ────────────────────────────────────────────────────────────────
   async loadEntitlements(orgId: string): Promise<void> {

@@ -5,7 +5,10 @@ import { MembershipsApi, MembershipsStore } from '@org/memberships/data-access';
 import { BillingApi } from '@org/billing/data-access';
 import { OrganizationsApi } from '@org/organizations/data-access';
 import { ActivityLogApi } from '@org/activity-log/data-access';
-import { NotificationsApi } from '@org/notifications/data-access';
+import {
+  NotificationsApi,
+  NotificationsSocketService,
+} from '@org/notifications/data-access';
 import { StorageApi } from '@org/storage/data-access';
 import {
   EntitlementsApi,
@@ -42,6 +45,7 @@ export const PLATFORM_ROUTES: Route[] = [
       OrganizationsApi,
       ActivityLogApi,
       NotificationsApi,
+      NotificationsSocketService,
       EntitlementsApi,
       EntitlementsStore,
       StorageApi,
