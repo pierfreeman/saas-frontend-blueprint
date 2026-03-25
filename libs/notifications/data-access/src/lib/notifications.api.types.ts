@@ -11,8 +11,21 @@ export interface GetNotificationsParams {
   offset?: number;
 }
 
-/** Typed as unknown[] until the backend OpenAPI schema is enriched for this endpoint. */
-export type NotificationList = unknown[];
+/** A single notification record as returned by GET /notifications. */
+export interface NotificationRecord {
+  id: string;
+  orgId: string;
+  userId: string;
+  type: string;
+  title: string;
+  body: string;
+  metadata: Record<string, unknown> | null;
+  /** ISO 8601 — null means the notification has not been read yet. */
+  readAt: string | null;
+  createdAt: string;
+}
+
+export type NotificationList = NotificationRecord[];
 
 export interface UnreadCountResponse {
   count?: number;

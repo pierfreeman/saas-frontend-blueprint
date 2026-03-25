@@ -4,6 +4,7 @@ import { MembershipsApi } from '@org/memberships/data-access';
 import { BillingApi } from '@org/billing/data-access';
 import { OrganizationsApi } from '@org/organizations/data-access';
 import { ActivityLogApi } from '@org/activity-log/data-access';
+import { NotificationsApi } from '@org/notifications/data-access';
 import { environment } from 'src/environments/environment';
 
 export const PLATFORM_ROUTES: Route[] = [
@@ -18,6 +19,7 @@ export const PLATFORM_ROUTES: Route[] = [
       BillingApi,
       OrganizationsApi,
       ActivityLogApi,
+      NotificationsApi,
     ],
     children: [
       {
@@ -53,6 +55,13 @@ export const PLATFORM_ROUTES: Route[] = [
         loadComponent: () =>
           import('../activity-log/activity-log.component').then(
             (m) => m.ActivityLogComponent,
+          ),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('../notifications/notifications.component').then(
+            (m) => m.NotificationsComponent,
           ),
       },
     ],

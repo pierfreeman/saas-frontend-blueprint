@@ -1,12 +1,20 @@
-import { Component, inject, computed } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, inject, computed, signal } from '@angular/core';
+import {
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  NavigationEnd,
+} from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter, merge, of, switchMap } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { AvatarModule } from 'primeng/avatar';
 import { MenuItem } from 'primeng/api';
 import { AuthStore } from '@org/auth/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
+import { NotificationsApi } from '@org/notifications/data-access';
 
 @Component({
   selector: 'app-navbar',
@@ -71,6 +79,25 @@ import { OrganizationsStore } from '@org/organizations/data-access';
       </div>
 
       <div class="flex items-center gap-4">
+        <!-- Notifications bell -->
+        <div class="relative">
+          <p-button
+            icon="pi pi-bell"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            routerLink="/notifications"
+            aria-label="Notifications"
+          />
+          @if (unreadCount() > 0) {
+            <span
+              class="absolute top-0 right-0 bg-red-500 text-white text-[10px] leading-none rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 pointer-events-none"
+            >
+              {{ unreadCount() > 99 ? '99+' : unreadCount() }}
+            </span>
+          }
+        </div>
+
         <!-- Org switcher -->
         @if (activeOrgId()) {
           <p-button
@@ -99,9 +126,30 @@ export class NavbarComponent {
   readonly #authStore = inject(AuthStore);
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #router = inject(Router);
+  readonly #notificationsApi = inject(NotificationsApi);
 
   readonly activeOrgId = this.#orgsStore.activeOrgId;
   readonly activeOrgName = this.#orgsStore.activeOrgName;
+  readonly unreadCount = signal(0);
+
+  constructor() {
+    // Re-fetch unread count whenever the active org changes, and again after
+    // every navigation (so the badge refreshes after visiting /notifications).
+    toObservable(this.activeOrgId)
+      .pipe(
+        filter(Boolean),
+        switchMap(() =>
+          merge(
+            of(null),
+            this.#router.events.pipe(filter((e) => e instanceof NavigationEnd)),
+          ).pipe(switchMap(() => this.#notificationsApi.getUnreadCount())),
+        ),
+      )
+      .subscribe({
+        next: (res) => this.unreadCount.set(res.count ?? 0),
+        error: () => {},
+      });
+  }
 
   readonly avatarLabel = computed(() => {
     const email = this.#authStore.currentUser()?.email ?? '';
