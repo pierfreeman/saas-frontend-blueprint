@@ -39,6 +39,13 @@ export const PLATFORM_ROUTES: Route[] = [
             (m) => m.SettingsComponent,
           ),
       },
+      {
+        path: 'billing',
+        loadComponent: () =>
+          import('../billing/billing.component').then(
+            (m) => m.BillingComponent,
+          ),
+      },
     ],
   },
 ];

@@ -53,6 +53,13 @@ import { OrganizationsStore } from '@org/organizations/data-access';
           >
             Settings
           </a>
+          <a
+            routerLink="/billing"
+            routerLinkActive="text-primary font-semibold"
+            class="px-3 py-1.5 rounded text-sm text-surface-600 hover:bg-surface-100 no-underline transition-colors"
+          >
+            Billing
+          </a>
         </nav>
       </div>
 
