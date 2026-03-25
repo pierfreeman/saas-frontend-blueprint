@@ -1,105 +1,350 @@
-# New Nx Repository
+# saas-frontend-blueprint
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Production-ready multi-tenant SaaS frontend built as an [Nx](https://nx.dev) monorepo using **Angular 21 Module Federation**.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+Four independently deployable micro-frontends (MFEs) share a single shell host, a unified design system (PrimeNG + Tailwind v4), and a type-safe API client layer coded against the backend OpenAPI schema.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
-## Try the full Nx platform
-🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/setup/connect-workspace/guide). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
-## Generate a library
+Designed to pair with [saas-backend-blueprint](../saas-backend-blueprint).
+
+---
+
+## Tech stack
+
+| Concern          | Choice                                                       |
+| ---------------- | ------------------------------------------------------------ |
+| Framework        | Angular 21 (standalone components, signals)                  |
+| Monorepo         | Nx 22                                                        |
+| Micro-frontends  | Webpack Module Federation (`@nx/module-federation`)          |
+| UI library       | PrimeNG 21 — Aura theme                                      |
+| Styling          | Tailwind CSS v4 + `tailwindcss-primeui`                      |
+| State management | Angular Signals (no NgRx)                                    |
+| Authentication   | Auth0 (`@auth0/auth0-angular`) — RS256, PKCE, silent refresh |
+| HTTP client      | Angular `HttpClient` + functional interceptors               |
+| Type safety      | OpenAPI-aligned types (`@org/shared/util-types`)             |
+| Testing          | Vitest 4 + Angular Testing Library                           |
+| Bundler          | Webpack 5 (MF bundles), Vite (unit tests)                    |
+| Lint             | ESLint + `angular-eslint`                                    |
+
+---
+
+## Features
+
+- 🏢 **Multi-tenancy** — every API call carries an `x-org-id` header injected automatically by the `tenantInterceptor`
+- 🔐 **Auth0 PKCE flow** — login, silent token refresh, automatic redirect to `/auth` on expiry
+- 🔀 **Org switcher** — users belonging to multiple orgs pick an active org at login; persisted to `localStorage`
+- 👥 **Members management** — invite, update role, remove members with optimistic UI
+- 💳 **Billing** — subscription status card, Stripe Checkout redirect, Billing Portal session, cancel with confirmation dialog
+- ⚙️ **Settings** — profile info, org rename, org data export request, org deletion (danger zone with confirm)
+- 📊 **Dashboard** — real-time stat cards (total members, active plan, storage used), skeleton loading states
+- 🎨 **Shared design system** — PrimeNG Aura theme, Tailwind utility classes, `tailwindcss-primeui` color palette integration
+- 🧩 **Module Federation** — each MFE is independently built and deployable; the shell composes them at runtime
+- 🔒 **Route guards** — `authGuard` (Auth0 session) + `orgGuard` (active org required before accessing platform routes)
+
+---
+
+## Monorepo structure
+
+```
+apps/
+  shell/          — Host app (port 4200): routing, layout, guards, global providers
+  auth/           — Auth MFE (port 4201): login page, Auth0 callback handler
+  platform/       — Platform MFE (port 4202): dashboard, members, settings, billing
+  admin/          — Admin MFE (port 4203): super-admin dashboard (placeholder)
+
+libs/
+  auth/
+    data-access/  — AuthStore (signals), AuthApi, type aliases
+  organizations/
+    data-access/  — OrganizationsStore (signals), OrganizationsApi, tenantInterceptor
+  memberships/
+    data-access/  — MembershipsApi, type aliases
+  billing/
+    data-access/  — BillingApi (checkout, portal, subscription, cancel), type aliases
+  activity-log/
+    data-access/  — ActivityLogApi, type aliases
+  entitlements/
+    data-access/  — EntitlementsApi, type aliases
+  notifications/
+    data-access/  — NotificationsApi, type aliases
+  storage/
+    data-access/  — StorageApi (presigned upload/download), type aliases
+  tasks/
+    data-access/  — TasksApi (background job status), type aliases
+  shared/
+    util-types/   — API_BASE_URL injection token, OpenAPI-aligned TypeScript types
+```
+
+---
+
+## Prerequisites
+
+| Tool    | Minimum version                                                                        |
+| ------- | -------------------------------------------------------------------------------------- |
+| Node.js | 20                                                                                     |
+| npm     | 10                                                                                     |
+| Auth0   | SPA application configured (see [Auth0 setup](#auth0-setup))                           |
+| Backend | [saas-backend-blueprint](../saas-backend-blueprint) running on `http://localhost:3000` |
+
+---
+
+## Quick start
 
 ```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+# 1. Install dependencies
+npm install
+
+# 2. Configure environment variables
+#    Edit apps/shell/src/environments/environment.ts  (auth0 + apiUrl)
+#    Edit apps/platform/src/environments/environment.ts  (stripePriceId)
+
+# 3. Start all MFEs in development mode
+npx nx serve shell --devRemotes=auth,platform,admin
 ```
 
-## Run tasks
+The shell starts on **http://localhost:4200** and launches the remotes on ports 4201–4203 automatically.
 
-To build the library use:
+To serve only specific remotes (faster startup):
 
 ```sh
-npx nx build pkg1
+npx nx serve shell --devRemotes=platform
 ```
 
-To run any task with Nx use:
+---
+
+## MFE ports
+
+| App      | Port | Role   | Exposes    |
+| -------- | ---- | ------ | ---------- |
+| shell    | 4200 | host   | —          |
+| auth     | 4201 | remote | `./Routes` |
+| platform | 4202 | remote | `./Routes` |
+| admin    | 4203 | remote | `./Routes` |
+
+---
+
+## Environment configuration
+
+**`apps/shell/src/environments/environment.ts`** — drives auth and the global API URL for all interceptors
+
+```ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:3000',
+  auth0Domain: 'your-tenant.auth0.com',
+  auth0ClientId: 'your-spa-client-id',
+  auth0Audience: 'https://api.your-app.com',
+  auth0RedirectUri: 'http://localhost:4200/auth/callback',
+};
+```
+
+**`apps/platform/src/environments/environment.ts`** — platform-specific config
+
+```ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:3000',
+  stripePriceId: 'price_xxx', // Stripe Price ID for the subscription plan
+};
+```
+
+> **AI agents**: `stripePriceId` must match a real Stripe Price object in test mode (Stripe Dashboard → Products → select plan → copy price ID).
+
+---
+
+## Development commands
 
 ```sh
-npx nx <target> <project-name>
+# Serve all MFEs
+npx nx serve shell --devRemotes=auth,platform,admin
+
+# Build all for production
+npx nx run-many -t build --all
+
+# Run all unit tests
+npx nx run-many -t test --all
+
+# Run tests for a single project
+npx nx run shell:test
+npx nx run platform:test --watch
+
+# Coverage report
+npx nx run shell:test --coverage
+
+# Lint all
+npx nx run-many -t lint --all
+
+# Type-check
+npx tsc -p apps/shell/tsconfig.app.json --noEmit
+npx tsc -p apps/platform/tsconfig.app.json --noEmit
+
+# Visualize project graph
+npx nx graph
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+---
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Architecture
 
-## Versioning and releasing
-
-To version and release the library use
+### Module Federation topology
 
 ```
-npx nx release
+                    ┌─────────────────────────────────────────┐
+                    │              shell (4200)               │
+                    │  routing · layout · guards · providers   │
+                    └────────┬──────────┬──────────┬──────────┘
+                             │          │          │
+              ┌──────────────▼──┐  ┌────▼────┐  ┌─▼────────┐
+              │   auth (4201)   │  │platform │  │  admin   │
+              │  login·callback │  │ (4202)  │  │  (4203)  │
+              └─────────────────┘  └─────────┘  └──────────┘
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+The shell loads each remote lazily via `loadChildren(() => import('auth/Routes'))`. Each remote exposes a single `./Routes` entry. All `@org/*` workspace libs are declared as **shared singletons** in every MFE's webpack config so Angular's DI system gets a single instance across the module boundary.
 
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+### Request pipeline
 
-## Keep TypeScript project references up to date
+Every API request passes through these functional interceptors (registered in shell's `appConfig`):
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+| Order | Interceptor           | Purpose                                                             |
+| ----- | --------------------- | ------------------------------------------------------------------- |
+| 1     | `AuthHttpInterceptor` | Attaches `Authorization: Bearer <jwt>` (Auth0)                      |
+| 2     | `tenantInterceptor`   | Attaches `x-org-id: <activeOrgId>`; skips `/auth/me` and `/auth0/*` |
+| 3     | `errorInterceptor`    | Maps HTTP errors to toast notifications; 401 → logout + redirect    |
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
+### State management
+
+| Store                | Lib                              | Persistence      | Key signals                                    |
+| -------------------- | -------------------------------- | ---------------- | ---------------------------------------------- |
+| `AuthStore`          | `@org/auth/data-access`          | `sessionStorage` | `currentUser`, `isLoggedIn`                    |
+| `OrganizationsStore` | `@org/organizations/data-access` | `localStorage`   | `activeOrgId`, `activeOrgName`, `hasActiveOrg` |
+
+### Route guards
+
+| Guard       | File                              | Condition                                     | Redirect      |
+| ----------- | --------------------------------- | --------------------------------------------- | ------------- |
+| `authGuard` | `apps/shell/src/app/app.guard.ts` | `AuthService.isAuthenticated$` is `true`      | `/auth`       |
+| `orgGuard`  | `apps/shell/src/app/org.guard.ts` | `OrganizationsStore.hasActiveOrg()` is `true` | `/org/select` |
+
+### Route hierarchy
+
+```
+/auth/**         → auth MFE (no guards)
+/                → authGuard → ShellLayout
+  /              → orgGuard → platform MFE
+    /dashboard
+    /members
+    /settings
+    /billing
+  /org/select    → platform MFE (org selection screen)
+  /admin/**      → orgGuard → admin MFE
+```
+
+### API_BASE_URL token — why remotes re-provide it
+
+Each MFE is a separate Webpack build with its own DI scope. `InjectionToken` identity is tied to the bundle that created it. To avoid `NullInjectorError`, every remote re-provides `API_BASE_URL` (and all `*Api` services) in its route group `providers` array:
+
+```ts
+// apps/platform/src/app/remote-entry/entry.routes.ts
+{
+  path: '',
+  providers: [
+    { provide: API_BASE_URL, useValue: environment.apiUrl },
+    MembershipsApi,
+    BillingApi,
+    OrganizationsApi,
+  ],
+  children: [ /* feature routes */ ],
+}
+```
+
+### Component conventions
+
+All page components follow this pattern:
+
+- `ChangeDetectionStrategy.OnPush`
+- Angular Signals for local reactive state (`signal()`, `computed()`, `effect()`)
+- Standalone API — no `NgModule`
+- PrimeNG components imported directly in \`imports\` array
+- Inline template (no separate `.html` file)
+- `inject()` for dependency injection
+
+---
+
+## Auth0 setup
+
+1. Dashboard → **Applications → Create Application → Single Page Application**
+2. **Allowed Callback URLs**: `http://localhost:4200/auth/callback`
+3. **Allowed Logout URLs** and **Allowed Web Origins**: `http://localhost:4200`
+4. Copy **Domain** and **Client ID** into `apps/shell/src/environments/environment.ts`
+5. Create an **API** → set the `Identifier` to match `auth0Audience` in the shell env
+6. Set the same Client ID as `AUTH0_SPA_CLIENT_ID` in the backend `.env` (used for email invite links)
+
+---
+
+## Libraries
+
+| Import path                      | README                                        | Description                                                   |
+| -------------------------------- | --------------------------------------------- | ------------------------------------------------------------- |
+| `@org/auth/data-access`          | [→](libs/auth/data-access/README.md)          | `AuthStore`, `AuthApi` — user identity and session            |
+| `@org/organizations/data-access` | [→](libs/organizations/data-access/README.md) | `OrganizationsStore`, `OrganizationsApi`, `tenantInterceptor` |
+| `@org/memberships/data-access`   | [→](libs/memberships/data-access/README.md)   | `MembershipsApi` — CRUD for org members                       |
+| `@org/billing/data-access`       | [→](libs/billing/data-access/README.md)       | `BillingApi` — subscription, checkout, portal, cancel         |
+| `@org/activity-log/data-access`  | [→](libs/activity-log/data-access/README.md)  | `ActivityLogApi` — paginated org activity log                 |
+| `@org/entitlements/data-access`  | [→](libs/entitlements/data-access/README.md)  | `EntitlementsApi` — plan-based feature flags                  |
+| `@org/notifications/data-access` | [→](libs/notifications/data-access/README.md) | `NotificationsApi` — in-app notifications                     |
+| `@org/storage/data-access`       | [→](libs/storage/data-access/README.md)       | `StorageApi` — presigned upload/download URLs                 |
+| `@org/tasks/data-access`         | [→](libs/tasks/data-access/README.md)         | `TasksApi` — background job status tracking                   |
+| `@org/shared/util-types`         | [→](libs/shared/util-types/README.md)         | `API_BASE_URL` token, OpenAPI-aligned TypeScript types        |
+
+---
+
+## Testing
+
+Unit tests run with **Vitest** (ESM, no JSDom overhead). Each project has its own `vite.config.mts`. The workspace `vitest.workspace.ts` aggregates all projects.
 
 ```sh
-npx nx sync
+npx nx run-many -t test --all          # all projects
+npx nx run shell:test --watch          # watch mode
+npx nx run shell:test --coverage       # coverage report (html + lcov)
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+Test files live next to source files as `*.spec.ts`.
+
+---
+
+## Adding a new feature page (platform MFE)
 
 ```sh
-npx nx sync:check
+# 1. Create the component
+touch apps/platform/src/app/<feature>/<feature>.component.ts
+
+# 2. Register the route in platform's entry routes
+#    apps/platform/src/app/remote-entry/entry.routes.ts
+
+# 3. Add the service to the route group providers[] (never in root)
+
+# 4. Add a nav link in the shell navbar
+#    apps/shell/src/app/layout/navbar.component.ts
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
-
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
+## Adding a new API client library
 
 ```sh
-npx nx g ci-workflow
+# 1. Generate the lib
+npx nx g @nx/js:lib libs/<domain>/data-access
+
+# 2. Implement <domain>.api.ts
+#    - @Injectable({ providedIn: 'root' })
+#    - inject(API_BASE_URL) + inject(HttpClient)
+#    - return typed Observables using aliases from @org/shared/util-types
+
+# 3. Create <domain>.api.types.ts — re-export type aliases
+# 4. Export from src/index.ts
+# 5. Provide the service in the consuming route group providers[]
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Install Nx Console
+## Related
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [saas-backend-blueprint](../saas-backend-blueprint) — NestJS API this frontend communicates with
