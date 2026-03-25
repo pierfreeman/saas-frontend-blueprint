@@ -3,6 +3,7 @@ import {
   inject,
   OnInit,
   signal,
+  computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -18,11 +19,13 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import {
-  MembershipsApi,
+  MembershipsStore,
   MembershipSummary,
   MembershipRole,
 } from '@org/memberships/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
+import { EntitlementsStore } from '@org/entitlements/data-access';
+import { PermissionsService, PERMISSIONS } from '@org/shared/util-rbac';
 
 type TagSeverity = 'success' | 'info' | 'secondary' | 'warn';
 
@@ -70,11 +73,13 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
             People with access to this organization.
           </p>
         </div>
-        <p-button
-          label="Invite member"
-          icon="pi pi-user-plus"
-          (onClick)="openInviteDialog()"
-        />
+        @if (canInvite()) {
+          <p-button
+            label="Invite member"
+            icon="pi pi-user-plus"
+            (onClick)="openInviteDialog()"
+          />
+        }
       </div>
 
       <p-card>
@@ -95,7 +100,7 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
               </div>
             }
           </div>
-        } @else if (error()) {
+        } @else if (error() && members().length === 0) {
           <p class="text-red-500 text-sm m-0">
             Failed to load members. Please try again.
           </p>
@@ -218,15 +223,39 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
   `,
 })
 export class MembersComponent implements OnInit {
-  readonly #api = inject(MembershipsApi);
+  readonly #store = inject(MembershipsStore);
   readonly #orgsStore = inject(OrganizationsStore);
+  readonly #ent = inject(EntitlementsStore);
+  readonly #permissions = inject(PermissionsService);
   readonly #confirm = inject(ConfirmationService);
   readonly #toast = inject(MessageService);
 
-  readonly members = signal<MembershipSummary[]>([]);
-  readonly loading = signal(true);
-  readonly saving = signal(false);
-  readonly error = signal(false);
+  // ── Store-backed state ────────────────────────────────────────────────────
+  readonly members = this.#store.memberships;
+  readonly loading = this.#store.loadingList;
+  readonly saving = this.#store.loadingMutation;
+  readonly error = computed(() => this.#store.error() !== null);
+
+  // ── RBAC computed signals ─────────────────────────────────────────────────
+  readonly canInvite = computed(
+    () =>
+      this.#permissions
+        .currentUserPermissions()
+        .has(PERMISSIONS.ORG_MEMBERS_INVITE) &&
+      this.members().length < this.#ent.maxSeats(),
+  );
+  readonly canEditRoles = computed(() =>
+    this.#permissions
+      .currentUserPermissions()
+      .has(PERMISSIONS.ORG_MEMBERS_ROLE_UPDATE),
+  );
+  readonly canRemoveMembers = computed(() =>
+    this.#permissions
+      .currentUserPermissions()
+      .has(PERMISSIONS.ORG_MEMBERS_REMOVE),
+  );
+
+  // ── UI state ──────────────────────────────────────────────────────────────
   readonly inviteError = signal<string | null>(null);
 
   readonly roleOptions = ROLE_OPTIONS;
@@ -249,11 +278,11 @@ export class MembersComponent implements OnInit {
   }
 
   canEditRole(m: MembershipSummary): boolean {
-    return m.role !== 'OWNER';
+    return this.canEditRoles() && m.role !== 'OWNER';
   }
 
   canRemove(m: MembershipSummary): boolean {
-    return m.role !== 'OWNER';
+    return this.canRemoveMembers() && m.role !== 'OWNER';
   }
 
   openInviteDialog(): void {
@@ -263,69 +292,53 @@ export class MembersComponent implements OnInit {
     this.inviteVisible = true;
   }
 
-  submitInvite(): void {
+  async submitInvite(): Promise<void> {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId || !this.inviteEmail.trim()) return;
 
-    this.saving.set(true);
     this.inviteError.set(null);
+    const result = await this.#store.inviteMember(orgId, {
+      email: this.inviteEmail.trim(),
+      role: this.inviteRole,
+    });
 
-    this.#api
-      .inviteMember(orgId, {
-        email: this.inviteEmail.trim(),
-        role: this.inviteRole,
-      })
-      .subscribe({
-        next: () => {
-          this.inviteVisible = false;
-          this.saving.set(false);
-          this.#toast.add({
-            severity: 'success',
-            summary: 'Invited',
-            detail: `Invitation sent to ${this.inviteEmail.trim()}.`,
-            life: 3000,
-          });
-          // Reload the members list to reflect any newly created membership
-          this.#loadMembers();
-        },
-        error: (err) => {
-          this.inviteError.set(
-            err?.error?.message ?? 'Failed to send invitation.',
-          );
-          this.saving.set(false);
-        },
+    if (result !== null) {
+      this.inviteVisible = false;
+      this.#toast.add({
+        severity: 'success',
+        summary: 'Invited',
+        detail: `Invitation sent to ${this.inviteEmail.trim()}.`,
+        life: 3000,
       });
+    } else {
+      const err = this.#store.error();
+      this.inviteError.set(err?.message ?? 'Failed to send invitation.');
+    }
   }
 
-  changeRole(m: MembershipSummary, newRole: MembershipRole): void {
+  async changeRole(
+    m: MembershipSummary,
+    newRole: MembershipRole,
+  ): Promise<void> {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId || !m.id) return;
 
-    this.saving.set(true);
-    this.#api.updateMembership(orgId, m.id, { role: newRole }).subscribe({
-      next: (updated) => {
-        this.members.update((list) =>
-          list.map((item) =>
-            item.id === m.id ? { ...item, role: updated.role } : item,
-          ),
-        );
-        this.saving.set(false);
-        this.#toast.add({
-          severity: 'success',
-          summary: 'Role updated',
-          life: 3000,
-        });
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.#toast.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: err?.error?.message ?? 'Failed to update role.',
-          life: 4000,
-        });
-      },
-    });
+    await this.#store.updateMemberRole(orgId, m.id, newRole);
+
+    if (this.#store.error()) {
+      this.#toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: this.#store.error()?.message ?? 'Failed to update role.',
+        life: 4000,
+      });
+    } else {
+      this.#toast.add({
+        severity: 'success',
+        summary: 'Role updated',
+        life: 3000,
+      });
+    }
   }
 
   confirmRemove(m: MembershipSummary): void {
@@ -337,49 +350,32 @@ export class MembersComponent implements OnInit {
     });
   }
 
-  #doRemove(m: MembershipSummary): void {
+  async #doRemove(m: MembershipSummary): Promise<void> {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId || !m.id) return;
 
-    this.saving.set(true);
-    this.#api.deleteMembership(orgId, m.id).subscribe({
-      next: () => {
-        this.members.update((list) => list.filter((item) => item.id !== m.id));
-        this.saving.set(false);
-        this.#toast.add({
-          severity: 'success',
-          summary: 'Removed',
-          detail: 'Member removed.',
-          life: 3000,
-        });
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.#toast.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: err?.error?.message ?? 'Failed to remove member.',
-          life: 4000,
-        });
-      },
-    });
+    await this.#store.removeMember(orgId, m.id);
+
+    if (this.#store.error()) {
+      this.#toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: this.#store.error()?.message ?? 'Failed to remove member.',
+        life: 4000,
+      });
+    } else {
+      this.#toast.add({
+        severity: 'success',
+        summary: 'Removed',
+        detail: 'Member removed.',
+        life: 3000,
+      });
+    }
   }
 
   #loadMembers(): void {
     const orgId = this.#orgsStore.activeOrgId();
-    if (!orgId) {
-      this.loading.set(false);
-      return;
-    }
-    this.#api.getMemberships(orgId).subscribe({
-      next: (list) => {
-        this.members.set(list);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set(true);
-        this.loading.set(false);
-      },
-    });
+    if (!orgId) return;
+    void this.#store.loadMemberships(orgId);
   }
 }

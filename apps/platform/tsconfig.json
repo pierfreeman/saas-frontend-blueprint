@@ -6,6 +6,12 @@
     "experimentalDecorators": true,
     "module": "preserve",
     "paths": {
+      "@org/shared/util-error": [
+        "../../libs/shared/util-error/src/index.ts"
+      ],
+      "@org/shared/util-rbac": [
+        "../../libs/shared/util-rbac/src/index.ts"
+      ],
       "@org/shared/util-types": [
         "../../libs/shared/util-types/src/index.ts"
       ],

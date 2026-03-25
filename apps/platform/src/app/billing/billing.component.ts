@@ -127,7 +127,7 @@ const STATUS_SEVERITY: Record<string, TagSeverity> = {
                     Seats
                   </div>
                   <div class="font-semibold text-surface-800">
-                    {{ sub()!.seatCount }}
+                    {{ maxSeats() }}
                   </div>
                 </div>
 
@@ -255,6 +255,8 @@ export class BillingComponent implements OnInit {
     if (p === 'PRO') return 'Pro Plan';
     return 'Free Plan';
   });
+
+  readonly maxSeats = this.#ent.maxSeats;
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);

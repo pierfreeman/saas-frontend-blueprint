@@ -1,0 +1,50 @@
+import type { MembershipRole } from '@org/memberships/data-access';
+
+/** Mirrors saas-backend-blueprint/libs/common/src/rbac/permissions.constants.ts */
+export const PERMISSIONS = {
+  // Organization
+  ORG_MANAGE: 'org.manage',
+  ORG_BILLING_MANAGE: 'org.billing.manage',
+  ORG_MEMBERS_INVITE: 'org.members.invite',
+  ORG_MEMBERS_REMOVE: 'org.members.remove',
+  ORG_MEMBERS_ROLE_UPDATE: 'org.members.role.update',
+  ORG_READ: 'org.read',
+
+  // Audit
+  AUDIT_READ: 'audit.read',
+
+  // Analytics
+  ANALYTICS_VIEW: 'analytics.view',
+  ANALYTICS_EXPORT: 'analytics.export',
+} as const;
+
+export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
+/**
+ * Frontend mirror of ROLE_PERMISSIONS from the backend.
+ * Mirrors saas-backend-blueprint/libs/common/src/rbac/roles.constants.ts.
+ */
+export const ROLE_PERMISSION_MAP: Record<MembershipRole, Permission[]> = {
+  OWNER: [
+    PERMISSIONS.ORG_MANAGE,
+    PERMISSIONS.ORG_BILLING_MANAGE,
+    PERMISSIONS.ORG_MEMBERS_INVITE,
+    PERMISSIONS.ORG_MEMBERS_REMOVE,
+    PERMISSIONS.ORG_MEMBERS_ROLE_UPDATE,
+    PERMISSIONS.ORG_READ,
+    PERMISSIONS.AUDIT_READ,
+    PERMISSIONS.ANALYTICS_VIEW,
+    PERMISSIONS.ANALYTICS_EXPORT,
+  ],
+  ADMIN: [
+    PERMISSIONS.ORG_MANAGE,
+    PERMISSIONS.ORG_MEMBERS_INVITE,
+    PERMISSIONS.ORG_MEMBERS_REMOVE,
+    PERMISSIONS.ORG_MEMBERS_ROLE_UPDATE,
+    PERMISSIONS.ORG_READ,
+    PERMISSIONS.AUDIT_READ,
+    PERMISSIONS.ANALYTICS_VIEW,
+  ],
+  MEMBER: [PERMISSIONS.ORG_READ, PERMISSIONS.ANALYTICS_VIEW],
+  READ_ONLY: [PERMISSIONS.ORG_READ],
+};

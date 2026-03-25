@@ -2,7 +2,7 @@ import { computed, Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { EntitlementsApi } from './entitlements.api';
 import type { OrganizationEntitlements } from './entitlements.api.types';
-import type { ApiError } from './api-error.type';
+import type { ApiError } from '@org/shared/util-error';
 
 type Plan = 'FREE' | 'PRO' | 'ENTERPRISE';
 
@@ -36,6 +36,10 @@ export class EntitlementsStore {
   );
   readonly prioritySupport = computed(
     () => this.entitlements()?.prioritySupport ?? false,
+  );
+  /** Maximum members allowed by the current plan. Falls back to 3 (FREE limit) if not yet loaded. */
+  readonly maxSeats = computed<number>(
+    () => this.entitlements()?.maxSeats ?? 3,
   );
 
   // ── Methods ────────────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import { AuthStore } from '@org/auth/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { MembershipsApi } from '@org/memberships/data-access';
 import { BillingApi, SubscriptionResponse } from '@org/billing/data-access';
+import { EntitlementsStore } from '@org/entitlements/data-access';
 
 @Component({
   selector: 'app-dashboard',
@@ -87,6 +88,7 @@ export class DashboardComponent implements OnInit {
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #membershipsApi = inject(MembershipsApi);
   readonly #billingApi = inject(BillingApi);
+  readonly #entsStore = inject(EntitlementsStore);
 
   readonly memberCount = signal<number | null>(null);
   readonly subscription = signal<SubscriptionResponse | null>(null);
@@ -107,7 +109,7 @@ export class DashboardComponent implements OnInit {
     return status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, ' ');
   };
 
-  readonly seatCount = () => this.subscription()?.seatCount ?? '—';
+  readonly seatCount = () => this.#entsStore.maxSeats();
 
   ngOnInit(): void {
     const orgId = this.#orgsStore.activeOrgId();

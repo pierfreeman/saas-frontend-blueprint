@@ -24,16 +24,14 @@ function makeEntitlements(
     apiAccess: true,
     ssoEnabled: false,
     prioritySupport: false,
+    maxSeats: 10,
     ...overrides,
   };
 }
 
 const apiError: ApiError = {
-  statusCode: 500,
+  status: 500,
   message: 'Internal Server Error',
-  timestamp: '2026-01-01T00:00:00Z',
-  path: '/organizations/org-1/entitlements',
-  method: 'GET',
 };
 
 // ── Suite ─────────────────────────────────────────────────────────────────────
@@ -254,6 +252,26 @@ describe('EntitlementsStore', () => {
       );
       await store.loadEntitlements('org-1');
       expect(store.prioritySupport()).toBe(true);
+    });
+
+    it('maxSeats returns value from API response', async () => {
+      getEntitlementsMock.mockReturnValue(
+        of(makeEntitlements({ maxSeats: 3 })),
+      );
+      await store.loadEntitlements('org-1');
+      expect(store.maxSeats()).toBe(3);
+    });
+
+    it('maxSeats returns 3 as fallback when entitlements not loaded', () => {
+      expect(store.maxSeats()).toBe(3);
+    });
+
+    it('maxSeats returns 999999 for ENTERPRISE plan', async () => {
+      getEntitlementsMock.mockReturnValue(
+        of(makeEntitlements({ maxSeats: 999999 })),
+      );
+      await store.loadEntitlements('org-1');
+      expect(store.maxSeats()).toBe(999999);
     });
   });
 

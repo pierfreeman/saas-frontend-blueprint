@@ -14,6 +14,14 @@ describe('PLATFORM_ROUTES', () => {
     expect(group?.providers?.length).toBeGreaterThan(0);
   });
 
+  it('has a canActivate guard on the route group to sync the current user', () => {
+    const group = PLATFORM_ROUTES.find(
+      (r) => r.path === '' && !r.redirectTo && r.canActivate,
+    );
+    expect(group?.canActivate).toBeDefined();
+    expect(group?.canActivate?.length).toBeGreaterThan(0);
+  });
+
   it('has a lazy dashboard route inside the group', () => {
     const group = PLATFORM_ROUTES.find(
       (r) => r.path === '' && !r.redirectTo && r.children,
