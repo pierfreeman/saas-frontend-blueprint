@@ -75,6 +75,13 @@ import { NotificationsApi } from '@org/notifications/data-access';
           >
             Activity Log
           </a>
+          <a
+            routerLink="/storage"
+            routerLinkActive="text-primary font-semibold"
+            class="px-3 py-1.5 rounded text-sm text-surface-600 hover:bg-surface-100 no-underline transition-colors"
+          >
+            Storage
+          </a>
         </nav>
       </div>
 

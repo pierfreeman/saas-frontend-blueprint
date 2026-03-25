@@ -6,6 +6,7 @@ import { BillingApi } from '@org/billing/data-access';
 import { OrganizationsApi } from '@org/organizations/data-access';
 import { ActivityLogApi } from '@org/activity-log/data-access';
 import { NotificationsApi } from '@org/notifications/data-access';
+import { StorageApi } from '@org/storage/data-access';
 import {
   EntitlementsApi,
   EntitlementsStore,
@@ -43,6 +44,7 @@ export const PLATFORM_ROUTES: Route[] = [
       NotificationsApi,
       EntitlementsApi,
       EntitlementsStore,
+      StorageApi,
       PermissionsService,
     ],
     children: [
@@ -86,6 +88,13 @@ export const PLATFORM_ROUTES: Route[] = [
         loadComponent: () =>
           import('../notifications/notifications.component').then(
             (m) => m.NotificationsComponent,
+          ),
+      },
+      {
+        path: 'storage',
+        loadComponent: () =>
+          import('../storage/storage.component').then(
+            (m) => m.StorageComponent,
           ),
       },
     ],
