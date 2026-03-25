@@ -2,6 +2,7 @@ import { Route } from '@angular/router';
 import { API_BASE_URL } from '@org/shared/util-types';
 import { MembershipsApi } from '@org/memberships/data-access';
 import { BillingApi } from '@org/billing/data-access';
+import { OrganizationsApi } from '@org/organizations/data-access';
 import { environment } from 'src/environments/environment';
 
 export const PLATFORM_ROUTES: Route[] = [
@@ -14,6 +15,7 @@ export const PLATFORM_ROUTES: Route[] = [
       { provide: API_BASE_URL, useValue: environment.apiUrl },
       MembershipsApi,
       BillingApi,
+      OrganizationsApi,
     ],
     children: [
       {
