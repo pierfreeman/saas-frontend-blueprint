@@ -4,16 +4,19 @@ import {
   Component,
   computed,
   inject,
+  OnDestroy,
   OnInit,
   signal,
 } from '@angular/core';
 import {
   NotificationRecord,
   NotificationsApi,
+  NotificationsSocketService,
 } from '@org/notifications/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
+import { Subscription } from 'rxjs';
 
 const PAGE_SIZE = 20;
 
@@ -159,8 +162,9 @@ function typeIcon(type: string): string {
     </div>
   `,
 })
-export class NotificationsComponent implements OnInit {
+export class NotificationsComponent implements OnInit, OnDestroy {
   readonly #api = inject(NotificationsApi);
+  readonly #socket = inject(NotificationsSocketService);
   readonly #orgsStore = inject(OrganizationsStore);
 
   readonly notifications = signal<NotificationRecord[]>([]);
@@ -168,8 +172,10 @@ export class NotificationsComponent implements OnInit {
   readonly loading = signal(true);
   readonly markingAll = signal(false);
   readonly unreadOnly = signal(false);
+  readonly unreadCount = signal(0);
 
   readonly #offset = signal(0);
+  readonly #subs = new Subscription();
 
   readonly hasMore = computed(() => this.notifications().length < this.total());
 
@@ -185,6 +191,21 @@ export class NotificationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.#load(true);
+    this.#socket.connect();
+    this.#subs.add(
+      this.#socket.notification$.subscribe((n) =>
+        this.#onRealtimeNotification(n),
+      ),
+    );
+    this.#subs.add(
+      this.#socket.unreadCount$.subscribe(({ count }) =>
+        this.unreadCount.set(count),
+      ),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.#subs.unsubscribe();
   }
 
   toggleUnreadOnly(): void {
@@ -274,5 +295,17 @@ export class NotificationsComponent implements OnInit {
         },
         error: () => this.loading.set(false),
       });
+  }
+
+  /** Prepend a server-pushed notification to the list, respecting the active filter. */
+  #onRealtimeNotification(n: NotificationRecord): void {
+    // If showing unread-only, skip notifications that somehow arrive already read.
+    if (this.unreadOnly() && n.readAt) return;
+
+    this.notifications.update((list) => [n, ...list]);
+    this.total.update((t) => t + 1);
+    if (!n.readAt) {
+      this.unreadCount.update((c) => c + 1);
+    }
   }
 }
