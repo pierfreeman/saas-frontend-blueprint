@@ -47,7 +47,6 @@ Thumbs.db
 .codex/*
 .cursor/*
 .gemini/*
-.github/*
 
 .claude/worktrees
 .claude/settings.local.json
