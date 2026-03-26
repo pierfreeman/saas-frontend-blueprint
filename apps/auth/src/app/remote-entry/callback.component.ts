@@ -1,12 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
-import { filter, switchMap, take } from 'rxjs';
-import { AuthApi, AuthStore } from '@org/auth/data-access';
-import {
-  OrganizationsApi,
-  OrganizationsStore,
-} from '@org/organizations/data-access';
+import { filter, take } from 'rxjs';
 
 @Component({
   selector: 'app-callback',
@@ -15,30 +10,26 @@ import {
 export class CallbackComponent implements OnInit {
   readonly #auth = inject(AuthService);
   readonly #router = inject(Router);
-  readonly #authApi = inject(AuthApi);
-  readonly #authStore = inject(AuthStore);
-  readonly #orgsApi = inject(OrganizationsApi);
-  readonly #orgsStore = inject(OrganizationsStore);
+  readonly #route = inject(ActivatedRoute);
 
-  ngOnInit() {
-    this.#auth.isAuthenticated$
+  ngOnInit(): void {
+    // If Auth0 returned an error (e.g. access_denied), navigate home and let
+    // the shell's authGuard redirect to login.
+    const error = this.#route.snapshot.queryParamMap.get('error');
+    if (error) {
+      console.error('[auth] callback error:', error);
+      this.#router.navigateByUrl('/');
+      return;
+    }
+
+    // Wait for Auth0 SDK to finish processing the callback (code exchange).
+    // The shell's provideAppInitializer has already loaded user + orgs.
+    this.#auth.isLoading$
       .pipe(
-        filter((ok) => ok),
+        filter((loading) => !loading),
         take(1),
-        // 1. Sync the Auth0 identity with the backend (upserts on first login)
-        switchMap(() => this.#authApi.getMe()),
-        // 2. Store the user in the shared AuthStore
-        switchMap((user) => {
-          this.#authStore.setUser(user);
-          return this.#orgsApi.getOrganizations();
-        }),
       )
-      .subscribe((orgs) => {
-        // 3. Default to the first org if none is already persisted in localStorage
-        if (!this.#orgsStore.activeOrgId() && orgs.length > 0) {
-          this.#orgsStore.setActiveOrg(orgs[0].id!, orgs[0].name ?? undefined);
-        }
-        // 4. Enter the app
+      .subscribe(() => {
         this.#router.navigateByUrl('/');
       });
   }

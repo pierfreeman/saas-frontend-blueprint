@@ -139,24 +139,27 @@ export class NavbarComponent {
   readonly activeOrgName = this.#orgsStore.activeOrgName;
   readonly unreadCount = signal(0);
 
-  // Re-fetch unread count whenever the active org changes, and again after
-  // every navigation (so the badge refreshes after visiting /notifications).
-  // Field initializer ensures we're always in injection context (fixes NG0203).
-  readonly #syncUnreadCount = toObservable(this.activeOrgId)
-    .pipe(
-      filter(Boolean),
-      switchMap(() =>
-        merge(
-          of(null),
-          this.#router.events.pipe(filter((e) => e instanceof NavigationEnd)),
-        ).pipe(switchMap(() => this.#notificationsApi.getUnreadCount())),
-      ),
-      takeUntilDestroyed(),
-    )
-    .subscribe({
-      next: (res) => this.unreadCount.set(res.count ?? 0),
-      error: () => {},
-    });
+  constructor() {
+    // Re-fetch unread count whenever the active org changes, and again after
+    // every navigation (so the badge refreshes after visiting /notifications).
+    toObservable(this.activeOrgId)
+      .pipe(
+        filter(Boolean),
+        switchMap(() =>
+          merge(
+            of(null),
+            this.#router.events.pipe(filter((e) => e instanceof NavigationEnd)),
+          ).pipe(switchMap(() => this.#notificationsApi.getUnreadCount())),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe({
+        next: (res) => this.unreadCount.set(res.count ?? 0),
+        error: () => {
+          /* badge stays stale — non-critical */
+        },
+      });
+  }
   readonly avatarLabel = computed(() => {
     const email = this.#authStore.currentUser()?.email ?? '';
     return email.charAt(0).toUpperCase() || '?';

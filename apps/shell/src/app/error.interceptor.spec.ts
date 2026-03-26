@@ -11,7 +11,7 @@ import {
 } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
-import { signal } from '@angular/core';
+
 import { vi } from 'vitest';
 import { errorInterceptor } from './error.interceptor';
 import { AuthStore } from '@org/auth/data-access';
@@ -49,7 +49,11 @@ describe('errorInterceptor', () => {
   afterEach(() => controller.verify());
 
   function triggerError(status: number, body: Record<string, unknown> = {}) {
-    const sub = http.get('/api/test').subscribe({ error: () => {} });
+    const sub = http.get('/api/test').subscribe({
+      error: () => {
+        /* expected error — verified by test assertions */
+      },
+    });
     controller.expectOne('/api/test').flush(body, { status, statusText: '' });
     return sub;
   }
