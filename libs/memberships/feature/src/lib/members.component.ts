@@ -129,11 +129,19 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
           >
             @for (m of members(); track m.id) {
               <li class="flex items-center gap-3 py-3">
-                <p-avatar
-                  [label]="avatarLabel(m)"
-                  shape="circle"
-                  styleClass="shrink-0"
-                />
+                @if (m.user?.pictureUrl) {
+                  <p-avatar
+                    [image]="m.user!.pictureUrl!"
+                    shape="circle"
+                    styleClass="shrink-0"
+                  />
+                } @else {
+                  <p-avatar
+                    [label]="avatarLabel(m)"
+                    shape="circle"
+                    styleClass="shrink-0"
+                  />
+                }
 
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-surface-900 m-0 truncate">
@@ -296,14 +304,16 @@ export class MembersComponent implements OnInit {
   }
 
   avatarLabel(m: MembershipSummary): string {
-    const src = m.user?.email ?? m.userId ?? '?';
-    return src.charAt(0).toUpperCase();
+    const name = this.displayName(m);
+    return name.charAt(0).toUpperCase();
   }
 
   displayName(m: MembershipSummary): string {
-    const email = m.user?.email;
-    if (!email) return m.userId ?? '—';
-    return email.split('@')[0];
+    const { firstName, lastName, email } = m.user ?? {};
+    if (firstName || lastName)
+      return [firstName, lastName].filter(Boolean).join(' ');
+    if (email) return email.split('@')[0];
+    return m.userId ?? '—';
   }
 
   displayEmail(m: MembershipSummary): string {
