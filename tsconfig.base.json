@@ -26,6 +26,9 @@
       "@org/shared/util-auth": [
         "libs/shared/util-auth/src/index.ts"
       ],
+      "@org/shared/util-org-context": [
+        "libs/shared/util-org-context/src/index.ts"
+      ],
       "@org/shared/util-types": [
         "libs/shared/util-types/src/index.ts"
       ],

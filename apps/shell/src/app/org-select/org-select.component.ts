@@ -4,9 +4,9 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import {
   OrganizationsApi,
-  OrganizationsStore,
   OrganizationSummary,
 } from '@org/organizations/data-access';
+import { OrgContextService } from '@org/shared/util-org-context';
 
 @Component({
   selector: 'app-org-select',
@@ -49,7 +49,7 @@ import {
 })
 export class OrgSelectComponent implements OnInit {
   readonly #api = inject(OrganizationsApi);
-  readonly #store = inject(OrganizationsStore);
+  readonly #orgContext = inject(OrgContextService);
   readonly #router = inject(Router);
 
   readonly orgs = signal<OrganizationSummary[]>([]);
@@ -62,7 +62,7 @@ export class OrgSelectComponent implements OnInit {
   }
 
   selectOrg(org: OrganizationSummary): void {
-    this.#store.setActiveOrg(org.id!, org.name ?? undefined);
-    this.#router.navigateByUrl('/');
+    this.#orgContext.switchOrg(org.id!, org.name ?? undefined);
+    void this.#router.navigateByUrl('/');
   }
 }
