@@ -8,7 +8,7 @@ import {
 import { AuthService } from '@auth0/auth0-angular';
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
-import { authGuard } from './app.guard';
+import { authGuard } from '@org/shared/util-auth';
 
 const executeGuard: CanActivateFn = (...args) =>
   TestBed.runInInjectionContext(() => authGuard(...args));
@@ -27,7 +27,10 @@ describe('authGuard', () => {
     beforeEach(() => {
       TestBed.configureTestingModule({
         providers: [
-          { provide: AuthService, useValue: { isAuthenticated$: of(true) } },
+          {
+            provide: AuthService,
+            useValue: { isLoading$: of(false), isAuthenticated$: of(true) },
+          },
           { provide: Router, useValue: routerSpy },
         ],
       });
@@ -50,7 +53,10 @@ describe('authGuard', () => {
     beforeEach(() => {
       TestBed.configureTestingModule({
         providers: [
-          { provide: AuthService, useValue: { isAuthenticated$: of(false) } },
+          {
+            provide: AuthService,
+            useValue: { isLoading$: of(false), isAuthenticated$: of(false) },
+          },
           { provide: Router, useValue: routerSpy },
         ],
       });

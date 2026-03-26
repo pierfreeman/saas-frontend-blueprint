@@ -9,6 +9,9 @@
       "@org/shared/util-types": [
         "../../libs/shared/util-types/src/index.ts"
       ],
+      "@org/shared/util-auth": [
+        "../../libs/shared/util-auth/src/index.ts"
+      ],
       "@org/auth/data-access": [
         "../../libs/auth/data-access/src/index.ts"
       ],

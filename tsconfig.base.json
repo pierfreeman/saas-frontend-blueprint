@@ -23,6 +23,9 @@
       "@org/shared/util-rbac": [
         "libs/shared/util-rbac/src/index.ts"
       ],
+      "@org/shared/util-auth": [
+        "libs/shared/util-auth/src/index.ts"
+      ],
       "@org/shared/util-types": [
         "libs/shared/util-types/src/index.ts"
       ],

@@ -4,10 +4,10 @@ import {
   CanActivateFn,
   Router,
   RouterStateSnapshot,
+  UrlTree,
 } from '@angular/router';
-import { vi } from 'vitest';
 import { OrganizationsStore } from '@org/organizations/data-access';
-import { orgGuard } from './org.guard';
+import { orgGuard } from '@org/shared/util-auth';
 
 const executeGuard: CanActivateFn = (...args) =>
   TestBed.runInInjectionContext(() => orgGuard(...args));
@@ -16,12 +16,6 @@ const route = {} as ActivatedRouteSnapshot;
 const state = {} as RouterStateSnapshot;
 
 describe('orgGuard', () => {
-  let routerSpy: { navigate: ReturnType<typeof vi.fn> };
-
-  beforeEach(() => {
-    routerSpy = { navigate: vi.fn() };
-  });
-
   describe('when an active org is set', () => {
     beforeEach(() => {
       TestBed.configureTestingModule({
@@ -30,7 +24,7 @@ describe('orgGuard', () => {
             provide: OrganizationsStore,
             useValue: { hasActiveOrg: () => true },
           },
-          { provide: Router, useValue: routerSpy },
+          { provide: Router, useValue: {} },
         ],
       });
     });
@@ -38,11 +32,6 @@ describe('orgGuard', () => {
     it('allows navigation (returns true)', () => {
       const result = executeGuard(route, state);
       expect(result).toBe(true);
-    });
-
-    it('does not redirect to /org/new', () => {
-      executeGuard(route, state);
-      expect(routerSpy.navigate).not.toHaveBeenCalled();
     });
   });
 
@@ -54,19 +43,28 @@ describe('orgGuard', () => {
             provide: OrganizationsStore,
             useValue: { hasActiveOrg: () => false },
           },
-          { provide: Router, useValue: routerSpy },
+          {
+            provide: Router,
+            useValue: {
+              createUrlTree: (commands: unknown[]) =>
+                ({ commands }) as unknown as UrlTree,
+            },
+          },
         ],
       });
     });
 
-    it('blocks navigation (returns false)', () => {
+    it('blocks navigation (returns a UrlTree, not boolean true)', () => {
       const result = executeGuard(route, state);
-      expect(result).toBe(false);
+      expect(result).not.toBe(true);
+      expect(result).not.toBe(false);
     });
 
-    it('redirects to /org/new', () => {
-      executeGuard(route, state);
-      expect(routerSpy.navigate).toHaveBeenCalledWith(['/org/select']);
+    it('redirects to /org/select', () => {
+      const result = executeGuard(route, state) as unknown as {
+        commands: string[];
+      };
+      expect(result.commands).toEqual(['/org/select']);
     });
   });
 });
