@@ -10,7 +10,10 @@ import {
 } from '@saas-frontend/memberships/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
-import { PermissionsService, PERMISSIONS } from '@saas-frontend/shared/util-rbac';
+import {
+  PermissionsService,
+  PERMISSIONS,
+} from '@saas-frontend/shared/util-rbac';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -288,17 +291,17 @@ describe('MembersComponent', () => {
   });
 
   describe('role and avatar helpers', () => {
-    it('avatarLabel returns uppercased first char of userId', () => {
+    it('avatarLabel returns uppercased first char of displayName', () => {
       const { component } = setup({});
       const m = makeMember({ userId: 'alice@x.com' });
       expect(component.avatarLabel(m)).toBe('A');
     });
 
-    it('avatarLabel returns ? for null userId', () => {
+    it('avatarLabel returns em-dash first char when userId is undefined', () => {
       const { component } = setup({});
       expect(
         component.avatarLabel({ ...makeMember(), userId: undefined as any }),
-      ).toBe('?');
+      ).toBe('—');
     });
 
     it('roleSeverity maps known roles', () => {
@@ -311,6 +314,79 @@ describe('MembersComponent', () => {
     it('roleSeverity defaults to secondary for unknown role', () => {
       const { component } = setup({});
       expect(component.roleSeverity('UNKNOWN')).toBe('secondary');
+    });
+  });
+
+  describe('displayName', () => {
+    it('returns firstName + lastName when both are present', () => {
+      const { component } = setup({});
+      const m = makeMember({
+        user: {
+          firstName: 'Alice',
+          lastName: 'Smith',
+          email: 'alice@example.com',
+        },
+      });
+      expect(component.displayName(m)).toBe('Alice Smith');
+    });
+
+    it('returns only firstName when lastName is absent', () => {
+      const { component } = setup({});
+      const m = makeMember({
+        user: { firstName: 'Alice', email: 'alice@example.com' },
+      });
+      expect(component.displayName(m)).toBe('Alice');
+    });
+
+    it('falls back to the local part of user email when no name', () => {
+      const { component } = setup({});
+      const m = makeMember({ user: { email: 'bob@example.com' } });
+      expect(component.displayName(m)).toBe('bob');
+    });
+
+    it('falls back to userId when no user data at all', () => {
+      const { component } = setup({});
+      const m = makeMember({ userId: 'user-uuid-123' });
+      expect(component.displayName(m)).toBe('user-uuid-123');
+    });
+
+    it('returns em-dash when user is absent and userId is undefined', () => {
+      const { component } = setup({});
+      const m = { ...makeMember(), userId: undefined as any };
+      expect(component.displayName(m)).toBe('—');
+    });
+  });
+
+  describe('displayEmail', () => {
+    it('returns user email when present', () => {
+      const { component } = setup({});
+      const m = makeMember({ user: { email: 'carol@example.com' } });
+      expect(component.displayEmail(m)).toBe('carol@example.com');
+    });
+
+    it('returns empty string when user has no email', () => {
+      const { component } = setup({});
+      const m = makeMember({ user: { firstName: 'Dave' } });
+      expect(component.displayEmail(m)).toBe('');
+    });
+
+    it('returns empty string when user is absent', () => {
+      const { component } = setup({});
+      expect(component.displayEmail(makeMember())).toBe('');
+    });
+  });
+
+  describe('avatarLabel with user data', () => {
+    it('uses first char of firstName when present', () => {
+      const { component } = setup({});
+      const m = makeMember({ user: { firstName: 'Eve', email: 'e@x.com' } });
+      expect(component.avatarLabel(m)).toBe('E');
+    });
+
+    it('uses first char of email local part when no name', () => {
+      const { component } = setup({});
+      const m = makeMember({ user: { email: 'frank@x.com' } });
+      expect(component.avatarLabel(m)).toBe('F');
     });
   });
 });

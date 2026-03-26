@@ -68,7 +68,7 @@ describe('NotificationsSocketService', () => {
   describe('connect()', () => {
     it('opens a socket to the /notifications namespace with the JWT', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
 
       expect(mockIo).toHaveBeenCalledOnce();
       const calls = mockIo.mock.calls as unknown as [
@@ -83,18 +83,18 @@ describe('NotificationsSocketService', () => {
 
     it('is idempotent — skips reconnection when already connected', () => {
       setup();
-      service.connect(); // first call — opens the socket
+      service.connect('org-1'); // first call — opens the socket
       mockSocket.connected = true; // simulate the socket being up
       mockIo.mockClear(); // reset call count for the assertion below
 
-      service.connect(); // second call — must be a no-op
+      service.connect('org-1'); // second call — must be a no-op
 
       expect(mockIo).not.toHaveBeenCalled();
     });
 
     it('does not open a socket when token retrieval fails', () => {
       setup('error');
-      service.connect();
+      service.connect('org-1');
 
       expect(mockIo).not.toHaveBeenCalled();
     });
@@ -105,7 +105,7 @@ describe('NotificationsSocketService', () => {
   describe('notification$', () => {
     it('emits when the socket fires notification:new', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
 
       const received: NotificationRecord[] = [];
       service.notification$.subscribe((n) => received.push(n));
@@ -144,7 +144,7 @@ describe('NotificationsSocketService', () => {
   describe('unreadCount$', () => {
     it('emits when the socket fires notification:unread-count', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
 
       const counts: unknown[] = [];
       service.unreadCount$.subscribe((c) => counts.push(c));
@@ -161,7 +161,7 @@ describe('NotificationsSocketService', () => {
   describe('disconnect()', () => {
     it('calls socket.disconnect()', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
       service.disconnect();
 
       expect(mockSocket.disconnect).toHaveBeenCalledOnce();
@@ -178,7 +178,7 @@ describe('NotificationsSocketService', () => {
   describe('ngOnDestroy()', () => {
     it('disconnects the socket and completes both streams', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
 
       let notifCompleted = false;
       let countCompleted = false;

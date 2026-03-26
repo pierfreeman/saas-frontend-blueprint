@@ -31,21 +31,27 @@ describe('PLATFORM_ROUTES', () => {
     expect(dashboard?.loadComponent).toBeDefined();
   });
 
-  it('has a lazy members route inside the group', () => {
+  it('has a lazy members route nested under org-settings', () => {
     const group = PLATFORM_ROUTES.find(
       (r) => r.path === '' && !r.redirectTo && r.children,
     );
-    const members = group?.children?.find((r) => r.path === 'members');
+    const orgSettings = group?.children?.find((r) => r.path === 'org-settings');
+    expect(orgSettings).toBeDefined();
+    const members = orgSettings?.children?.find((r) => r.path === 'members');
     expect(members).toBeDefined();
-    expect(members?.loadComponent).toBeDefined();
+    expect(members?.loadChildren).toBeDefined();
   });
 
-  it('has a lazy settings route inside the group', () => {
+  it('has a lazy settings route nested under org-settings', () => {
     const group = PLATFORM_ROUTES.find(
       (r) => r.path === '' && !r.redirectTo && r.children,
     );
-    const settings = group?.children?.find((r) => r.path === 'settings');
-    expect(settings).toBeDefined();
-    expect(settings?.loadComponent).toBeDefined();
+    const orgSettings = group?.children?.find((r) => r.path === 'org-settings');
+    expect(orgSettings).toBeDefined();
+    const organization = orgSettings?.children?.find(
+      (r) => r.path === 'organization',
+    );
+    expect(organization).toBeDefined();
+    expect(organization?.loadChildren).toBeDefined();
   });
 });

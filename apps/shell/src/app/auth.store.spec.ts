@@ -1,15 +1,27 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthStore } from '@saas-frontend/auth/data-access';
+import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
+import { AuthStore, AuthApi } from '@saas-frontend/auth/data-access';
 import type { User } from '@saas-frontend/auth/data-access';
 
 const mockUser: User = { id: 'u1', email: 'a@b.com', auth0Id: 'auth0|1' };
+
+function mockApi(overrides: Partial<InstanceType<typeof AuthApi>> = {}) {
+  return {
+    getMe: vi.fn(() => of(mockUser)),
+    updateMe: vi.fn(() => of(mockUser)),
+    ...overrides,
+  } as unknown as AuthApi;
+}
 
 describe('AuthStore', () => {
   let store: AuthStore;
 
   beforeEach(() => {
     sessionStorage.clear();
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: AuthApi, useValue: mockApi() }],
+    });
     store = TestBed.inject(AuthStore);
   });
 
@@ -40,9 +52,73 @@ describe('AuthStore', () => {
     sessionStorage.setItem('saas.currentUser', JSON.stringify(mockUser));
     // New TestBed instance simulates a new bundle/injector reading from storage
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [{ provide: AuthApi, useValue: mockApi() }],
+    });
     const freshStore = TestBed.inject(AuthStore) as AuthStore;
     expect(freshStore.currentUser()).toEqual(mockUser);
     expect(freshStore.isLoggedIn()).toBe(true);
+  });
+
+  describe('updateProfile', () => {
+    it('calls api.updateMe with the dto, updates the signal, and returns the updated user', async () => {
+      const updated: User = {
+        ...mockUser,
+        firstName: 'Alice',
+        lastName: 'Smith',
+      };
+      const api = mockApi({ updateMe: vi.fn(() => of(updated)) });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthApi, useValue: api }],
+      });
+      store = TestBed.inject(AuthStore);
+      store.setUser(mockUser);
+
+      const result = await store.updateProfile({
+        firstName: 'Alice',
+        lastName: 'Smith',
+      });
+
+      expect(api.updateMe).toHaveBeenCalledWith({
+        firstName: 'Alice',
+        lastName: 'Smith',
+      });
+      expect(result).toEqual(updated);
+      expect(store.currentUser()).toEqual(updated);
+    });
+
+    it('persists the updated user to sessionStorage', async () => {
+      const updated: User = {
+        ...mockUser,
+        pictureUrl: 'https://example.com/pic.jpg',
+      };
+      const api = mockApi({ updateMe: vi.fn(() => of(updated)) });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthApi, useValue: api }],
+      });
+      store = TestBed.inject(AuthStore);
+
+      await store.updateProfile({ pictureUrl: 'https://example.com/pic.jpg' });
+
+      const raw = sessionStorage.getItem('saas.currentUser');
+      expect(JSON.parse(raw!)).toEqual(updated);
+    });
+
+    it('propagates API errors', async () => {
+      const api = mockApi({
+        updateMe: vi.fn(() => throwError(() => new Error('Network error'))),
+      });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthApi, useValue: api }],
+      });
+      store = TestBed.inject(AuthStore);
+
+      await expect(store.updateProfile({ firstName: 'X' })).rejects.toThrow(
+        'Network error',
+      );
+    });
   });
 });

@@ -85,23 +85,6 @@ describe('SettingsComponent', () => {
     });
   });
 
-  describe('user info helpers', () => {
-    it('email returns current user email', () => {
-      const { component } = setup({ email: 'bob@test.com' });
-      expect(component.email()).toBe('bob@test.com');
-    });
-
-    it('name returns the part before the @ sign', () => {
-      const { component } = setup({ email: 'charlie@example.com' });
-      expect(component.name()).toBe('charlie');
-    });
-
-    it('avatarLabel returns uppercased first char of email', () => {
-      const { component } = setup({ email: 'dave@x.com' });
-      expect(component.avatarLabel()).toBe('D');
-    });
-  });
-
   describe('canSaveName', () => {
     it('returns false when draft equals current name', () => {
       const { component } = setup({ orgName: 'Acme Corp' });
