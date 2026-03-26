@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 import { vi } from 'vitest';
-import { errorInterceptor } from './error.interceptor';
+import { errorInterceptor } from '@org/shared/util-error';
 import { AuthStore } from '@org/auth/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 

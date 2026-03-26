@@ -5,7 +5,7 @@ import { MessageService } from 'primeng/api';
 import { AuthStore } from '@org/auth/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { catchError, throwError } from 'rxjs';
-import { isApiError } from '@org/shared/util-error';
+import { isApiError } from './api-error';
 
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);

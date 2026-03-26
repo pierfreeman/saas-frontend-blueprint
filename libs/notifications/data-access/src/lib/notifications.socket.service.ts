@@ -10,11 +10,11 @@ export interface UnreadCountPayload {
 }
 
 /**
- * Manages a Socket.IO connection to the `/notifications` namespace.
+ * Manages a tenant-scoped Socket.IO connection to the `/notifications` namespace.
  *
- * Call `connect()` once to establish the WebSocket session (JWT is fetched
- * silently from Auth0). The connection is automatically cleaned up on
- * service destruction.
+ * The connection is org-scoped: call `connect(orgId)` on initial bootstrap and
+ * again on every org switch so the server only pushes events for the active org.
+ * Call `disconnect()` before switching org to cleanly close the old session.
  *
  * Streams:
  *  - `notification$` — emits whenever the server pushes a `notification:new` event.
@@ -26,6 +26,8 @@ export class NotificationsSocketService implements OnDestroy {
   readonly #auth = inject(AuthService);
 
   #socket: Socket | null = null;
+  /** Tracks the org the current socket is connected for — avoids spurious reconnects. */
+  #connectedOrgId: string | null = null;
 
   readonly #notification$ = new Subject<NotificationRecord>();
   readonly #unreadCount$ = new Subject<UnreadCountPayload>();
@@ -37,14 +39,20 @@ export class NotificationsSocketService implements OnDestroy {
   readonly unreadCount$ = this.#unreadCount$.asObservable();
 
   /**
-   * Connect to the WebSocket gateway.
-   * Idempotent — safe to call multiple times; opens only one connection.
+   * Connect to the WebSocket gateway for the given org.
+   *
+   * Idempotent when called with the same org — safe to call on every navigation.
+   * If already connected to a different org, disconnects first.
+   * The orgId is forwarded in the socket handshake auth so the server can filter
+   * events to the correct tenant without needing an HTTP call for each WS message.
    */
-  connect(): void {
-    if (this.#socket?.connected) return;
+  connect(orgId: string): void {
+    if (this.#socket?.connected && this.#connectedOrgId === orgId) return;
+    // Reconnecting for a different org — close the old session first.
+    if (this.#socket) this.disconnect();
 
     this.#auth.getAccessTokenSilently().subscribe({
-      next: (token) => this.#open(token),
+      next: (token) => this.#open(token, orgId),
       error: () => {
         // If token retrieval fails the component degrades gracefully to HTTP-only.
       },
@@ -55,6 +63,7 @@ export class NotificationsSocketService implements OnDestroy {
   disconnect(): void {
     this.#socket?.disconnect();
     this.#socket = null;
+    this.#connectedOrgId = null;
   }
 
   ngOnDestroy(): void {
@@ -65,9 +74,10 @@ export class NotificationsSocketService implements OnDestroy {
 
   // ─── Private ────────────────────────────────────────────────────────────────
 
-  #open(token: string): void {
+  #open(token: string, orgId: string): void {
+    this.#connectedOrgId = orgId;
     this.#socket = io(`${this.#base}/notifications`, {
-      auth: { token },
+      auth: { token, orgId },
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,

@@ -191,7 +191,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.#load(true);
-    this.#socket.connect();
+    const orgId = this.#orgsStore.activeOrgId();
+    if (orgId) this.#socket.connect(orgId);
     this.#subs.add(
       this.#socket.notification$.subscribe((n) =>
         this.#onRealtimeNotification(n),
