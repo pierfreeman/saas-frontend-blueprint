@@ -2,11 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, computed } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { BillingComponent } from '@org/billing/feature';
-import { AuthStore } from '@org/auth/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { BillingApi, SubscriptionResponse } from '@org/billing/data-access';
-import { EntitlementsStore } from '@org/entitlements/data-access';
+import { BillingComponent } from '@saas-frontend/billing/feature';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { BillingApi, SubscriptionResponse } from '@saas-frontend/billing/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

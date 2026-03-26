@@ -1,4 +1,4 @@
-import { OrganizationsStore } from '@org/organizations/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { TestBed } from '@angular/core/testing';
 
 describe('OrganizationsStore', () => {

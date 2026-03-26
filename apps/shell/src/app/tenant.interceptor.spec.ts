@@ -12,8 +12,8 @@ import {
 import {
   tenantInterceptor,
   OrganizationsStore,
-} from '@org/organizations/data-access';
-import { API_BASE_URL } from '@org/shared/util-types';
+} from '@saas-frontend/organizations/data-access';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 
 const API_URL = 'http://localhost:3000';
 

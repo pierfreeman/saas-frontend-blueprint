@@ -13,8 +13,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { AuthStore } from '@org/auth/data-access';
-import { OrganizationsStore, OrganizationsApi } from '@org/organizations/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { OrganizationsStore, OrganizationsApi } from '@saas-frontend/organizations/data-access';
 
 @Component({
   selector: 'app-settings',

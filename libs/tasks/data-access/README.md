@@ -1,8 +1,8 @@
-# @org/tasks/data-access
+# @saas-frontend/tasks/data-access
 
 HTTP client for the background job endpoints (`/tasks/*`).
 
-**Import path**: `@org/tasks/data-access`
+**Import path**: `@saas-frontend/tasks/data-access`
 
 ---
 
@@ -35,7 +35,7 @@ All methods return `Observable<T>`.
 Long-running background tasks (org export, org deletion) are submitted via the task queue and polled for completion:
 
 ```ts
-import { TasksApi } from '@org/tasks/data-access';
+import { TasksApi } from '@saas-frontend/tasks/data-access';
 import { interval, switchMap, takeWhile } from 'rxjs';
 
 providers: [TasksApi, { provide: API_BASE_URL, useValue: environment.apiUrl }];

@@ -6,7 +6,7 @@ import {
   inject,
   effect,
 } from '@angular/core';
-import { EntitlementsStore } from '@org/entitlements/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 
 type Plan = 'FREE' | 'PRO' | 'ENTERPRISE';
 

@@ -24,7 +24,7 @@ Read this before writing any code. The architecture is intentional. Deviating fr
 ## 1. Monorepo overview
 
 ```
-nx-angular/
+saas-frontend-blueprint/
 ├── apps/
 │   ├── shell/      ← Host MFE (port 4200): routing, layout, guards, global providers
 │   ├── auth/       ← Auth MFE (port 4201): login, Auth0 callback
@@ -96,7 +96,7 @@ Each remote is an **independently deployable Angular app** that exposes a single
 Key characteristics:
 
 - `module-federation.config.ts` has `exposes: { './Routes': './apps/{name}/src/app/remote-entry/entry.routes.ts' }`
-- All `@org/*` libs are shared as **singletons** (see [Rule 2](#rule-2--always-share-org-libs-as-singletons))
+- All `@saas-frontend/*` libs are shared as **singletons** (see [Rule 2](#rule-2--always-share-org-libs-as-singletons))
 - The main route group in `entry.routes.ts` re-provides `API_BASE_URL` and all `*Api` services it needs (see [Rule 3](#rule-3--always-re-provide-api_base_url-and-api-services-in-the-remote-route-group))
 - Feature components are loaded lazily via `loadComponent`
 - No global interceptors — those are handled by the shell
@@ -124,7 +124,7 @@ The standard library pattern. A `data-access` library provides one or more of:
 - An **API service** — `@Injectable({ providedIn: 'root' })`, injects `API_BASE_URL` and `HttpClient`, returns typed `Observable<T>`
 - A **signal store** — `@Injectable({ providedIn: 'root' })`, uses Angular Signals, handles `localStorage`/`sessionStorage` persistence
 - A **functional interceptor** — `HttpInterceptorFn`, registered in the shell's `appConfig`
-- **Type aliases** — re-exported from the OpenAPI schema in `@org/shared/util-types`
+- **Type aliases** — re-exported from the OpenAPI schema in `@saas-frontend/shared/util-types`
 
 All four may coexist in the same library. Not all are required. The minimum is an API service + type aliases.
 
@@ -132,7 +132,7 @@ All four may coexist in the same library. Not all are required. The minimum is a
 libs/{domain}/data-access/src/
   lib/
     {domain}.api.ts           ← API service (HTTP calls)
-    {domain}.api.types.ts     ← type aliases from @org/shared/util-types
+    {domain}.api.types.ts     ← type aliases from @saas-frontend/shared/util-types
     {domain}.store.ts         ← signal store (optional)
     {domain}.interceptor.ts   ← HttpInterceptorFn (optional)
   index.ts                    ← public exports
@@ -146,7 +146,7 @@ libs/{domain}/data-access/src/
 
 Reserved for libraries that provide **no business logic** — only tokens, types, constants, or pure utilities consumed by all other libs and apps.
 
-Currently: `@org/shared/util-types` (the `API_BASE_URL` token + OpenAPI type tree).
+Currently: `@saas-frontend/shared/util-types` (the `API_BASE_URL` token + OpenAPI type tree).
 
 ```
 libs/shared/{name}/src/
@@ -260,10 +260,10 @@ Create `{feature}.component.spec.ts` alongside the component file. See [§8 Test
 ### Step 1 — Generate the Nx library
 
 ```sh
-npx nx g @nx/js:lib libs/{domain}/data-access --importPath=@org/{domain}/data-access
+npx nx g @nx/js:lib libs/{domain}/data-access --importPath=@saas-frontend/{domain}/data-access
 ```
 
-This registers `@org/{domain}/data-access` in `tsconfig.base.json` and creates the base structure.
+This registers `@saas-frontend/{domain}/data-access` in `tsconfig.base.json` and creates the base structure.
 
 ### Step 2 — Create the API service
 
@@ -272,7 +272,7 @@ This registers `@org/{domain}/data-access` in `tsconfig.base.json` and creates t
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { API_BASE_URL } from '@org/shared/util-types';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 import type { SomeResponseType } from './{domain}.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -297,7 +297,7 @@ Rules:
 
 ```ts
 // libs/{domain}/data-access/src/lib/{domain}.api.types.ts
-import type { components, operations } from '@org/shared/util-types';
+import type { components, operations } from '@saas-frontend/shared/util-types';
 
 // Prefer components['schemas'] for DTO shapes
 export type {Domain}Response = components['schemas']['{Domain}ResponseDto'];
@@ -308,7 +308,7 @@ export type {Domain}Item =
   operations['{Domain}Controller_findById']['responses']['200']['content']['application/json'];
 ```
 
-Types must be derived from `@org/shared/util-types` (the auto-generated OpenAPI type tree). Do not hand-write DTO shapes.
+Types must be derived from `@saas-frontend/shared/util-types` (the auto-generated OpenAPI type tree). Do not hand-write DTO shapes.
 
 ### Step 4 — Create the signal store (if managing global state)
 
@@ -399,8 +399,8 @@ const config: ModuleFederationConfig = {
     './Routes': './apps/{name}/src/app/remote-entry/entry.routes.ts',
   },
   shared: (libraryName, defaultConfig) => {
-    // This rule is MANDATORY for all @org/* libs.
-    if (libraryName.startsWith('@org/')) {
+    // This rule is MANDATORY for all @saas-frontend/* libs.
+    if (libraryName.startsWith('@saas-frontend/')) {
       return { singleton: true, strictVersion: false, requiredVersion: false };
     }
     return defaultConfig;
@@ -413,8 +413,8 @@ const config: ModuleFederationConfig = {
 ```ts
 // apps/{name}/src/app/remote-entry/entry.routes.ts
 import { Route } from '@angular/router';
-import { API_BASE_URL } from '@org/shared/util-types';
-import { SomeApi } from '@org/some-domain/data-access';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
+import { SomeApi } from '@saas-frontend/some-domain/data-access';
 import { environment } from 'src/environments/environment';
 
 export const {NAME}_ROUTES: Route[] = [
@@ -505,13 +505,13 @@ export class FooComponent {}
 export class FooComponent {}
 ```
 
-### Rule 2 — Always share `@org/*` libs as singletons in MF configs
+### Rule 2 — Always share `@saas-frontend/*` libs as singletons in MF configs
 
-Every `module-federation.config.ts` (shell and all remotes) must include the singleton sharing rule for `@org/*`:
+Every `module-federation.config.ts` (shell and all remotes) must include the singleton sharing rule for `@saas-frontend/*`:
 
 ```ts
 shared: (libraryName, defaultConfig) => {
-  if (libraryName.startsWith('@org/')) {
+  if (libraryName.startsWith('@saas-frontend/')) {
     return { singleton: true, strictVersion: false, requiredVersion: false };
   }
   return defaultConfig;
@@ -578,7 +578,7 @@ All templates are inline strings in `template: \`...\``. All styles are Tailwind
 
 ### Rule 8 — Type aliases from OpenAPI, never hand-written DTOs
 
-Any type that corresponds to a backend DTO or response must be an alias from `@org/shared/util-types`:
+Any type that corresponds to a backend DTO or response must be an alias from `@saas-frontend/shared/util-types`:
 
 ```ts
 // ❌ WRONG — hand-written interface
@@ -588,7 +588,7 @@ interface SubscriptionResponse {
 }
 
 // ✅ CORRECT — derived from OpenAPI schema
-import type { components } from '@org/shared/util-types';
+import type { components } from '@saas-frontend/shared/util-types';
 export type SubscriptionResponse =
   components['schemas']['SubscriptionResponseDto'];
 ```
@@ -733,7 +733,7 @@ The following patterns are explicitly forbidden.
 | Inline HTTP call in component                  | `inject(HttpClient).get('/api/...')`                   | Bypasses the API service layer; prevents testing and type safety            |
 | Hand-written DTO interface                     | `interface MyDto { field: string }`                    | Gets out of sync with the backend; use OpenAPI-derived types                |
 | Missing re-provision in remote                 | No `API_BASE_URL` in route group `providers`           | `NullInjectorError` at runtime; all API calls fail                          |
-| Missing singleton sharing in MF config         | `@org/*` libs not marked `singleton: true`             | `InjectionToken` identity mismatch; stores and interceptors break           |
+| Missing singleton sharing in MF config         | `@saas-frontend/*` libs not marked `singleton: true`   | `InjectionToken` identity mismatch; stores and interceptors break           |
 | Subscribing inside an API service              | `getMe(): void { this.#http.get(...).subscribe(...) }` | Makes the service non-composable; caller cannot chain operators             |
 | NgRx or other state lib                        | `import { Store } from '@ngrx/store'`                  | Not permitted; use Angular Signals + Signal Stores                          |
 | Separate `.html`/`.scss` files                 | `templateUrl: './foo.component.html'`                  | All templates are inline; all styles are Tailwind classes                   |
@@ -751,9 +751,9 @@ Use this when opening a PR for a new page, library, or app:
 - [ ] Component uses `inject()`, not constructor injection
 - [ ] Template is inline (`template: \`...\``), no `.html`/`.scss` files
 - [ ] HTTP calls are in `*Api` service, not in the component
-- [ ] Types are aliases from `@org/shared/util-types`, not hand-written interfaces
+- [ ] Types are aliases from `@saas-frontend/shared/util-types`, not hand-written interfaces
 - [ ] New service is added to the remote route group `providers[]`, not to `appConfig`
-- [ ] `module-federation.config.ts` shares `@org/*` as singletons (if a new MFE was added)
+- [ ] `module-federation.config.ts` shares `@saas-frontend/*` as singletons (if a new MFE was added)
 - [ ] Spec file co-located alongside every new source file
 - [ ] `openapi.types.ts` was regenerated (not hand-edited) if the API schema changed
 - [ ] Nav link added to `navbar.component.ts` if the page is user-visible

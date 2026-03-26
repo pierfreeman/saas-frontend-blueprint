@@ -6,16 +6,16 @@
     "experimentalDecorators": true,
     "module": "preserve",
     "paths": {
-      "@org/shared/util-types": [
+      "@saas-frontend/shared/util-types": [
         "../../libs/shared/util-types/src/index.ts"
       ],
-      "@org/shared/util-auth": [
+      "@saas-frontend/shared/util-auth": [
         "../../libs/shared/util-auth/src/index.ts"
       ],
-      "@org/auth/data-access": [
+      "@saas-frontend/auth/data-access": [
         "../../libs/auth/data-access/src/index.ts"
       ],
-      "@org/organizations/data-access": [
+      "@saas-frontend/organizations/data-access": [
         "../../libs/organizations/data-access/src/index.ts"
       ]
     }

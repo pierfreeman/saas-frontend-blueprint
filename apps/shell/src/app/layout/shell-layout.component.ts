@@ -4,8 +4,8 @@ import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, merge, of, switchMap } from 'rxjs';
 import { ToastModule } from 'primeng/toast';
 import { NavbarComponent } from './navbar.component';
-import { NotificationsApi } from '@org/notifications/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
+import { NotificationsApi } from '@saas-frontend/notifications/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 
 @Component({
   selector: 'app-shell-layout',

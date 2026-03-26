@@ -1,8 +1,8 @@
-# @org/memberships/data-access
+# @saas-frontend/memberships/data-access
 
 HTTP client for the org memberships endpoints (`/organizations/:orgId/memberships/*`).
 
-**Import path**: `@org/memberships/data-access`
+**Import path**: `@saas-frontend/memberships/data-access`
 
 ---
 
@@ -41,7 +41,7 @@ All methods return `Observable<T>`.
 ### Usage
 
 ```ts
-import { MembershipsApi } from '@org/memberships/data-access';
+import { MembershipsApi } from '@saas-frontend/memberships/data-access';
 
 // In route providers
 providers: [MembershipsApi, { provide: API_BASE_URL, useValue: environment.apiUrl }]

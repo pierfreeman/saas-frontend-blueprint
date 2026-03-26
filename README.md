@@ -20,7 +20,7 @@ Designed to pair with [saas-backend-blueprint](../saas-backend-blueprint).
 | State management | Angular Signals (no NgRx)                                    |
 | Authentication   | Auth0 (`@auth0/auth0-angular`) — RS256, PKCE, silent refresh |
 | HTTP client      | Angular `HttpClient` + functional interceptors               |
-| Type safety      | OpenAPI-aligned types (`@org/shared/util-types`)             |
+| Type safety      | OpenAPI-aligned types (`@saas-frontend/shared/util-types`)             |
 | Testing          | Vitest 4 + Angular Testing Library                           |
 | Bundler          | Webpack 5 (MF bundles), Vite (unit tests)                    |
 | Lint             | ESLint + `angular-eslint`                                    |
@@ -199,7 +199,7 @@ npx nx graph
               └─────────────────┘  └─────────┘  └──────────┘
 ```
 
-The shell loads each remote lazily via `loadChildren(() => import('auth/Routes'))`. Each remote exposes a single `./Routes` entry. All `@org/*` workspace libs are declared as **shared singletons** in every MFE's webpack config so Angular's DI system gets a single instance across the module boundary.
+The shell loads each remote lazily via `loadChildren(() => import('auth/Routes'))`. Each remote exposes a single `./Routes` entry. All `@saas-frontend/*` workspace libs are declared as **shared singletons** in every MFE's webpack config so Angular's DI system gets a single instance across the module boundary.
 
 ### Request pipeline
 
@@ -215,8 +215,8 @@ Every API request passes through these functional interceptors (registered in sh
 
 | Store                | Lib                              | Persistence      | Key signals                                    |
 | -------------------- | -------------------------------- | ---------------- | ---------------------------------------------- |
-| `AuthStore`          | `@org/auth/data-access`          | `sessionStorage` | `currentUser`, `isLoggedIn`                    |
-| `OrganizationsStore` | `@org/organizations/data-access` | `localStorage`   | `activeOrgId`, `activeOrgName`, `hasActiveOrg` |
+| `AuthStore`          | `@saas-frontend/auth/data-access`          | `sessionStorage` | `currentUser`, `isLoggedIn`                    |
+| `OrganizationsStore` | `@saas-frontend/organizations/data-access` | `localStorage`   | `activeOrgId`, `activeOrgName`, `hasActiveOrg` |
 
 ### Route guards
 
@@ -285,16 +285,16 @@ All page components follow this pattern:
 
 | Import path                      | README                                        | Description                                                   |
 | -------------------------------- | --------------------------------------------- | ------------------------------------------------------------- |
-| `@org/auth/data-access`          | [→](libs/auth/data-access/README.md)          | `AuthStore`, `AuthApi` — user identity and session            |
-| `@org/organizations/data-access` | [→](libs/organizations/data-access/README.md) | `OrganizationsStore`, `OrganizationsApi`, `tenantInterceptor` |
-| `@org/memberships/data-access`   | [→](libs/memberships/data-access/README.md)   | `MembershipsApi` — CRUD for org members                       |
-| `@org/billing/data-access`       | [→](libs/billing/data-access/README.md)       | `BillingApi` — subscription, checkout, portal, cancel         |
-| `@org/activity-log/data-access`  | [→](libs/activity-log/data-access/README.md)  | `ActivityLogApi` — paginated org activity log                 |
-| `@org/entitlements/data-access`  | [→](libs/entitlements/data-access/README.md)  | `EntitlementsApi` — plan-based feature flags                  |
-| `@org/notifications/data-access` | [→](libs/notifications/data-access/README.md) | `NotificationsApi` — in-app notifications                     |
-| `@org/storage/data-access`       | [→](libs/storage/data-access/README.md)       | `StorageApi` — presigned upload/download URLs                 |
-| `@org/tasks/data-access`         | [→](libs/tasks/data-access/README.md)         | `TasksApi` — background job status tracking                   |
-| `@org/shared/util-types`         | [→](libs/shared/util-types/README.md)         | `API_BASE_URL` token, OpenAPI-aligned TypeScript types        |
+| `@saas-frontend/auth/data-access`          | [→](libs/auth/data-access/README.md)          | `AuthStore`, `AuthApi` — user identity and session            |
+| `@saas-frontend/organizations/data-access` | [→](libs/organizations/data-access/README.md) | `OrganizationsStore`, `OrganizationsApi`, `tenantInterceptor` |
+| `@saas-frontend/memberships/data-access`   | [→](libs/memberships/data-access/README.md)   | `MembershipsApi` — CRUD for org members                       |
+| `@saas-frontend/billing/data-access`       | [→](libs/billing/data-access/README.md)       | `BillingApi` — subscription, checkout, portal, cancel         |
+| `@saas-frontend/activity-log/data-access`  | [→](libs/activity-log/data-access/README.md)  | `ActivityLogApi` — paginated org activity log                 |
+| `@saas-frontend/entitlements/data-access`  | [→](libs/entitlements/data-access/README.md)  | `EntitlementsApi` — plan-based feature flags                  |
+| `@saas-frontend/notifications/data-access` | [→](libs/notifications/data-access/README.md) | `NotificationsApi` — in-app notifications                     |
+| `@saas-frontend/storage/data-access`       | [→](libs/storage/data-access/README.md)       | `StorageApi` — presigned upload/download URLs                 |
+| `@saas-frontend/tasks/data-access`         | [→](libs/tasks/data-access/README.md)         | `TasksApi` — background job status tracking                   |
+| `@saas-frontend/shared/util-types`         | [→](libs/shared/util-types/README.md)         | `API_BASE_URL` token, OpenAPI-aligned TypeScript types        |
 
 ---
 
@@ -336,7 +336,7 @@ npx nx g @nx/js:lib libs/<domain>/data-access
 # 2. Implement <domain>.api.ts
 #    - @Injectable({ providedIn: 'root' })
 #    - inject(API_BASE_URL) + inject(HttpClient)
-#    - return typed Observables using aliases from @org/shared/util-types
+#    - return typed Observables using aliases from @saas-frontend/shared/util-types
 
 # 3. Create <domain>.api.types.ts — re-export type aliases
 # 4. Export from src/index.ts

@@ -12,9 +12,9 @@ import { RouterLink } from '@angular/router';
 import {
   ActivityLogApi,
   ActivityLogRecord,
-} from '@org/activity-log/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { EntitlementsStore } from '@org/entitlements/data-access';
+} from '@saas-frontend/activity-log/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';

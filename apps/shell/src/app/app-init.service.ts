@@ -2,12 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
 import { firstValueFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { AuthApi, AuthStore } from '@org/auth/data-access';
+import { AuthApi, AuthStore } from '@saas-frontend/auth/data-access';
 import {
   OrganizationsApi,
   OrganizationsStore,
-} from '@org/organizations/data-access';
-import { NotificationsSocketService } from '@org/notifications/data-access';
+} from '@saas-frontend/organizations/data-access';
+import { NotificationsSocketService } from '@saas-frontend/notifications/data-access';
 
 /**
  * Coordinates the post-Auth0-load bootstrap sequence:

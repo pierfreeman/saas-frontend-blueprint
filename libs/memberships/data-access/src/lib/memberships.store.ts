@@ -9,7 +9,7 @@ import type {
   InviteMemberDto,
   InviteMemberResponse,
 } from './memberships.api.types';
-import type { ApiError } from '@org/shared/util-error';
+import type { ApiError } from '@saas-frontend/shared/util-error';
 
 @Injectable({ providedIn: 'root' })
 export class MembershipsStore {

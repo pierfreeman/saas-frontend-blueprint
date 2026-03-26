@@ -5,8 +5,8 @@ import { CardModule } from 'primeng/card';
 import {
   OrganizationsApi,
   OrganizationSummary,
-} from '@org/organizations/data-access';
-import { OrgContextService } from '@org/shared/util-org-context';
+} from '@saas-frontend/organizations/data-access';
+import { OrgContextService } from '@saas-frontend/shared/util-org-context';
 
 @Component({
   selector: 'app-org-select',

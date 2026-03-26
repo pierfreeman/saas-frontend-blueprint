@@ -1,8 +1,8 @@
-# @org/auth/data-access
+# @saas-frontend/auth/data-access
 
 Signal-based user identity store and HTTP client for the `/auth` backend endpoints.
 
-**Import path**: `@org/auth/data-access`
+**Import path**: `@saas-frontend/auth/data-access`
 
 ---
 
@@ -44,7 +44,7 @@ clearUser(): void
 ### Usage
 
 ```ts
-import { AuthStore } from '@org/auth/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
 
 @Component({ ... })
 export class MyComponent {
@@ -71,7 +71,7 @@ Returns `Observable<User>`.
 ### Usage
 
 ```ts
-import { AuthApi } from '@org/auth/data-access';
+import { AuthApi } from '@saas-frontend/auth/data-access';
 
 // In a route's providers[] or in the app
 providers: [AuthApi, { provide: API_BASE_URL, useValue: environment.apiUrl }];

@@ -52,7 +52,7 @@ The shell declares three remotes in `module-federation.config.ts`:
 remotes: ['auth', 'platform', 'admin'];
 ```
 
-All `@org/*` workspace library paths are shared as **singletons** so the same Angular DI instance is used across all bundles. This is critical for `InjectionToken` identity — without singleton sharing, `inject(API_BASE_URL)` in a remote would not resolve the token provided in the shell.
+All `@saas-frontend/*` workspace library paths are shared as **singletons** so the same Angular DI instance is used across all bundles. This is critical for `InjectionToken` identity — without singleton sharing, `inject(API_BASE_URL)` in a remote would not resolve the token provided in the shell.
 
 Type stubs for remote entry modules live in `src/remotes.d.ts`:
 
@@ -104,7 +104,7 @@ Checks `OrganizationsStore.hasActiveOrg()`. If no org is selected, redirects to 
 | `provideRouter(appRoutes)` | App-level router                                                                             |
 | `provideHttpClient(...)`   | HttpClient with both DI- and functional-based interceptors                                   |
 | `AuthHttpInterceptor`      | Auth0 SDK interceptor — attaches `Authorization: Bearer <jwt>`                               |
-| `tenantInterceptor`        | Attaches `x-org-id` header from `OrganizationsStore` (from `@org/organizations/data-access`) |
+| `tenantInterceptor`        | Attaches `x-org-id` header from `OrganizationsStore` (from `@saas-frontend/organizations/data-access`) |
 | `errorInterceptor`         | Maps HTTP errors to PrimeNG toast messages                                                   |
 | `API_BASE_URL`             | `environment.apiUrl` — consumed by all `*Api` services in the shell bundle                   |
 | `provideAuth0(...)`        | Auth0 SDK with audience, redirect URI, `allowedList` for JWT injection                       |
@@ -117,7 +117,7 @@ Checks `OrganizationsStore.hasActiveOrg()`. If no org is selected, redirects to 
 
 ### `tenantInterceptor`
 
-From `@org/organizations/data-access`. Attaches `x-org-id: <activeOrgId>` to every request whose URL starts with `environment.apiUrl`. Skips `/auth/me` and `/auth0` paths because those endpoints run before any org context is established.
+From `@saas-frontend/organizations/data-access`. Attaches `x-org-id: <activeOrgId>` to every request whose URL starts with `environment.apiUrl`. Skips `/auth/me` and `/auth0` paths because those endpoints run before any org context is established.
 
 ### `errorInterceptor` (`error.interceptor.ts`)
 

@@ -1,8 +1,8 @@
-# @org/activity-log/data-access
+# @saas-frontend/activity-log/data-access
 
 HTTP client for the org activity log endpoint (`/organizations/:orgId/activity-log`).
 
-**Import path**: `@org/activity-log/data-access`
+**Import path**: `@saas-frontend/activity-log/data-access`
 
 ---
 
@@ -43,7 +43,7 @@ interface ActivityLogParams {
 ### Usage
 
 ```ts
-import { ActivityLogApi } from '@org/activity-log/data-access';
+import { ActivityLogApi } from '@saas-frontend/activity-log/data-access';
 
 providers: [
   ActivityLogApi,

@@ -2,8 +2,8 @@ import { inject } from '@angular/core';
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
-import { AuthStore } from '@org/auth/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { catchError, throwError } from 'rxjs';
 import { isApiError } from './api-error';
 

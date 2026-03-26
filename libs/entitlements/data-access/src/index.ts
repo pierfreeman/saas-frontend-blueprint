@@ -4,4 +4,4 @@ export type {
   InvalidateCacheResponse,
 } from './lib/entitlements.api.types';
 export { EntitlementsStore } from './lib/entitlements.store';
-export type { ApiError } from '@org/shared/util-error';
+export type { ApiError } from '@saas-frontend/shared/util-error';

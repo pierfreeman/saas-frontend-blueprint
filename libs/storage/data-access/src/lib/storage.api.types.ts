@@ -1,4 +1,4 @@
-import type { components } from '@org/shared/util-types';
+import type { components } from '@saas-frontend/shared/util-types';
 
 export type GenerateUploadUrlDto =
   components['schemas']['GenerateUploadUrlDto'];

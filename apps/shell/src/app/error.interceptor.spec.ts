@@ -13,9 +13,9 @@ import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 
 import { vi } from 'vitest';
-import { errorInterceptor } from '@org/shared/util-error';
-import { AuthStore } from '@org/auth/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
+import { errorInterceptor } from '@saas-frontend/shared/util-error';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;

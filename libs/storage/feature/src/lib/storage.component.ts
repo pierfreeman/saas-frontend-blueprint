@@ -13,8 +13,8 @@ import {
   StorageApi,
   FileMetadata,
   StorageQuotaResponse,
-} from '@org/storage/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
+} from '@saas-frontend/storage/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { SkeletonModule } from 'primeng/skeleton';

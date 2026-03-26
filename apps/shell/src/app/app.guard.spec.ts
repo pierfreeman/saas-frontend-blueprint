@@ -8,7 +8,7 @@ import {
 import { AuthService } from '@auth0/auth0-angular';
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
-import { authGuard } from '@org/shared/util-auth';
+import { authGuard } from '@saas-frontend/shared/util-auth';
 
 const executeGuard: CanActivateFn = (...args) =>
   TestBed.runInInjectionContext(() => authGuard(...args));

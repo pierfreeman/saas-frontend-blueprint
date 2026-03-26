@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
-import { AuthStore } from '@org/auth/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 
 @Component({
   selector: 'app-admin-dashboard',

@@ -1,5 +1,5 @@
 import { appRoutes } from './app.routes';
-import { authGuard, orgGuard } from '@org/shared/util-auth';
+import { authGuard, orgGuard } from '@saas-frontend/shared/util-auth';
 import { Route } from '@angular/router';
 
 describe('appRoutes', () => {

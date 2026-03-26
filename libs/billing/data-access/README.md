@@ -1,8 +1,8 @@
-# @org/billing/data-access
+# @saas-frontend/billing/data-access
 
 HTTP client for the Stripe-backed billing endpoints (`/billing/*`).
 
-**Import path**: `@org/billing/data-access`
+**Import path**: `@saas-frontend/billing/data-access`
 
 ---
 
@@ -81,7 +81,7 @@ All methods return `Observable<T>`.
 ## Usage
 
 ```ts
-import { BillingApi } from '@org/billing/data-access';
+import { BillingApi } from '@saas-frontend/billing/data-access';
 
 // In route providers (platform MFE's entry.routes.ts)
 providers: [

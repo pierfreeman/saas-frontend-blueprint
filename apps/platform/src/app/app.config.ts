@@ -14,8 +14,8 @@ import {
 import { provideRouter } from '@angular/router';
 import { AuthHttpInterceptor } from '@auth0/auth0-angular';
 import { appRoutes } from './app.routes';
-import { API_BASE_URL } from '@org/shared/util-types';
-import { tenantInterceptor } from '@org/organizations/data-access';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
+import { tenantInterceptor } from '@saas-frontend/organizations/data-access';
 import { environment } from 'src/environments/environment';
 
 export const appConfig: ApplicationConfig = {

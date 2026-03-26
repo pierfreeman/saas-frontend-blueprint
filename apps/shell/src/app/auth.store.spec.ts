@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthStore } from '@org/auth/data-access';
-import type { User } from '@org/auth/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import type { User } from '@saas-frontend/auth/data-access';
 
 const mockUser: User = { id: 'u1', email: 'a@b.com', auth0Id: 'auth0|1' };
 

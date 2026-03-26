@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { RemoteEntry } from './entry';
-import { AuthStore } from '@org/auth/data-access';
-import type { User } from '@org/auth/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import type { User } from '@saas-frontend/auth/data-access';
 
 const mockUser: User = {
   id: 'user-1',

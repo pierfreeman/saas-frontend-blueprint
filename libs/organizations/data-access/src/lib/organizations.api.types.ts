@@ -1,4 +1,4 @@
-import type { components, operations } from '@org/shared/util-types';
+import type { components, operations } from '@saas-frontend/shared/util-types';
 
 export type CreateOrganizationDto =
   components['schemas']['CreateOrganizationDto'];

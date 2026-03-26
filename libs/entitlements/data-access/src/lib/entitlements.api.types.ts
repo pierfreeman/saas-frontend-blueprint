@@ -1,9 +1,9 @@
-import type { operations } from '@org/shared/util-types';
+import type { operations } from '@saas-frontend/shared/util-types';
 
 /**
  * Full entitlements for an organization, extended with storage quota information.
  * `storageLimitBytes` is added manually here since it may not yet be present in
- * the generated OpenAPI types — regenerate `@org/shared/util-types` after the
+ * the generated OpenAPI types — regenerate `@saas-frontend/shared/util-types` after the
  * backend is deployed to remove the manual extension.
  */
 export type OrganizationEntitlements =

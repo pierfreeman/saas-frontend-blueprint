@@ -53,10 +53,10 @@ import {
 import { provideRouter } from '@angular/router';
 import { AuthHttpInterceptor, provideAuth0 } from '@auth0/auth0-angular';
 import { appRoutes } from './app.routes';
-import { API_BASE_URL } from '@org/shared/util-types';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 import { MessageService } from 'primeng/api';
-import { tenantInterceptor } from '@org/organizations/data-access';
-import { errorInterceptor } from '@org/shared/util-error';
+import { tenantInterceptor } from '@saas-frontend/organizations/data-access';
+import { errorInterceptor } from '@saas-frontend/shared/util-error';
 import { environment } from 'src/environments/environment';
 import { AppInitService } from './app-init.service';
 

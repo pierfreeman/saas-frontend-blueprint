@@ -4,11 +4,11 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import {
   EntitlementsStore,
   EntitlementsApi,
-} from '@org/entitlements/data-access';
+} from '@saas-frontend/entitlements/data-access';
 import type {
   OrganizationEntitlements,
   ApiError,
-} from '@org/entitlements/data-access';
+} from '@saas-frontend/entitlements/data-access';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

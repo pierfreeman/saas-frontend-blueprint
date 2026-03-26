@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { OrganizationsStore } from './organizations.store';
-import { API_BASE_URL } from '@org/shared/util-types';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 
 /** Paths that must never receive an x-org-id header. */
 const SKIP_PATHS = ['/auth/me', '/auth0'];

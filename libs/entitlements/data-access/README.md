@@ -1,8 +1,8 @@
-# @org/entitlements/data-access
+# @saas-frontend/entitlements/data-access
 
 HTTP client for the plan entitlements endpoint (`/organizations/:orgId/entitlements`).
 
-**Import path**: `@org/entitlements/data-access`
+**Import path**: `@saas-frontend/entitlements/data-access`
 
 ---
 
@@ -34,7 +34,7 @@ All methods return `Observable<T>`.
 ### Usage
 
 ```ts
-import { EntitlementsApi } from '@org/entitlements/data-access';
+import { EntitlementsApi } from '@saas-frontend/entitlements/data-access';
 
 providers: [
   EntitlementsApi,
@@ -91,7 +91,7 @@ Root-level singleton. Wraps `EntitlementsApi` with Angular Signals and async lif
 ### Usage
 
 ```ts
-import { EntitlementsStore } from '@org/entitlements/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 
 @Component({ ... })
 export class BillingComponent {

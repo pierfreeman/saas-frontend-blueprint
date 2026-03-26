@@ -2,16 +2,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { of, Subject } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { NotificationsComponent } from '@org/notifications/feature';
+import { NotificationsComponent } from '@saas-frontend/notifications/feature';
 import {
   NotificationsApi,
   NotificationsSocketService,
-} from '@org/notifications/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
+} from '@saas-frontend/notifications/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import type {
   NotificationRecord,
   UnreadCountPayload,
-} from '@org/notifications/data-access';
+} from '@saas-frontend/notifications/data-access';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

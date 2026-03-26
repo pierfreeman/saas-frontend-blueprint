@@ -5,8 +5,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
 import { TooltipModule } from 'primeng/tooltip';
 import { MenuItem } from 'primeng/api';
-import { AuthStore } from '@org/auth/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 
 @Component({
   selector: 'app-navbar',

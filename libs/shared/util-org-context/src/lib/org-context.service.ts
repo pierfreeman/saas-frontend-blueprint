@@ -1,8 +1,8 @@
 import { Injectable, inject, computed } from '@angular/core';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { MembershipsStore } from '@org/memberships/data-access';
-import { EntitlementsStore } from '@org/entitlements/data-access';
-import { NotificationsSocketService } from '@org/notifications/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { MembershipsStore } from '@saas-frontend/memberships/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
+import { NotificationsSocketService } from '@saas-frontend/notifications/data-access';
 
 /**
  * Single orchestration point for org-context state.

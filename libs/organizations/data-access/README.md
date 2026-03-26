@@ -1,8 +1,8 @@
-# @org/organizations/data-access
+# @saas-frontend/organizations/data-access
 
 Signal-based active-org store, HTTP client for the `/organizations` backend endpoints, and the `tenantInterceptor`.
 
-**Import path**: `@org/organizations/data-access`
+**Import path**: `@saas-frontend/organizations/data-access`
 
 ---
 
@@ -46,7 +46,7 @@ clearActiveOrg(): void
 ### Usage
 
 ```ts
-import { OrganizationsStore } from '@org/organizations/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 
 @Component({ ... })
 export class MyComponent {
@@ -79,7 +79,7 @@ All methods return `Observable<T>`.
 ### Usage
 
 ```ts
-import { OrganizationsApi } from '@org/organizations/data-access';
+import { OrganizationsApi } from '@saas-frontend/organizations/data-access';
 
 providers: [
   OrganizationsApi,
@@ -110,7 +110,7 @@ A functional `HttpInterceptorFn` that attaches `x-org-id: <activeOrgId>` to ever
 Register once in the shell's `appConfig`:
 
 ```ts
-import { tenantInterceptor } from '@org/organizations/data-access';
+import { tenantInterceptor } from '@saas-frontend/organizations/data-access';
 
 provideHttpClient(withInterceptors([tenantInterceptor, errorInterceptor]));
 ```

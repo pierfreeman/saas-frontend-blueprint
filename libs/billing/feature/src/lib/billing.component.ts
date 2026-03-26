@@ -14,10 +14,10 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { BillingApi } from '@org/billing/data-access';
-import type { SubscriptionResponse } from '@org/billing/data-access';
-import { EntitlementsStore } from '@org/entitlements/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { BillingApi } from '@saas-frontend/billing/data-access';
+import type { SubscriptionResponse } from '@saas-frontend/billing/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import { environment } from 'src/environments/environment';
 
 type TagSeverity =

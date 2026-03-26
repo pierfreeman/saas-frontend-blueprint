@@ -2,12 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { SettingsComponent } from '@org/organizations/feature-settings';
-import { AuthStore } from '@org/auth/data-access';
+import { SettingsComponent } from '@saas-frontend/organizations/feature-settings';
+import { AuthStore } from '@saas-frontend/auth/data-access';
 import {
   OrganizationsStore,
   OrganizationsApi,
-} from '@org/organizations/data-access';
+} from '@saas-frontend/organizations/data-access';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { PermissionsService } from '@org/shared/util-rbac';
-import type { Permission } from '@org/shared/util-rbac';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { PermissionsService } from '@saas-frontend/shared/util-rbac';
+import type { Permission } from '@saas-frontend/shared/util-rbac';
 import { of } from 'rxjs';
 import { filter, map, switchMap, take, timeout } from 'rxjs';
 

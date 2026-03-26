@@ -6,8 +6,8 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { orgGuard } from '@org/shared/util-auth';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { orgGuard } from '@saas-frontend/shared/util-auth';
 
 const executeGuard: CanActivateFn = (...args) =>
   TestBed.runInInjectionContext(() => orgGuard(...args));

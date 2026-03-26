@@ -12,8 +12,8 @@ import {
   NotificationRecord,
   NotificationsApi,
   NotificationsSocketService,
-} from '@org/notifications/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
+} from '@saas-frontend/notifications/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { Subscription } from 'rxjs';

@@ -3,14 +3,14 @@ import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { MembersComponent } from '@org/memberships/feature';
+import { MembersComponent } from '@saas-frontend/memberships/feature';
 import {
   MembershipsStore,
   MembershipSummary,
-} from '@org/memberships/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { EntitlementsStore } from '@org/entitlements/data-access';
-import { PermissionsService, PERMISSIONS } from '@org/shared/util-rbac';
+} from '@saas-frontend/memberships/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
+import { PermissionsService, PERMISSIONS } from '@saas-frontend/shared/util-rbac';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

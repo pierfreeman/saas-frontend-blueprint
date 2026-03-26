@@ -2,7 +2,7 @@ import { Injectable, OnDestroy, inject } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
 import { Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { API_BASE_URL } from '@org/shared/util-types';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 import type { NotificationRecord } from './notifications.api.types';
 
 export interface UnreadCountPayload {

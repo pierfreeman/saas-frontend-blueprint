@@ -1,4 +1,4 @@
-import type { MembershipRole } from '@org/memberships/data-access';
+import type { MembershipRole } from '@saas-frontend/memberships/data-access';
 
 /** Mirrors saas-backend-blueprint/libs/common/src/rbac/permissions.constants.ts */
 export const PERMISSIONS = {

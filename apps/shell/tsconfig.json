@@ -6,46 +6,46 @@
     "experimentalDecorators": true,
     "module": "preserve",
     "paths": {
-      "@org/shared/util-error": [
+      "@saas-frontend/shared/util-error": [
         "../../libs/shared/util-error/src/index.ts"
       ],
-      "@org/shared/util-rbac": [
+      "@saas-frontend/shared/util-rbac": [
         "../../libs/shared/util-rbac/src/index.ts"
       ],
-      "@org/shared/util-auth": [
+      "@saas-frontend/shared/util-auth": [
         "../../libs/shared/util-auth/src/index.ts"
       ],
-      "@org/shared/util-org-context": [
+      "@saas-frontend/shared/util-org-context": [
         "../../libs/shared/util-org-context/src/index.ts"
       ],
-      "@org/shared/util-types": [
+      "@saas-frontend/shared/util-types": [
         "../../libs/shared/util-types/src/index.ts"
       ],
-      "@org/activity-log/data-access": [
+      "@saas-frontend/activity-log/data-access": [
         "../../libs/activity-log/data-access/src/index.ts"
       ],
-      "@org/auth/data-access": [
+      "@saas-frontend/auth/data-access": [
         "../../libs/auth/data-access/src/index.ts"
       ],
-      "@org/billing/data-access": [
+      "@saas-frontend/billing/data-access": [
         "../../libs/billing/data-access/src/index.ts"
       ],
-      "@org/entitlements/data-access": [
+      "@saas-frontend/entitlements/data-access": [
         "../../libs/entitlements/data-access/src/index.ts"
       ],
-      "@org/memberships/data-access": [
+      "@saas-frontend/memberships/data-access": [
         "../../libs/memberships/data-access/src/index.ts"
       ],
-      "@org/notifications/data-access": [
+      "@saas-frontend/notifications/data-access": [
         "../../libs/notifications/data-access/src/index.ts"
       ],
-      "@org/organizations/data-access": [
+      "@saas-frontend/organizations/data-access": [
         "../../libs/organizations/data-access/src/index.ts"
       ],
-      "@org/storage/data-access": [
+      "@saas-frontend/storage/data-access": [
         "../../libs/storage/data-access/src/index.ts"
       ],
-      "@org/tasks/data-access": [
+      "@saas-frontend/tasks/data-access": [
         "../../libs/tasks/data-access/src/index.ts"
       ]
     }

@@ -1,4 +1,4 @@
-import { authGuard, orgGuard } from '@org/shared/util-auth';
+import { authGuard, orgGuard } from '@saas-frontend/shared/util-auth';
 import { Route } from '@angular/router';
 
 export const appRoutes: Route[] = [

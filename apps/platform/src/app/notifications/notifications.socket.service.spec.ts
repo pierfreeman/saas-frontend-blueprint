@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { AuthService } from '@auth0/auth0-angular';
-import { API_BASE_URL } from '@org/shared/util-types';
-import { NotificationsSocketService } from '@org/notifications/data-access';
-import type { NotificationRecord } from '@org/notifications/data-access';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
+import { NotificationsSocketService } from '@saas-frontend/notifications/data-access';
+import type { NotificationRecord } from '@saas-frontend/notifications/data-access';
 
 // ── Socket.IO mock ────────────────────────────────────────────────────────────
 // vi.hoisted() ensures the variables exist when vi.mock()'s factory runs,

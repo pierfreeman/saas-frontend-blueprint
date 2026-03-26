@@ -1,8 +1,8 @@
-# @org/storage/data-access
+# @saas-frontend/storage/data-access
 
 HTTP client for the file storage endpoints (`/files/*`) — presigned upload/download URL flow.
 
-**Import path**: `@org/storage/data-access`
+**Import path**: `@saas-frontend/storage/data-access`
 
 ---
 
@@ -51,7 +51,7 @@ All methods return `Observable<T>` (or `Observable<void>` for delete).
 ### Usage
 
 ```ts
-import { StorageApi } from '@org/storage/data-access';
+import { StorageApi } from '@saas-frontend/storage/data-access';
 
 providers: [
   StorageApi,

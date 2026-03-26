@@ -4,12 +4,12 @@ import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { DashboardComponent } from './dashboard.component';
-import { AuthStore } from '@org/auth/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { MembershipsApi } from '@org/memberships/data-access';
-import { BillingApi, SubscriptionResponse } from '@org/billing/data-access';
-import { EntitlementsStore } from '@org/entitlements/data-access';
-import { StorageApi, StorageQuotaResponse } from '@org/storage/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { MembershipsApi } from '@saas-frontend/memberships/data-access';
+import { BillingApi, SubscriptionResponse } from '@saas-frontend/billing/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
+import { StorageApi, StorageQuotaResponse } from '@saas-frontend/storage/data-access';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

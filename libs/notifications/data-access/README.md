@@ -1,8 +1,8 @@
-# @org/notifications/data-access
+# @saas-frontend/notifications/data-access
 
 HTTP + real-time WebSocket client for the in-app notifications system.
 
-**Import path**: `@org/notifications/data-access`
+**Import path**: `@saas-frontend/notifications/data-access`
 
 ---
 
@@ -42,7 +42,7 @@ All methods return `Observable<T>` (or `Observable<void>` for mutations).
 ### Usage
 
 ```ts
-import { NotificationsApi } from '@org/notifications/data-access';
+import { NotificationsApi } from '@saas-frontend/notifications/data-access';
 
 providers: [
   NotificationsApi,
@@ -106,7 +106,7 @@ If `getAccessTokenSilently()` fails (e.g. session expired) the service silently 
 import {
   NotificationsSocketService,
   NotificationRecord,
-} from '@org/notifications/data-access';
+} from '@saas-frontend/notifications/data-access';
 
 @Component({ ... })
 export class NotificationsComponent implements OnInit, OnDestroy {

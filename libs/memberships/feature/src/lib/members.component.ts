@@ -23,10 +23,10 @@ import {
   MembershipsStore,
   MembershipSummary,
   MembershipRole,
-} from '@org/memberships/data-access';
-import { OrganizationsStore } from '@org/organizations/data-access';
-import { EntitlementsStore } from '@org/entitlements/data-access';
-import { PermissionsService, PERMISSIONS } from '@org/shared/util-rbac';
+} from '@saas-frontend/memberships/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
+import { PermissionsService, PERMISSIONS } from '@saas-frontend/shared/util-rbac';
 
 type TagSeverity = 'success' | 'info' | 'secondary' | 'warn';
 

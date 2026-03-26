@@ -2,7 +2,7 @@ import { computed, Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { EntitlementsApi } from './entitlements.api';
 import type { OrganizationEntitlements } from './entitlements.api.types';
-import type { ApiError } from '@org/shared/util-error';
+import type { ApiError } from '@saas-frontend/shared/util-error';
 
 type Plan = 'FREE' | 'PRO' | 'ENTERPRISE';
 

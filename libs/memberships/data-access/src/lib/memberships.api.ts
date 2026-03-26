@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { API_BASE_URL } from '@org/shared/util-types';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 import type {
   CreateMembershipDto,
   UpdateMembershipDto,

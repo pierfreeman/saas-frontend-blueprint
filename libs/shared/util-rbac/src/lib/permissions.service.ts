@@ -1,5 +1,5 @@
 import { Injectable, inject, computed } from '@angular/core';
-import { MembershipsStore } from '@org/memberships/data-access';
+import { MembershipsStore } from '@saas-frontend/memberships/data-access';
 import { resolvePermissions } from './resolve-permissions';
 import type { Permission } from './permissions.constants';
 
