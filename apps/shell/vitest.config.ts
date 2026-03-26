@@ -6,6 +6,7 @@ const mfStub = resolve(__dirname, 'src/testing/mf-stubs.ts');
 
 export default defineConfig({
   resolve: {
+    tsconfigPaths: true,
     alias: {
       'auth/Routes': mfStub,
       'admin/Routes': mfStub,
