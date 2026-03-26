@@ -61,45 +61,41 @@ export const PLATFORM_ROUTES: Route[] = [
       },
       {
         path: 'members',
-        loadComponent: () =>
-          import('../members/members.component').then(
-            (m) => m.MembersComponent,
+        loadChildren: () =>
+          import('@org/memberships/feature').then(
+            (m) => m.FEATURE_MEMBERSHIPS_ROUTES,
           ),
       },
       {
         path: 'settings',
-        loadComponent: () =>
-          import('../settings/settings.component').then(
-            (m) => m.SettingsComponent,
+        loadChildren: () =>
+          import('@org/organizations/feature-settings').then(
+            (m) => m.FEATURE_ORG_SETTINGS_ROUTES,
           ),
       },
       {
         path: 'billing',
-        loadComponent: () =>
-          import('../billing/billing.component').then(
-            (m) => m.BillingComponent,
-          ),
+        loadChildren: () =>
+          import('@org/billing/feature').then((m) => m.FEATURE_BILLING_ROUTES),
       },
       {
         path: 'activity-log',
-        loadComponent: () =>
-          import('../activity-log/activity-log.component').then(
-            (m) => m.ActivityLogComponent,
+        loadChildren: () =>
+          import('@org/activity-log/feature').then(
+            (m) => m.FEATURE_ACTIVITY_LOG_ROUTES,
           ),
       },
       {
         path: 'notifications',
-        loadComponent: () =>
-          import('../notifications/notifications.component').then(
-            (m) => m.NotificationsComponent,
+        loadChildren: () =>
+          import('@org/notifications/feature').then(
+            (m) => m.FEATURE_NOTIFICATIONS_ROUTES,
           ),
       },
       {
         path: 'storage',
-        loadComponent: () =>
-          import('../storage/storage.component').then(
-            (m) => m.StorageComponent,
-          ),
+        loadChildren: () =>
+          import('@org/storage/feature').then((m) => m.FEATURE_STORAGE_ROUTES),
       },
     ],
   },

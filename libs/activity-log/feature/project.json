@@ -1,0 +1,13 @@
+{
+  "name": "activity-log-feature",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/activity-log/feature/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:feature", "scope:activity-log"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

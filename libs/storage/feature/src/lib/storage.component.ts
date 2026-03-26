@@ -9,7 +9,11 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { StorageApi, FileMetadata, StorageQuotaResponse } from '@org/storage/data-access';
+import {
+  StorageApi,
+  FileMetadata,
+  StorageQuotaResponse,
+} from '@org/storage/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { ButtonModule } from 'primeng/button';
 import { ProgressBarModule } from 'primeng/progressbar';
@@ -69,7 +73,15 @@ function statusSeverity(
   selector: 'app-storage',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ButtonModule, ProgressBarModule, SkeletonModule, TagModule, TooltipModule, DatePipe, RouterLink],
+  imports: [
+    ButtonModule,
+    ProgressBarModule,
+    SkeletonModule,
+    TagModule,
+    TooltipModule,
+    DatePipe,
+    RouterLink,
+  ],
   template: `
     <div class="flex flex-col gap-6">
       <!-- Page header -->
@@ -93,13 +105,17 @@ function statusSeverity(
 
       <!-- Storage quota bar -->
       @if (quota(); as q) {
-        <div class="p-4 rounded border bg-surface-0"
-             [class.border-surface-200]="!isNearLimit()"
-             [class.border-orange-300]="isNearLimit() && !isAtLimit()"
-             [class.border-red-400]="isAtLimit()">
+        <div
+          class="p-4 rounded border bg-surface-0"
+          [class.border-surface-200]="!isNearLimit()"
+          [class.border-orange-300]="isNearLimit() && !isAtLimit()"
+          [class.border-red-400]="isAtLimit()"
+        >
           <div class="flex items-center justify-between mb-2 text-sm">
             <span class="font-medium text-surface-700">Storage used</span>
-            <span class="text-surface-500">{{ formattedUsed() }} / {{ formattedLimit() }}</span>
+            <span class="text-surface-500"
+              >{{ formattedUsed() }} / {{ formattedLimit() }}</span
+            >
           </div>
           <p-progressBar
             [value]="usagePercent()"
@@ -111,7 +127,9 @@ function statusSeverity(
             <div class="mt-2 text-sm text-red-600 flex items-center gap-2">
               <i class="pi pi-exclamation-circle"></i>
               Storage limit reached.
-              <a routerLink="/billing" class="underline font-medium">Upgrade your plan</a>
+              <a routerLink="/billing" class="underline font-medium"
+                >Upgrade your plan</a
+              >
               to upload more files.
             </div>
           } @else if (isNearLimit()) {
@@ -300,9 +318,11 @@ export class StorageComponent {
   #offset = 0;
 
   // Reload file list whenever the active org changes.
-  readonly #orgSub = toObservable(this.#orgsStore.activeOrgId)
-    .pipe(filter(Boolean), takeUntilDestroyed())
-    .subscribe(() => this.#resetAndLoad());
+  constructor() {
+    toObservable(this.#orgsStore.activeOrgId)
+      .pipe(filter(Boolean), takeUntilDestroyed())
+      .subscribe(() => this.#resetAndLoad());
+  }
 
   // Expose pure helpers to the template.
   readonly formatBytes = formatBytes;

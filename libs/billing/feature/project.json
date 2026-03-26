@@ -1,0 +1,13 @@
+{
+  "name": "billing-feature",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/billing/feature/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:feature", "scope:billing"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

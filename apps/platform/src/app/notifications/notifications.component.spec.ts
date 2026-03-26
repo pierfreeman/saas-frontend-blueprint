@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { of, Subject } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { NotificationsComponent } from './notifications.component';
+import { NotificationsComponent } from '@org/notifications/feature';
 import {
   NotificationsApi,
   NotificationsSocketService,

@@ -2,19 +2,24 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { SettingsComponent } from './settings.component';
+import { SettingsComponent } from '@org/organizations/feature-settings';
 import { AuthStore } from '@org/auth/data-access';
-import { OrganizationsStore, OrganizationsApi } from '@org/organizations/data-access';
+import {
+  OrganizationsStore,
+  OrganizationsApi,
+} from '@org/organizations/data-access';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function setup(opts: {
-  email?: string;
-  orgName?: string;
-  orgId?: string | null;
-  updateError?: boolean;
-} = {}) {
+function setup(
+  opts: {
+    email?: string;
+    orgName?: string;
+    orgId?: string | null;
+    updateError?: boolean;
+  } = {},
+) {
   const {
     email = 'alice@example.com',
     orgName = 'Acme Corp',

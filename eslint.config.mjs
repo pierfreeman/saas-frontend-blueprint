@@ -78,46 +78,55 @@ export default [
                 'scope:activity-log',
               ],
             },
-            // domain libs are isolated: can only depend on their own scope + shared
+            // scope isolation applies only to type:data-access libs
+            // feature libs intentionally orchestrate across domains
             {
-              sourceTag: 'scope:auth',
+              allSourceTags: ['scope:auth', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:auth', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:organizations',
+              allSourceTags: ['scope:organizations', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:organizations', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:memberships',
+              allSourceTags: ['scope:memberships', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:memberships', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:billing',
+              allSourceTags: ['scope:billing', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:billing', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:entitlements',
+              allSourceTags: ['scope:entitlements', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:entitlements', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:tasks',
+              allSourceTags: ['scope:tasks', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:tasks', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:notifications',
+              allSourceTags: ['scope:notifications', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:notifications', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:storage',
+              allSourceTags: ['scope:storage', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:storage', 'scope:shared'],
             },
             {
-              sourceTag: 'scope:activity-log',
+              allSourceTags: ['scope:activity-log', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:activity-log', 'scope:shared'],
             },
           ],
         },
       ],
+    },
+  },
+  // Disable boundary checks for test files — specs statically import the
+  // component under test even when the app loads it lazily.
+  {
+    files: ['**/*.spec.ts', '**/*.spec.mts'],
+    rules: {
+      '@nx/enforce-module-boundaries': 'off',
     },
   },
   // Disable boundary checks for eslint config files themselves

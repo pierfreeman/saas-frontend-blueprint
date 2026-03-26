@@ -3,8 +3,11 @@ import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { MembersComponent } from './members.component';
-import { MembershipsStore, MembershipSummary } from '@org/memberships/data-access';
+import { MembersComponent } from '@org/memberships/feature';
+import {
+  MembershipsStore,
+  MembershipSummary,
+} from '@org/memberships/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { EntitlementsStore } from '@org/entitlements/data-access';
 import { PermissionsService, PERMISSIONS } from '@org/shared/util-rbac';
@@ -12,7 +15,9 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function makeMember(overrides: Partial<MembershipSummary> = {}): MembershipSummary {
+function makeMember(
+  overrides: Partial<MembershipSummary> = {},
+): MembershipSummary {
   return {
     id: 'm1',
     orgId: 'org-1',
@@ -42,7 +47,9 @@ function setup(opts: {
 
   const memberships = signal<MembershipSummary[]>(members);
   const loadingListSig = signal(loadingList);
-  const savingMock: ReturnType<typeof vi.fn> = vi.fn(() => Promise.resolve(members[0] ?? null));
+  const savingMock: ReturnType<typeof vi.fn> = vi.fn(() =>
+    Promise.resolve(members[0] ?? null),
+  );
 
   const mockStore = {
     memberships,
@@ -105,7 +112,10 @@ describe('MembersComponent', () => {
     });
 
     it('atSeatLimit is true when count equals maxSeats', () => {
-      const members = [makeMember(), makeMember({ id: 'm2', userId: 'u2@x.com' })];
+      const members = [
+        makeMember(),
+        makeMember({ id: 'm2', userId: 'u2@x.com' }),
+      ];
       const { component } = setup({ members, maxSeats: 2 });
       expect(component.atSeatLimit()).toBe(true);
     });
@@ -206,7 +216,9 @@ describe('MembersComponent', () => {
         memberships: signal<MembershipSummary[]>([]),
         loadingList: signal(false),
         loadingMutation: signal(false),
-        error: signal<{ message: string } | null>({ message: 'Seat limit exceeded' }),
+        error: signal<{ message: string } | null>({
+          message: 'Seat limit exceeded',
+        }),
         loadMemberships: vi.fn(() => Promise.resolve()),
         inviteMember: vi.fn(() => Promise.resolve(null)),
         updateMemberRole: vi.fn(() => Promise.resolve()),
@@ -284,7 +296,9 @@ describe('MembersComponent', () => {
 
     it('avatarLabel returns ? for null userId', () => {
       const { component } = setup({});
-      expect(component.avatarLabel({ ...makeMember(), userId: undefined as any })).toBe('?');
+      expect(
+        component.avatarLabel({ ...makeMember(), userId: undefined as any }),
+      ).toBe('?');
     });
 
     it('roleSeverity maps known roles', () => {

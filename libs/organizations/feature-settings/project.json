@@ -1,0 +1,13 @@
+{
+  "name": "organizations-feature-settings",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/organizations/feature-settings/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:feature", "scope:organizations"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

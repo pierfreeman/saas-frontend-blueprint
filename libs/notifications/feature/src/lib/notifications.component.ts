@@ -232,7 +232,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
           ),
         );
       },
-      error: () => {},
+      error: () => {
+        /* swallow – UI is not affected by failed mark-as-read */
+      },
     });
   }
 
@@ -259,7 +261,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this.notifications.update((list) => list.filter((n) => n.id !== id));
         this.total.update((t) => Math.max(0, t - 1));
       },
-      error: () => {},
+      error: () => {
+        /* swallow – UI is not affected by failed delete */
+      },
     });
   }
 

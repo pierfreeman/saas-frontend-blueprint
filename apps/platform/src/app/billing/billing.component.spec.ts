@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal, computed } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { BillingComponent } from './billing.component';
+import { BillingComponent } from '@org/billing/feature';
 import { AuthStore } from '@org/auth/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { BillingApi, SubscriptionResponse } from '@org/billing/data-access';
@@ -252,7 +252,10 @@ describe('BillingComponent', () => {
       await new Promise((r) => setTimeout(r, 0));
 
       expect(mockBillingApi.createCheckoutSession).toHaveBeenCalled();
-      Object.defineProperty(window, 'location', { writable: true, value: original });
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value: original,
+      });
     });
   });
 
@@ -271,7 +274,10 @@ describe('BillingComponent', () => {
       await new Promise((r) => setTimeout(r, 0));
 
       expect(mockBillingApi.createPortalSession).toHaveBeenCalled();
-      Object.defineProperty(window, 'location', { writable: true, value: original });
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value: original,
+      });
     });
   });
 });

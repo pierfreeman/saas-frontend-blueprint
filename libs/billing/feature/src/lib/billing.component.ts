@@ -14,7 +14,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { AuthStore } from '@org/auth/data-access';
 import { OrganizationsStore } from '@org/organizations/data-access';
 import { BillingApi } from '@org/billing/data-access';
 import type { SubscriptionResponse } from '@org/billing/data-access';
@@ -242,7 +241,6 @@ const STATUS_SEVERITY: Record<string, TagSeverity> = {
   `,
 })
 export class BillingComponent implements OnInit {
-  readonly #authStore = inject(AuthStore);
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #billingApi = inject(BillingApi);
   readonly #ent = inject(EntitlementsStore);

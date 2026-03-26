@@ -59,6 +59,24 @@
       "@org/tasks/data-access": [
         "libs/tasks/data-access/src/index.ts"
       ],
+      "@org/activity-log/feature": [
+        "libs/activity-log/feature/src/index.ts"
+      ],
+      "@org/billing/feature": [
+        "libs/billing/feature/src/index.ts"
+      ],
+      "@org/memberships/feature": [
+        "libs/memberships/feature/src/index.ts"
+      ],
+      "@org/notifications/feature": [
+        "libs/notifications/feature/src/index.ts"
+      ],
+      "@org/organizations/feature-settings": [
+        "libs/organizations/feature-settings/src/index.ts"
+      ],
+      "@org/storage/feature": [
+        "libs/storage/feature/src/index.ts"
+      ],
       "auth/Routes": [
         "apps/auth/src/app/remote-entry/entry.routes.ts"
       ],
