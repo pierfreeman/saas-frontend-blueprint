@@ -7,14 +7,15 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
-import { AvatarModule } from 'primeng/avatar';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { AuthStore } from '@saas-frontend/auth/data-access';
-import { OrganizationsStore, OrganizationsApi } from '@saas-frontend/organizations/data-access';
+import {
+  OrganizationsStore,
+  OrganizationsApi,
+} from '@saas-frontend/organizations/data-access';
 
 @Component({
   selector: 'app-settings',
@@ -23,7 +24,6 @@ import { OrganizationsStore, OrganizationsApi } from '@saas-frontend/organizatio
   imports: [
     FormsModule,
     CardModule,
-    AvatarModule,
     ButtonModule,
     InputTextModule,
     ConfirmDialogModule,
@@ -35,22 +35,6 @@ import { OrganizationsStore, OrganizationsApi } from '@saas-frontend/organizatio
     <p-confirmDialog />
 
     <div class="flex flex-col gap-6 max-w-2xl">
-      <h1 class="text-2xl font-bold text-surface-900 m-0">Settings</h1>
-
-      <!-- Profile -->
-      <p-card header="Profile">
-        <div class="flex items-center gap-4">
-          <p-avatar [label]="avatarLabel()" size="xlarge" shape="circle" />
-          <div>
-            <div class="font-semibold text-surface-900">{{ name() }}</div>
-            <div class="text-surface-500 text-sm">{{ email() }}</div>
-          </div>
-        </div>
-        <p class="text-surface-400 text-sm mt-4 mb-0">
-          Profile information is managed via your identity provider.
-        </p>
-      </p-card>
-
       <!-- Organisation -->
       <p-card header="Organisation">
         <div class="flex flex-col gap-4">
@@ -108,8 +92,8 @@ import { OrganizationsStore, OrganizationsApi } from '@saas-frontend/organizatio
       <p-card header="Danger zone" styleClass="border border-red-300">
         <div class="flex flex-col gap-3">
           <p class="text-surface-600 text-sm m-0">
-            Permanently delete this organisation and all its data.
-            This action is irreversible and will be scheduled for processing.
+            Permanently delete this organisation and all its data. This action
+            is irreversible and will be scheduled for processing.
           </p>
           <div>
             <p-button
@@ -127,7 +111,6 @@ import { OrganizationsStore, OrganizationsApi } from '@saas-frontend/organizatio
   `,
 })
 export class SettingsComponent implements OnInit {
-  readonly #authStore = inject(AuthStore);
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #orgsApi = inject(OrganizationsApi);
   readonly #confirm = inject(ConfirmationService);
@@ -140,10 +123,6 @@ export class SettingsComponent implements OnInit {
   readonly requestingDeletion = signal(false);
 
   orgNameDraft = '';
-
-  readonly email = () => this.#authStore.currentUser()?.email ?? '';
-  readonly name = () => this.#authStore.currentUser()?.email?.split('@')[0] ?? 'Unknown';
-  readonly avatarLabel = () => this.email().charAt(0).toUpperCase() || '?';
 
   canSaveName(): boolean {
     const current = this.#orgsStore.activeOrgName();
