@@ -1925,6 +1925,15 @@ export interface operations {
              * @example 2026-02-26T12:34:56.789Z
              */
             updatedAt?: string;
+            /** Basic profile of the member. */
+            user?: {
+              /**
+               * Format: email
+               * @description Email address from the Auth0 token.
+               * @example alice@example.com
+               */
+              email?: string;
+            };
           }[];
         };
       };

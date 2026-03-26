@@ -26,7 +26,10 @@ import {
 } from '@saas-frontend/memberships/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
-import { PermissionsService, PERMISSIONS } from '@saas-frontend/shared/util-rbac';
+import {
+  PermissionsService,
+  PERMISSIONS,
+} from '@saas-frontend/shared/util-rbac';
 
 type TagSeverity = 'success' | 'info' | 'secondary' | 'warn';
 
@@ -86,7 +89,10 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
             @if (atSeatLimit()) {
               <p class="text-xs text-orange-600 m-0">
                 Seat limit reached ({{ members().length }}/{{ maxSeats() }}).
-                <a routerLink="/billing" class="underline text-orange-600">Upgrade</a> to add more.
+                <a routerLink="/billing" class="underline text-orange-600"
+                  >Upgrade</a
+                >
+                to add more.
               </p>
             }
           </div>
@@ -131,10 +137,10 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
 
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-surface-900 m-0 truncate">
-                    {{ m.userId }}
+                    {{ displayName(m) }}
                   </p>
-                  <p class="text-xs text-surface-400 m-0">
-                    {{ m.status ?? 'ACTIVE' }}
+                  <p class="text-xs text-surface-400 m-0 truncate">
+                    {{ displayEmail(m) || (m.status ?? 'ACTIVE') }}
                   </p>
                 </div>
 
@@ -290,7 +296,18 @@ export class MembersComponent implements OnInit {
   }
 
   avatarLabel(m: MembershipSummary): string {
-    return (m.userId ?? '?').charAt(0).toUpperCase();
+    const src = m.user?.email ?? m.userId ?? '?';
+    return src.charAt(0).toUpperCase();
+  }
+
+  displayName(m: MembershipSummary): string {
+    const email = m.user?.email;
+    if (!email) return m.userId ?? '—';
+    return email.split('@')[0];
+  }
+
+  displayEmail(m: MembershipSummary): string {
+    return m.user?.email ?? '';
   }
 
   roleSeverity(role?: string): TagSeverity {
@@ -363,7 +380,7 @@ export class MembersComponent implements OnInit {
 
   confirmRemove(m: MembershipSummary): void {
     this.#confirm.confirm({
-      message: `Remove member ${m.userId} from this organization?`,
+      message: `Remove ${m.user?.email ?? m.userId} from this organization?`,
       header: 'Confirm removal',
       icon: 'pi pi-exclamation-triangle',
       accept: () => this.#doRemove(m),
