@@ -1,4 +1,8 @@
 {
   "snyk.advanced.autoSelectOrganization": true,
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "sonarlint.connectedMode.project": {
+    "connectionId": "pierfreeman",
+    "projectKey": "pierfreeman_saas-frontend-blueprint"
+  }
 }
