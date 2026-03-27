@@ -146,6 +146,7 @@ describe('errorInterceptor', () => {
       const next = () => throwError(() => apiError);
 
       TestBed.runInInjectionContext(() => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         errorInterceptor(req, next as never).subscribe({ error: () => {} });
       });
 

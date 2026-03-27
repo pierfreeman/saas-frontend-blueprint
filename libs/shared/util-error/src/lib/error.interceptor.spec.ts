@@ -48,6 +48,7 @@ describe('errorInterceptor', () => {
   afterEach(() => controller.verify());
 
   function triggerError(status: number, body: Record<string, unknown> = {}) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     http.get('/api/test').subscribe({ error: () => {} });
     controller.expectOne('/api/test').flush(body, { status, statusText: '' });
   }
@@ -132,6 +133,7 @@ describe('errorInterceptor', () => {
       const req = new HttpRequest('GET', '/api/test');
       const next = () => throwError(() => apiError);
       TestBed.runInInjectionContext(() => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         errorInterceptor(req, next as never).subscribe({ error: () => {} });
       });
       expect(messageService.add).toHaveBeenCalledWith(
