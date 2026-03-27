@@ -6,14 +6,20 @@ import { TagModule } from 'primeng/tag';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { MembershipsApi } from '@saas-frontend/memberships/data-access';
-import { BillingApi, SubscriptionResponse } from '@saas-frontend/billing/data-access';
+import {
+  BillingApi,
+  SubscriptionResponse,
+} from '@saas-frontend/billing/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
-import { StorageApi, StorageQuotaResponse } from '@saas-frontend/storage/data-access';
+import {
+  StorageApi,
+  StorageQuotaResponse,
+} from '@saas-frontend/storage/data-access';
 
 function formatStorageBytes(bytes: string | null | undefined): string {
   if (!bytes) return '—';
-  const n = parseInt(bytes, 10);
-  if (isNaN(n)) return '—';
+  const n = Number.parseInt(bytes, 10);
+  if (Number.isNaN(n)) return '—';
   if (n < 1024) return `${n} B`;
   if (n < 1_048_576) return `${(n / 1024).toFixed(1)} KB`;
   if (n < 1_073_741_824) return `${(n / 1_048_576).toFixed(1)} MB`;
@@ -105,7 +111,9 @@ function formatStorageBytes(bytes: string | null | undefined): string {
             <div class="text-surface-500 text-sm mt-1">
               Storage
               @if (storageLimitLabel()) {
-                <span class="text-surface-400"> / {{ storageLimitLabel() }}</span>
+                <span class="text-surface-400">
+                  / {{ storageLimitLabel() }}</span
+                >
               }
             </div>
           </p-card>
@@ -145,7 +153,9 @@ export class DashboardComponent implements OnInit {
     if (status === 'NONE') return 'Free';
     if (status === 'ACTIVE' || status === 'TRIALING') return 'Pro';
     if (status === 'CANCELED' || status === 'PAUSED') return 'Free';
-    return status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, ' ');
+    return (
+      status.charAt(0) + status.slice(1).toLowerCase().replaceAll('_', ' ')
+    );
   };
 
   readonly seatCount = () => this.#entsStore.maxSeats();

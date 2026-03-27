@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 // Stub module federation remotes that can't be resolved in the test environment

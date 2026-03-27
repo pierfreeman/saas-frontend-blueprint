@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { AuthStore } from '@saas-frontend/auth/data-access';
-import type { User } from '@saas-frontend/auth/data-access';
 
 @Component({
   selector: 'app-platform-entry',

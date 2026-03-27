@@ -1,4 +1,3 @@
-import { TestBed } from '@angular/core/testing';
 import {
   HttpClient,
   HttpRequest,
@@ -9,14 +8,15 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { throwError } from 'rxjs';
 
-import { vi } from 'vitest';
-import { errorInterceptor } from '@saas-frontend/shared/util-error';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { errorInterceptor } from '@saas-frontend/shared/util-error';
+import { vi } from 'vitest';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;

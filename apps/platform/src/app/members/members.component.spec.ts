@@ -1,20 +1,19 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { MembersComponent } from '@saas-frontend/memberships/feature';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import {
   MembershipsStore,
   MembershipSummary,
 } from '@saas-frontend/memberships/data-access';
+import { MembersComponent } from '@saas-frontend/memberships/feature';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
-import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import {
-  PermissionsService,
   PERMISSIONS,
+  PermissionsService,
 } from '@saas-frontend/shared/util-rbac';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { describe, expect, it, vi } from 'vitest';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -50,9 +49,6 @@ function setup(opts: {
 
   const memberships = signal<MembershipSummary[]>(members);
   const loadingListSig = signal(loadingList);
-  const savingMock: ReturnType<typeof vi.fn> = vi.fn(() =>
-    Promise.resolve(members[0] ?? null),
-  );
 
   const mockStore = {
     memberships,

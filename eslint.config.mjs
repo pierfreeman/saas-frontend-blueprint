@@ -15,9 +15,9 @@ export default [
         {
           enforceBuildableLibDependency: false,
           allow: [
-            '^.*/eslint(\\.base)?\\.config\\.[cm]?[jt]s$',
-            '^.*/environments/.*$',
-            '^(auth|platform|admin)/Routes$',
+            String.raw`^.*/eslint(\.base)?\.config\.[cm]?[jt]s$`,
+            String.raw`^.*/environments/.*$`,
+            String.raw`^(auth|platform|admin)/Routes$`,
           ],
           ignoredCircularDependencies: [
             ['shared-util-rbac', 'memberships-data-access'],

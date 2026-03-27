@@ -36,7 +36,7 @@ export class HasPermissionDirective {
   constructor() {
     effect(() => {
       // Re-run whenever permissions change (e.g. after org switch)
-      void this.#permissions.currentUserPermissions();
+      this.#permissions.currentUserPermissions();
       this.#update();
     });
   }

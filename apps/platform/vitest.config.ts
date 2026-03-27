@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 // When running via Nx (nx run platform:test), NX_TASK_TARGET_PROJECT is set.

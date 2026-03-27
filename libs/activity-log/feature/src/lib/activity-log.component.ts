@@ -256,7 +256,7 @@ export class ActivityLogComponent implements OnInit {
   readonly loading = signal(true);
 
   readonly pageSize = PAGE_SIZE;
-  readonly skeletonRows = Array(8);
+  readonly skeletonRows = new Array(8);
 
   // filter state (v-model)
   actionFilter = '';
@@ -278,7 +278,7 @@ export class ActivityLogComponent implements OnInit {
 
   ngOnInit(): void {
     const orgId = this.#orgId();
-    if (orgId) void this.#ent.loadEntitlements(orgId);
+    if (orgId) this.#ent.loadEntitlements(orgId);
     this.#load(0);
   }
 

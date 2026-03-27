@@ -349,7 +349,10 @@ export class MembersComponent implements OnInit {
       role: this.inviteRole,
     });
 
-    if (result !== null) {
+    if (result === null) {
+      const err = this.#store.error();
+      this.inviteError.set(err?.message ?? 'Failed to send invitation.');
+    } else {
       this.inviteVisible = false;
       this.#toast.add({
         severity: 'success',
@@ -357,9 +360,6 @@ export class MembersComponent implements OnInit {
         detail: `Invitation sent to ${this.inviteEmail.trim()}.`,
         life: 3000,
       });
-    } else {
-      const err = this.#store.error();
-      this.inviteError.set(err?.message ?? 'Failed to send invitation.');
     }
   }
 
@@ -423,6 +423,6 @@ export class MembersComponent implements OnInit {
   #loadMembers(): void {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId) return;
-    void this.#store.loadMemberships(orgId);
+    this.#store.loadMemberships(orgId);
   }
 }
