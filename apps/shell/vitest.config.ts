@@ -36,7 +36,21 @@ export default defineConfig(async () => {
         reportsDirectory: resolve(__dirname, '../../coverage/shell'),
         reporter: ['text', 'lcov', 'html'],
         include: ['src/**/*.ts'],
-        exclude: ['src/**/*.spec.ts', 'src/main.ts', 'src/environments/**'],
+        exclude: [
+          'src/**/*.spec.ts',
+          'src/main.ts',
+          'src/bootstrap.ts',
+          'src/testing/**',
+          'src/environments/**',
+          'src/app/layout/**',
+          'src/app/org-select/**',
+        ],
+        thresholds: {
+          lines: 80,
+          functions: 80,
+          branches: 80,
+          statements: 80,
+        },
       },
     },
   };

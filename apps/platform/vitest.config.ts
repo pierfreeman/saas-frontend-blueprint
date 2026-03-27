@@ -36,10 +36,17 @@ export default defineConfig(async () => {
         include: ['src/**/*.ts'],
         exclude: [
           'src/**/*.spec.ts',
-          'src/test-setup.*',
           'src/main.ts',
+          'src/bootstrap.ts',
+          'src/testing/**',
           'src/environments/**',
         ],
+        thresholds: {
+          lines: 80,
+          functions: 80,
+          branches: 80,
+          statements: 80,
+        },
       },
     },
   };
