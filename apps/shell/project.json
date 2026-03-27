@@ -103,7 +103,14 @@
         "buildTarget": "shell:build-for-test",
         "tsConfig": "apps/shell/tsconfig.spec.json",
         "runnerConfig": "apps/shell/vitest.config.ts",
-        "watch": false
+        "watch": false,
+        "coverageInclude": ["apps/shell/src/**/*.ts"],
+        "coverageExclude": [
+          "apps/shell/src/**/*.spec.ts",
+          "apps/shell/src/main.ts",
+          "apps/shell/src/environments/**"
+        ],
+        "coverageReporters": ["text", "lcov", "html"]
       }
     },
     "serve-static": {

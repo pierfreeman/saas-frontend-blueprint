@@ -103,7 +103,15 @@
         "buildTarget": "platform:build-for-test",
         "tsConfig": "apps/platform/tsconfig.spec.json",
         "runnerConfig": "apps/platform/vitest.config.ts",
-        "watch": false
+        "watch": false,
+        "coverageInclude": ["apps/platform/src/**/*.ts"],
+        "coverageExclude": [
+          "apps/platform/src/**/*.spec.ts",
+          "apps/platform/src/test-setup.*",
+          "apps/platform/src/main.ts",
+          "apps/platform/src/environments/**"
+        ],
+        "coverageReporters": ["text", "lcov", "html"]
       }
     },
     "serve-static": {
