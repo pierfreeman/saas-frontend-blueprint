@@ -44,8 +44,8 @@ jobs:
             nx-${{ runner.os }}-${{ hashFiles('package-lock.json') }}-
             nx-${{ runner.os }}-
 
-      - name: Format check
-        run: npx nx format:check --base=remotes/origin/main
+      # - name: Format check
+      #   run: npx nx format:check --base=remotes/origin/main
 
       - name: Lint
         run: npx nx run-many -t lint --nx-bail

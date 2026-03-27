@@ -1,9 +1,14 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { Injectable, InjectionToken, OnDestroy, inject } from '@angular/core';
 import { AuthService } from '@auth0/auth0-angular';
 import { Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 import type { NotificationRecord } from './notifications.api.types';
+
+export const SOCKET_IO_FACTORY = new InjectionToken<typeof io>(
+  'SOCKET_IO_FACTORY',
+  { providedIn: 'root', factory: () => io },
+);
 
 export interface UnreadCountPayload {
   count: number;
@@ -24,6 +29,7 @@ export interface UnreadCountPayload {
 export class NotificationsSocketService implements OnDestroy {
   readonly #base = inject(API_BASE_URL);
   readonly #auth = inject(AuthService);
+  readonly #io = inject(SOCKET_IO_FACTORY);
 
   #socket: Socket | null = null;
   /** Tracks the org the current socket is connected for — avoids spurious reconnects. */
@@ -76,7 +82,7 @@ export class NotificationsSocketService implements OnDestroy {
 
   #open(token: string, orgId: string): void {
     this.#connectedOrgId = orgId;
-    this.#socket = io(`${this.#base}/notifications`, {
+    this.#socket = this.#io(`${this.#base}/notifications`, {
       auth: { token, orgId },
       transports: ['websocket', 'polling'],
       reconnection: true,

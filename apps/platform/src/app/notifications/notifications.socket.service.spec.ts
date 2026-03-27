@@ -3,22 +3,22 @@ import { of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { AuthService } from '@auth0/auth0-angular';
 import { API_BASE_URL } from '@saas-frontend/shared/util-types';
-import { NotificationsSocketService } from '@saas-frontend/notifications/data-access';
+import {
+  NotificationsSocketService,
+  SOCKET_IO_FACTORY,
+} from '@saas-frontend/notifications/data-access';
 import type { NotificationRecord } from '@saas-frontend/notifications/data-access';
 
 // ── Socket.IO mock ────────────────────────────────────────────────────────────
-// vi.hoisted() ensures the variables exist when vi.mock()'s factory runs,
-// because vi.mock() is hoisted to the top of the module by Vitest's transform.
-const { mockIo, mockSocket } = vi.hoisted(() => {
-  const socket = {
-    connected: false,
-    on: vi.fn(),
-    disconnect: vi.fn(),
-  };
-  return { mockIo: vi.fn(() => socket), mockSocket: socket };
-});
-
-vi.mock('socket.io-client', () => ({ io: mockIo }));
+// Provide mockIo via SOCKET_IO_FACTORY token instead of vi.mock() so the
+// Angular esbuild test runner (which marks npm packages as external) can
+// intercept the dependency through Angular's DI system.
+const mockSocket = {
+  connected: false,
+  on: vi.fn(),
+  disconnect: vi.fn(),
+};
+const mockIo = vi.fn(() => mockSocket);
 
 // Helper: retrieve the handler registered for a given socket event.
 function getSocketHandler(
@@ -41,6 +41,7 @@ describe('NotificationsSocketService', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: API_BASE_URL, useValue: BASE_URL },
+        { provide: SOCKET_IO_FACTORY, useValue: mockIo },
         {
           provide: AuthService,
           useValue: {

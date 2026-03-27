@@ -28,6 +28,7 @@ export default defineConfig(async () => {
       environment: 'jsdom',
       isolate: false,
       setupFiles: isNxRun ? [] : [resolve(__dirname, 'src/test-setup.mjs')],
+      watch: false,
       coverage: {
         provider: 'v8',
         reportsDirectory: resolve(__dirname, '../../coverage/platform'),

@@ -90,12 +90,20 @@
     "lint": {
       "executor": "@nx/eslint:lint"
     },
+    "build-for-test": {
+      "executor": "@nx/angular:application",
+      "options": {
+        "outputPath": "dist/apps/shell-test",
+        "tsConfig": "apps/shell/tsconfig.app.json"
+      }
+    },
     "test": {
       "executor": "@nx/angular:unit-test",
       "options": {
-        "buildTarget": "shell:build:development",
+        "buildTarget": "shell:build-for-test",
         "tsConfig": "apps/shell/tsconfig.spec.json",
-        "runnerConfig": "apps/shell/vitest.config.ts"
+        "runnerConfig": "apps/shell/vitest.config.ts",
+        "watch": false
       }
     },
     "serve-static": {
