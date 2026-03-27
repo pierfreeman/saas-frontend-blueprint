@@ -1,5 +1,7 @@
 # saas-frontend-blueprint
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pierfreeman_saas-frontend-blueprint&metric=alert_status&token=6b063929024d089faeac87874c12276a4f07c546)](https://sonarcloud.io/summary/new_code?id=pierfreeman_saas-frontend-blueprint) [![CI](https://github.com/pierfreeman/saas-frontend-blueprint/actions/workflows/ci.yml/badge.svg)](https://github.com/pierfreeman/saas-frontend-blueprint/actions/workflows/ci.yml)
+
 Production-ready multi-tenant SaaS frontend built as an [Nx](https://nx.dev) monorepo using **Angular 21 Module Federation**.
 
 Four independently deployable micro-frontends (MFEs) share a single shell host, a unified design system (PrimeNG + Tailwind v4), and a type-safe API client layer coded against the backend OpenAPI schema.
@@ -20,7 +22,7 @@ Designed to pair with [saas-backend-blueprint](../saas-backend-blueprint).
 | State management | Angular Signals (no NgRx)                                    |
 | Authentication   | Auth0 (`@auth0/auth0-angular`) — RS256, PKCE, silent refresh |
 | HTTP client      | Angular `HttpClient` + functional interceptors               |
-| Type safety      | OpenAPI-aligned types (`@saas-frontend/shared/util-types`)             |
+| Type safety      | OpenAPI-aligned types (`@saas-frontend/shared/util-types`)   |
 | Testing          | Vitest 4 + Angular Testing Library                           |
 | Bundler          | Webpack 5 (MF bundles), Vite (unit tests)                    |
 | Lint             | ESLint + `angular-eslint`                                    |
@@ -213,8 +215,8 @@ Every API request passes through these functional interceptors (registered in sh
 
 ### State management
 
-| Store                | Lib                              | Persistence      | Key signals                                    |
-| -------------------- | -------------------------------- | ---------------- | ---------------------------------------------- |
+| Store                | Lib                                        | Persistence      | Key signals                                    |
+| -------------------- | ------------------------------------------ | ---------------- | ---------------------------------------------- |
 | `AuthStore`          | `@saas-frontend/auth/data-access`          | `sessionStorage` | `currentUser`, `isLoggedIn`                    |
 | `OrganizationsStore` | `@saas-frontend/organizations/data-access` | `localStorage`   | `activeOrgId`, `activeOrgName`, `hasActiveOrg` |
 
@@ -283,8 +285,8 @@ All page components follow this pattern:
 
 ## Libraries
 
-| Import path                      | README                                        | Description                                                   |
-| -------------------------------- | --------------------------------------------- | ------------------------------------------------------------- |
+| Import path                                | README                                        | Description                                                   |
+| ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------- |
 | `@saas-frontend/auth/data-access`          | [→](libs/auth/data-access/README.md)          | `AuthStore`, `AuthApi` — user identity and session            |
 | `@saas-frontend/organizations/data-access` | [→](libs/organizations/data-access/README.md) | `OrganizationsStore`, `OrganizationsApi`, `tenantInterceptor` |
 | `@saas-frontend/memberships/data-access`   | [→](libs/memberships/data-access/README.md)   | `MembershipsApi` — CRUD for org members                       |
