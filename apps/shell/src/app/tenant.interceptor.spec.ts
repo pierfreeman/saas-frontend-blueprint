@@ -1,7 +1,5 @@
-import { TestBed } from '@angular/core/testing';
 import {
   HttpClient,
-  HttpRequest,
   provideHttpClient,
   withInterceptors,
 } from '@angular/common/http';
@@ -9,9 +7,10 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import {
-  tenantInterceptor,
   OrganizationsStore,
+  tenantInterceptor,
 } from '@saas-frontend/organizations/data-access';
 import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 

@@ -302,12 +302,12 @@ export class BillingComponent implements OnInit {
     if (!orgId) return;
     this.loading.set(true);
     this.error.set(null);
-    void this.#ent.loadEntitlements(orgId);
+    this.#ent.loadEntitlements(orgId);
     this.#billingApi.getSubscription(orgId).subscribe({
       next: (data) => {
         this.sub.set(data);
         this.loading.set(false);
-        void this.#ent.invalidateCache(orgId);
+        this.#ent.invalidateCache(orgId);
       },
       error: () => {
         this.error.set('Failed to load billing information.');
@@ -318,7 +318,7 @@ export class BillingComponent implements OnInit {
 
   upgrade(): void {
     const orgId = this.#orgId();
-    const origin = window.location.origin;
+    const origin = globalThis.location.origin;
     this.redirecting.set(true);
     this.#billingApi
       .createCheckoutSession({
@@ -329,7 +329,7 @@ export class BillingComponent implements OnInit {
       })
       .subscribe({
         next: ({ url }) => {
-          window.location.href = url;
+          globalThis.location.href = url;
         },
         error: () => {
           this.redirecting.set(false);
@@ -344,13 +344,13 @@ export class BillingComponent implements OnInit {
 
   openPortal(): void {
     const orgId = this.#orgId();
-    const origin = window.location.origin;
+    const origin = globalThis.location.origin;
     this.redirecting.set(true);
     this.#billingApi
       .createPortalSession({ orgId, returnUrl: `${origin}/billing` })
       .subscribe({
         next: ({ url }) => {
-          window.location.href = url;
+          globalThis.location.href = url;
         },
         error: () => {
           this.redirecting.set(false);

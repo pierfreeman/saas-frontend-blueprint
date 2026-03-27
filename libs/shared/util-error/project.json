@@ -8,6 +8,17 @@
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx vitest run --config libs/shared/util-error/vitest.config.ts"
+      },
+      "configurations": {
+        "coverage": {
+          "command": "npx vitest run --config libs/shared/util-error/vitest.config.ts --coverage"
+        }
+      }
     }
   }
 }

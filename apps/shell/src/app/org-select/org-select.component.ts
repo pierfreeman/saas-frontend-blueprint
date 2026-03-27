@@ -63,6 +63,6 @@ export class OrgSelectComponent implements OnInit {
 
   selectOrg(org: OrganizationSummary): void {
     this.#orgContext.switchOrg(org.id!, org.name ?? undefined);
-    void this.#router.navigateByUrl('/');
+    this.#router.navigateByUrl('/');
   }
 }

@@ -61,7 +61,7 @@ export interface paths {
     delete?: never;
     options?: never;
     head?: never;
-    patch?: never;
+    patch: operations['AuthController_updateMe'];
     trace?: never;
   };
   '/organizations': {
@@ -1395,6 +1395,21 @@ export interface operations {
              * @example alice@example.com
              */
             email: string;
+            /**
+             * @description Given name. Synced from Auth0 on first social login; editable via PATCH /auth/me.
+             * @example Alice
+             */
+            firstName?: string | null;
+            /**
+             * @description Family name. Synced from Auth0 on first social login; editable via PATCH /auth/me.
+             * @example Smith
+             */
+            lastName?: string | null;
+            /**
+             * @description Profile picture URL. Synced from Auth0 on first social login; editable via PATCH /auth/me.
+             * @example https://lh3.googleusercontent.com/a/example
+             */
+            pictureUrl?: string | null;
           };
         };
       };
@@ -1411,6 +1426,49 @@ export interface operations {
             message?: string;
           };
         };
+      };
+    };
+  };
+  AuthController_updateMe: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': {
+          firstName?: string;
+          lastName?: string;
+          pictureUrl?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Updated user profile. */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            firstName?: string | null;
+            lastName?: string | null;
+            pictureUrl?: string | null;
+          };
+        };
+      };
+      /** @description Missing or invalid JWT bearer token. */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
@@ -1925,6 +1983,21 @@ export interface operations {
              * @example 2026-02-26T12:34:56.789Z
              */
             updatedAt?: string;
+            /** Basic profile of the member. */
+            user?: {
+              /**
+               * Format: email
+               * @description Email address from the Auth0 token.
+               * @example alice@example.com
+               */
+              email?: string;
+              /** @example Alice */
+              firstName?: string | null;
+              /** @example Smith */
+              lastName?: string | null;
+              /** @example https://lh3.googleusercontent.com/a/example */
+              pictureUrl?: string | null;
+            };
           }[];
         };
       };

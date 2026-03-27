@@ -36,7 +36,7 @@ export class HasPlanDirective {
 
   constructor() {
     effect(() => {
-      void this.#store.plan();
+      this.#store.plan();
       this.#update();
     });
   }

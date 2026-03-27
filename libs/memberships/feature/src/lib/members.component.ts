@@ -26,7 +26,10 @@ import {
 } from '@saas-frontend/memberships/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
-import { PermissionsService, PERMISSIONS } from '@saas-frontend/shared/util-rbac';
+import {
+  PermissionsService,
+  PERMISSIONS,
+} from '@saas-frontend/shared/util-rbac';
 
 type TagSeverity = 'success' | 'info' | 'secondary' | 'warn';
 
@@ -86,7 +89,10 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
             @if (atSeatLimit()) {
               <p class="text-xs text-orange-600 m-0">
                 Seat limit reached ({{ members().length }}/{{ maxSeats() }}).
-                <a routerLink="/billing" class="underline text-orange-600">Upgrade</a> to add more.
+                <a routerLink="/billing" class="underline text-orange-600"
+                  >Upgrade</a
+                >
+                to add more.
               </p>
             }
           </div>
@@ -123,18 +129,26 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
           >
             @for (m of members(); track m.id) {
               <li class="flex items-center gap-3 py-3">
-                <p-avatar
-                  [label]="avatarLabel(m)"
-                  shape="circle"
-                  styleClass="shrink-0"
-                />
+                @if (m.user?.pictureUrl) {
+                  <p-avatar
+                    [image]="m.user!.pictureUrl!"
+                    shape="circle"
+                    styleClass="shrink-0"
+                  />
+                } @else {
+                  <p-avatar
+                    [label]="avatarLabel(m)"
+                    shape="circle"
+                    styleClass="shrink-0"
+                  />
+                }
 
                 <div class="flex-1 min-w-0">
                   <p class="text-sm font-medium text-surface-900 m-0 truncate">
-                    {{ m.userId }}
+                    {{ displayName(m) }}
                   </p>
-                  <p class="text-xs text-surface-400 m-0">
-                    {{ m.status ?? 'ACTIVE' }}
+                  <p class="text-xs text-surface-400 m-0 truncate">
+                    {{ displayEmail(m) || (m.status ?? 'ACTIVE') }}
                   </p>
                 </div>
 
@@ -290,7 +304,20 @@ export class MembersComponent implements OnInit {
   }
 
   avatarLabel(m: MembershipSummary): string {
-    return (m.userId ?? '?').charAt(0).toUpperCase();
+    const name = this.displayName(m);
+    return name.charAt(0).toUpperCase();
+  }
+
+  displayName(m: MembershipSummary): string {
+    const { firstName, lastName, email } = m.user ?? {};
+    if (firstName || lastName)
+      return [firstName, lastName].filter(Boolean).join(' ');
+    if (email) return email.split('@')[0];
+    return m.userId ?? '—';
+  }
+
+  displayEmail(m: MembershipSummary): string {
+    return m.user?.email ?? '';
   }
 
   roleSeverity(role?: string): TagSeverity {
@@ -322,7 +349,10 @@ export class MembersComponent implements OnInit {
       role: this.inviteRole,
     });
 
-    if (result !== null) {
+    if (result === null) {
+      const err = this.#store.error();
+      this.inviteError.set(err?.message ?? 'Failed to send invitation.');
+    } else {
       this.inviteVisible = false;
       this.#toast.add({
         severity: 'success',
@@ -330,9 +360,6 @@ export class MembersComponent implements OnInit {
         detail: `Invitation sent to ${this.inviteEmail.trim()}.`,
         life: 3000,
       });
-    } else {
-      const err = this.#store.error();
-      this.inviteError.set(err?.message ?? 'Failed to send invitation.');
     }
   }
 
@@ -363,7 +390,7 @@ export class MembersComponent implements OnInit {
 
   confirmRemove(m: MembershipSummary): void {
     this.#confirm.confirm({
-      message: `Remove member ${m.userId} from this organization?`,
+      message: `Remove ${m.user?.email ?? m.userId} from this organization?`,
       header: 'Confirm removal',
       icon: 'pi pi-exclamation-triangle',
       accept: () => this.#doRemove(m),
@@ -396,6 +423,6 @@ export class MembersComponent implements OnInit {
   #loadMembers(): void {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId) return;
-    void this.#store.loadMemberships(orgId);
+    this.#store.loadMemberships(orgId);
   }
 }

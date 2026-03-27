@@ -25,8 +25,8 @@ const PAGE_SIZE = 20;
 
 function formatBytes(bytes: string | null): string {
   if (!bytes) return '—';
-  const n = parseInt(bytes, 10);
-  if (isNaN(n)) return '—';
+  const n = Number.parseInt(bytes, 10);
+  if (Number.isNaN(n)) return '—';
   if (n < 1024) return `${n} B`;
   if (n < 1_048_576) return `${(n / 1024).toFixed(1)} KB`;
   if (n < 1_073_741_824) return `${(n / 1_048_576).toFixed(1)} MB`;
@@ -299,7 +299,7 @@ export class StorageComponent {
   // ── Quota computed ─────────────────────────────────────────────────────────
   readonly usagePercent = computed<number>(() => {
     const q = this.quota();
-    if (!q || !q.storageLimitBytes) return 0;
+    if (!q?.storageLimitBytes) return 0;
     const used = Number(q.storageUsedBytes);
     const limit = Number(q.storageLimitBytes);
     return limit > 0 ? Math.min(Math.round((used / limit) * 100), 100) : 0;
@@ -313,7 +313,7 @@ export class StorageComponent {
     formatBytes(this.quota()?.storageLimitBytes ?? null),
   );
 
-  readonly skeletonRows = Array(5);
+  readonly skeletonRows = new Array(5);
 
   #offset = 0;
 

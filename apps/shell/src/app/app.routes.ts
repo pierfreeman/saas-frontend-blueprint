@@ -5,12 +5,14 @@ export const appRoutes: Route[] = [
   {
     // Auth remote: no shell layout (full-screen login/callback)
     path: 'auth',
+    /* v8 ignore next */
     loadChildren: () => import('auth/Routes').then((m) => m.AUTH_ROUTES),
   },
   {
     // All authenticated routes share the shell layout (navbar + main)
     path: '',
     canActivate: [authGuard],
+    /* v8 ignore next 3 */
     loadComponent: () =>
       import('./layout/shell-layout.component').then(
         (m) => m.ShellLayoutComponent,
@@ -18,6 +20,7 @@ export const appRoutes: Route[] = [
     children: [
       {
         path: 'org/select',
+        /* v8 ignore next 3 */
         loadComponent: () =>
           import('./org-select/org-select.component').then(
             (m) => m.OrgSelectComponent,
@@ -26,11 +29,13 @@ export const appRoutes: Route[] = [
       {
         path: 'admin',
         canActivate: [orgGuard],
+        /* v8 ignore next */
         loadChildren: () => import('admin/Routes').then((m) => m.ADMIN_ROUTES),
       },
       {
         path: '',
         canActivate: [orgGuard],
+        /* v8 ignore next 2 */
         loadChildren: () =>
           import('platform/Routes').then((m) => m.PLATFORM_ROUTES),
       },

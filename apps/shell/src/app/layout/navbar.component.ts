@@ -7,6 +7,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MenuItem } from 'primeng/api';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { OrgContextService } from '@saas-frontend/shared/util-org-context';
 
 @Component({
   selector: 'app-navbar',
@@ -37,6 +38,7 @@ import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 
       <!-- Primary Navigation -->
       <nav class="flex flex-col items-center gap-1 py-3 flex-1">
+        <!-- Dashboard -->
         <a
           routerLink="/dashboard"
           routerLinkActive="!text-primary"
@@ -46,33 +48,8 @@ import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
         >
           <i class="pi pi-home"></i>
         </a>
-        <a
-          routerLink="/activity-log"
-          routerLinkActive="!text-primary"
-          pTooltip="Activity Log"
-          tooltipPosition="right"
-          class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
-        >
-          <i class="pi pi-history"></i>
-        </a>
-        <a
-          routerLink="/members"
-          routerLinkActive="!text-primary"
-          pTooltip="Members"
-          tooltipPosition="right"
-          class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
-        >
-          <i class="pi pi-users"></i>
-        </a>
-        <a
-          routerLink="/billing"
-          routerLinkActive="!text-primary"
-          pTooltip="Billing"
-          tooltipPosition="right"
-          class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
-        >
-          <i class="pi pi-credit-card"></i>
-        </a>
+
+        <!-- Storage -->
         <a
           routerLink="/storage"
           routerLinkActive="!text-primary"
@@ -88,6 +65,19 @@ import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
       <div
         class="flex flex-col items-center gap-1 pb-4 pt-2 border-t border-surface-100"
       >
+        <!-- Organisation Settings — OWNER / ADMIN only -->
+        @if (showOrgSettings()) {
+          <a
+            routerLink="/org-settings"
+            routerLinkActive="!text-primary"
+            pTooltip="Organisation Settings"
+            tooltipPosition="right"
+            class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
+          >
+            <i class="pi pi-building"></i>
+          </a>
+        }
+
         <!-- Help -->
         <button
           type="button"
@@ -99,18 +89,7 @@ import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
           <i class="pi pi-question-circle"></i>
         </button>
 
-        <!-- Settings -->
-        <a
-          routerLink="/settings"
-          routerLinkActive="!text-primary"
-          pTooltip="Settings"
-          tooltipPosition="right"
-          class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
-        >
-          <i class="pi pi-cog"></i>
-        </a>
-
-        <!-- User Avatar -->
+        <!-- User Avatar with contextual menu -->
         <p-menu
           #menu
           [model]="avatarMenuItems"
@@ -133,6 +112,7 @@ export class NavbarComponent {
   readonly #auth = inject(AuthService);
   readonly #authStore = inject(AuthStore);
   readonly #orgsStore = inject(OrganizationsStore);
+  readonly #orgContext = inject(OrgContextService);
   readonly #router = inject(Router);
 
   readonly avatarLabel = computed(() => {
@@ -140,7 +120,15 @@ export class NavbarComponent {
     return email.charAt(0).toUpperCase() || '?';
   });
 
+  /** Show the Organisation Settings icon only for OWNER and ADMIN. */
+  readonly showOrgSettings = this.#orgContext.canManageOrg;
+
   readonly avatarMenuItems: MenuItem[] = [
+    {
+      label: 'Personal Settings',
+      icon: 'pi pi-user',
+      command: () => this.#router.navigate(['/personal-settings']),
+    },
     {
       label: 'Switch organization',
       icon: 'pi pi-building',

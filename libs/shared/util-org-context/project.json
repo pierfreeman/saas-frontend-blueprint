@@ -7,6 +7,17 @@
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx vitest run --config libs/shared/util-org-context/vitest.config.ts"
+      },
+      "configurations": {
+        "coverage": {
+          "command": "npx vitest run --config libs/shared/util-org-context/vitest.config.ts --coverage"
+        }
+      }
     }
   }
 }

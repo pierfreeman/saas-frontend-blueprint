@@ -185,7 +185,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
       .map((n) => n.id),
   );
 
-  readonly skeletons = Array(6);
+  readonly skeletons = new Array(6);
 
   readonly typeIcon = typeIcon;
 

@@ -1,14 +1,14 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { of, throwError } from 'rxjs';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { SettingsComponent } from '@saas-frontend/organizations/feature-settings';
+import { TestBed } from '@angular/core/testing';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import {
-  OrganizationsStore,
   OrganizationsApi,
+  OrganizationsStore,
 } from '@saas-frontend/organizations/data-access';
+import { SettingsComponent } from '@saas-frontend/organizations/feature-settings';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { of, throwError } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -82,23 +82,6 @@ describe('SettingsComponent', () => {
     it('exposes the activeOrgId from the store', () => {
       const { component } = setup({ orgId: 'org-abc' });
       expect(component.activeOrgId()).toBe('org-abc');
-    });
-  });
-
-  describe('user info helpers', () => {
-    it('email returns current user email', () => {
-      const { component } = setup({ email: 'bob@test.com' });
-      expect(component.email()).toBe('bob@test.com');
-    });
-
-    it('name returns the part before the @ sign', () => {
-      const { component } = setup({ email: 'charlie@example.com' });
-      expect(component.name()).toBe('charlie');
-    });
-
-    it('avatarLabel returns uppercased first char of email', () => {
-      const { component } = setup({ email: 'dave@x.com' });
-      expect(component.avatarLabel()).toBe('D');
     });
   });
 

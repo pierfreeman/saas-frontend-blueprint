@@ -1,5 +1,8 @@
 export { NotificationsApi } from './lib/notifications.api';
-export { NotificationsSocketService } from './lib/notifications.socket.service';
+export {
+  NotificationsSocketService,
+  SOCKET_IO_FACTORY,
+} from './lib/notifications.socket.service';
 export type { UnreadCountPayload } from './lib/notifications.socket.service';
 export type {
   CreateNotificationDto,

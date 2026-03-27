@@ -1,13 +1,16 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, computed } from '@angular/core';
-import { of, throwError } from 'rxjs';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { BillingComponent } from '@saas-frontend/billing/feature';
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { AuthStore } from '@saas-frontend/auth/data-access';
-import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
-import { BillingApi, SubscriptionResponse } from '@saas-frontend/billing/data-access';
+import {
+  BillingApi,
+  SubscriptionResponse,
+} from '@saas-frontend/billing/data-access';
+import { BillingComponent } from '@saas-frontend/billing/feature';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { of, throwError } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -241,21 +244,10 @@ describe('BillingComponent', () => {
       const { component, mockBillingApi } = setup({});
       await new Promise((r) => setTimeout(r, 0));
 
-      // stub location
-      const original = window.location;
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: { ...original, href: '' },
-      });
-
       component.upgrade();
       await new Promise((r) => setTimeout(r, 0));
 
       expect(mockBillingApi.createCheckoutSession).toHaveBeenCalled();
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: original,
-      });
     });
   });
 
@@ -264,20 +256,10 @@ describe('BillingComponent', () => {
       const { component, mockBillingApi } = setup({});
       await new Promise((r) => setTimeout(r, 0));
 
-      const original = window.location;
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: { ...original, href: '' },
-      });
-
       component.openPortal();
       await new Promise((r) => setTimeout(r, 0));
 
       expect(mockBillingApi.createPortalSession).toHaveBeenCalled();
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: original,
-      });
     });
   });
 });

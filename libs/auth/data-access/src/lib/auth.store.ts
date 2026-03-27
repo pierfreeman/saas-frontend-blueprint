@@ -1,4 +1,6 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { AuthApi, UpdateProfileDto } from './auth.api';
 import type { User } from './auth.api.types';
 
 const STORAGE_KEY = 'saas.currentUser';
@@ -14,6 +16,8 @@ function loadFromStorage(): User | null {
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
+  readonly #api = inject(AuthApi);
+
   readonly currentUser = signal<User | null>(loadFromStorage());
 
   readonly isLoggedIn = computed(() => this.currentUser() !== null);
@@ -30,5 +34,11 @@ export class AuthStore {
   clearUser(): void {
     this.currentUser.set(null);
     sessionStorage.removeItem(STORAGE_KEY);
+  }
+
+  async updateProfile(dto: UpdateProfileDto): Promise<User> {
+    const updated = await firstValueFrom(this.#api.updateMe(dto));
+    this.setUser(updated);
+    return updated;
   }
 }

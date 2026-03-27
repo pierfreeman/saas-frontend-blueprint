@@ -1,7 +1,6 @@
-import { TestBed } from '@angular/core/testing';
 import {
   HttpClient,
-  HttpErrorResponse,
+  HttpRequest,
   provideHttpClient,
   withInterceptors,
 } from '@angular/common/http';
@@ -9,13 +8,15 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
+import { throwError } from 'rxjs';
 
-import { vi } from 'vitest';
-import { errorInterceptor } from '@saas-frontend/shared/util-error';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { errorInterceptor } from '@saas-frontend/shared/util-error';
+import { vi } from 'vitest';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;
@@ -80,8 +81,8 @@ describe('errorInterceptor', () => {
     });
   });
 
-  describe('non-401 errors', () => {
-    it('shows an error toast for 403', () => {
+  describe('non-401 HTTP errors', () => {
+    it('shows "Access denied" toast for 403', () => {
       triggerError(403);
       expect(messageService.add).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -91,16 +92,86 @@ describe('errorInterceptor', () => {
       );
     });
 
-    it('shows an error toast for 500', () => {
+    it('shows "Not found" toast for 404', () => {
+      triggerError(404);
+      expect(messageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', summary: 'Not found' }),
+      );
+    });
+
+    it('shows "Validation error" toast for 422', () => {
+      triggerError(422);
+      expect(messageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          summary: 'Validation error',
+        }),
+      );
+    });
+
+    it('shows "Server error" toast for 500', () => {
       triggerError(500);
       expect(messageService.add).toHaveBeenCalledWith(
         expect.objectContaining({ severity: 'error', summary: 'Server error' }),
       );
     });
 
+    it('shows "Request failed" toast for other status codes (e.g. 400)', () => {
+      triggerError(400);
+      expect(messageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          summary: 'Request failed',
+        }),
+      );
+    });
+
+    it('uses err.error.message as detail when available', () => {
+      triggerError(500, { message: 'Database connection failed' });
+      expect(messageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({ detail: 'Database connection failed' }),
+      );
+    });
+
     it('does NOT redirect to /auth', () => {
       triggerError(500);
       expect(router.navigateByUrl).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('ApiError-shaped errors (non-HttpErrorResponse)', () => {
+    it('shows a toast with the ApiError message and correct summary', () => {
+      const apiError = { status: 422, message: 'Validation failed' };
+      const req = new HttpRequest('GET', '/api/test');
+      const next = () => throwError(() => apiError);
+
+      TestBed.runInInjectionContext(() => {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        errorInterceptor(req, next as never).subscribe({ error: () => {} });
+      });
+
+      expect(messageService.add).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          summary: 'Validation error',
+          detail: 'Validation failed',
+        }),
+      );
+    });
+
+    it('re-throws the original error', () => {
+      const apiError = { status: 403, message: 'Forbidden' };
+      const req = new HttpRequest('GET', '/api/test');
+      const next = () => throwError(() => apiError);
+      let caughtError: unknown;
+
+      TestBed.runInInjectionContext(() => {
+        errorInterceptor(req, next as never).subscribe({
+          error: (err) => (caughtError = err),
+        });
+      });
+
+      expect(caughtError).toBe(apiError);
     });
   });
 });

@@ -1,15 +1,21 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { DashboardComponent } from './dashboard.component';
 import { AuthStore } from '@saas-frontend/auth/data-access';
-import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
-import { MembershipsApi } from '@saas-frontend/memberships/data-access';
-import { BillingApi, SubscriptionResponse } from '@saas-frontend/billing/data-access';
+import {
+  BillingApi,
+  SubscriptionResponse,
+} from '@saas-frontend/billing/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
-import { StorageApi, StorageQuotaResponse } from '@saas-frontend/storage/data-access';
+import { MembershipsApi } from '@saas-frontend/memberships/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import {
+  StorageApi,
+  StorageQuotaResponse,
+} from '@saas-frontend/storage/data-access';
+import { of, throwError } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
+import { DashboardComponent } from './dashboard.component';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

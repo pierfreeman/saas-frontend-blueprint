@@ -3,22 +3,22 @@ import { of, throwError } from 'rxjs';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { AuthService } from '@auth0/auth0-angular';
 import { API_BASE_URL } from '@saas-frontend/shared/util-types';
-import { NotificationsSocketService } from '@saas-frontend/notifications/data-access';
+import {
+  NotificationsSocketService,
+  SOCKET_IO_FACTORY,
+} from '@saas-frontend/notifications/data-access';
 import type { NotificationRecord } from '@saas-frontend/notifications/data-access';
 
 // ── Socket.IO mock ────────────────────────────────────────────────────────────
-// vi.hoisted() ensures the variables exist when vi.mock()'s factory runs,
-// because vi.mock() is hoisted to the top of the module by Vitest's transform.
-const { mockIo, mockSocket } = vi.hoisted(() => {
-  const socket = {
-    connected: false,
-    on: vi.fn(),
-    disconnect: vi.fn(),
-  };
-  return { mockIo: vi.fn(() => socket), mockSocket: socket };
-});
-
-vi.mock('socket.io-client', () => ({ io: mockIo }));
+// Provide mockIo via SOCKET_IO_FACTORY token instead of vi.mock() so the
+// Angular esbuild test runner (which marks npm packages as external) can
+// intercept the dependency through Angular's DI system.
+const mockSocket = {
+  connected: false,
+  on: vi.fn(),
+  disconnect: vi.fn(),
+};
+const mockIo = vi.fn(() => mockSocket);
 
 // Helper: retrieve the handler registered for a given socket event.
 function getSocketHandler(
@@ -41,6 +41,7 @@ describe('NotificationsSocketService', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: API_BASE_URL, useValue: BASE_URL },
+        { provide: SOCKET_IO_FACTORY, useValue: mockIo },
         {
           provide: AuthService,
           useValue: {
@@ -68,7 +69,7 @@ describe('NotificationsSocketService', () => {
   describe('connect()', () => {
     it('opens a socket to the /notifications namespace with the JWT', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
 
       expect(mockIo).toHaveBeenCalledOnce();
       const calls = mockIo.mock.calls as unknown as [
@@ -83,18 +84,18 @@ describe('NotificationsSocketService', () => {
 
     it('is idempotent — skips reconnection when already connected', () => {
       setup();
-      service.connect(); // first call — opens the socket
+      service.connect('org-1'); // first call — opens the socket
       mockSocket.connected = true; // simulate the socket being up
       mockIo.mockClear(); // reset call count for the assertion below
 
-      service.connect(); // second call — must be a no-op
+      service.connect('org-1'); // second call — must be a no-op
 
       expect(mockIo).not.toHaveBeenCalled();
     });
 
     it('does not open a socket when token retrieval fails', () => {
       setup('error');
-      service.connect();
+      service.connect('org-1');
 
       expect(mockIo).not.toHaveBeenCalled();
     });
@@ -105,7 +106,7 @@ describe('NotificationsSocketService', () => {
   describe('notification$', () => {
     it('emits when the socket fires notification:new', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
 
       const received: NotificationRecord[] = [];
       service.notification$.subscribe((n) => received.push(n));
@@ -144,7 +145,7 @@ describe('NotificationsSocketService', () => {
   describe('unreadCount$', () => {
     it('emits when the socket fires notification:unread-count', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
 
       const counts: unknown[] = [];
       service.unreadCount$.subscribe((c) => counts.push(c));
@@ -161,7 +162,7 @@ describe('NotificationsSocketService', () => {
   describe('disconnect()', () => {
     it('calls socket.disconnect()', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
       service.disconnect();
 
       expect(mockSocket.disconnect).toHaveBeenCalledOnce();
@@ -178,7 +179,7 @@ describe('NotificationsSocketService', () => {
   describe('ngOnDestroy()', () => {
     it('disconnects the socket and completes both streams', () => {
       setup();
-      service.connect();
+      service.connect('org-1');
 
       let notifCompleted = false;
       let countCompleted = false;

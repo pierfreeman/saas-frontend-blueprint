@@ -685,9 +685,9 @@ When testing the shell, remote `loadChildren` imports would fail because the rem
 
 ```ts
 // In a test file
-jest.mock('auth/Routes', () => require('src/testing/mf-stubs'));
-jest.mock('platform/Routes', () => require('src/testing/mf-stubs'));
-jest.mock('admin/Routes', () => require('src/testing/mf-stubs'));
+vi.mock('auth/Routes', () => import('src/testing/mf-stubs'));
+vi.mock('platform/Routes', () => import('src/testing/mf-stubs'));
+vi.mock('admin/Routes', () => import('src/testing/mf-stubs'));
 ```
 
 ---
