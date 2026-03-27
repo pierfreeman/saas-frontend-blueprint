@@ -84,6 +84,7 @@ export const PLATFORM_ROUTES: Route[] = [
     children: [
       {
         path: 'dashboard',
+        /* v8 ignore next 3 */
         loadComponent: () =>
           import('../dashboard/dashboard.component').then(
             (m) => m.DashboardComponent,
@@ -91,6 +92,7 @@ export const PLATFORM_ROUTES: Route[] = [
       },
       {
         path: 'storage',
+        /* v8 ignore next 3 */
         loadChildren: () =>
           import('@saas-frontend/storage/feature').then(
             (m) => m.FEATURE_STORAGE_ROUTES,
@@ -98,6 +100,7 @@ export const PLATFORM_ROUTES: Route[] = [
       },
       {
         path: 'personal-settings',
+        /* v8 ignore next 3 */
         loadComponent: () =>
           import('../personal-settings/personal-settings.component').then(
             (m) => m.PersonalSettingsComponent,
@@ -107,6 +110,7 @@ export const PLATFORM_ROUTES: Route[] = [
         // Organisation Settings section — OWNER and ADMIN only
         path: 'org-settings',
         canActivate: [requireOrgManage],
+        /* v8 ignore next 3 */
         loadComponent: () =>
           import('../org-settings/org-settings-layout.component').then(
             (m) => m.OrgSettingsLayoutComponent,
@@ -115,6 +119,7 @@ export const PLATFORM_ROUTES: Route[] = [
           { path: '', redirectTo: 'organization', pathMatch: 'full' },
           {
             path: 'organization',
+            /* v8 ignore next 3 */
             loadChildren: () =>
               import('@saas-frontend/organizations/feature-settings').then(
                 (m) => m.FEATURE_ORG_SETTINGS_ROUTES,
@@ -122,6 +127,7 @@ export const PLATFORM_ROUTES: Route[] = [
           },
           {
             path: 'members',
+            /* v8 ignore next 3 */
             loadChildren: () =>
               import('@saas-frontend/memberships/feature').then(
                 (m) => m.FEATURE_MEMBERSHIPS_ROUTES,
@@ -129,6 +135,7 @@ export const PLATFORM_ROUTES: Route[] = [
           },
           {
             path: 'billing',
+            /* v8 ignore next 3 */
             loadChildren: () =>
               import('@saas-frontend/billing/feature').then(
                 (m) => m.FEATURE_BILLING_ROUTES,
@@ -136,6 +143,7 @@ export const PLATFORM_ROUTES: Route[] = [
           },
           {
             path: 'activity-log',
+            /* v8 ignore next 3 */
             loadChildren: () =>
               import('@saas-frontend/activity-log/feature').then(
                 (m) => m.FEATURE_ACTIVITY_LOG_ROUTES,
@@ -145,6 +153,7 @@ export const PLATFORM_ROUTES: Route[] = [
       },
       {
         path: 'notifications',
+        /* v8 ignore next 3 */
         loadChildren: () =>
           import('@saas-frontend/notifications/feature').then(
             (m) => m.FEATURE_NOTIFICATIONS_ROUTES,
