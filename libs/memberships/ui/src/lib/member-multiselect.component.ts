@@ -129,8 +129,10 @@ export class MemberMultiselectComponent implements ControlValueAccessor {
   protected options: MemberOption[] = [];
   protected selectedIds: string[] = [];
 
-  // CVA plumbing
+  // CVA plumbing — default no-ops replaced by registerOnChange / registerOnTouched
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   #onChange: (v: string[]) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   #onTouched: () => void = () => {};
 
   writeValue(value: string[] | null): void {
