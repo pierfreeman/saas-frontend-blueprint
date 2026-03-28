@@ -48,6 +48,9 @@
       "@saas-frontend/tasks/data-access": [
         "../../libs/tasks/data-access/src/index.ts"
       ],
+      "@saas-frontend/planning/data-access": [
+        "../../libs/planning/data-access/src/index.ts"
+      ],
       "@saas-frontend/activity-log/feature": [
         "../../libs/activity-log/feature/src/index.ts"
       ],
@@ -65,6 +68,9 @@
       ],
       "@saas-frontend/storage/feature": [
         "../../libs/storage/feature/src/index.ts"
+      ],
+      "@saas-frontend/planning/feature": [
+        "../../libs/planning/feature/src/index.ts"
       ]
     }
   },

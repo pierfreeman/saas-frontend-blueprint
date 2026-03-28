@@ -47,6 +47,9 @@
       ],
       "@saas-frontend/tasks/data-access": [
         "../../libs/tasks/data-access/src/index.ts"
+      ],
+      "@saas-frontend/planning/data-access": [
+        "../../libs/planning/data-access/src/index.ts"
       ]
     }
   },

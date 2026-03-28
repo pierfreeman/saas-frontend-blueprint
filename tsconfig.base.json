@@ -2,7 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "target": "es2022",
-    "lib": ["es2022", "dom"],
+    "lib": [
+      "es2022",
+      "dom"
+    ],
     "module": "es2022",
     "moduleResolution": "bundler",
     "strict": true,
@@ -17,8 +20,12 @@
       "@saas-frontend/shared/util-error": [
         "libs/shared/util-error/src/index.ts"
       ],
-      "@saas-frontend/shared/util-rbac": ["libs/shared/util-rbac/src/index.ts"],
-      "@saas-frontend/shared/util-auth": ["libs/shared/util-auth/src/index.ts"],
+      "@saas-frontend/shared/util-rbac": [
+        "libs/shared/util-rbac/src/index.ts"
+      ],
+      "@saas-frontend/shared/util-auth": [
+        "libs/shared/util-auth/src/index.ts"
+      ],
       "@saas-frontend/shared/util-org-context": [
         "libs/shared/util-org-context/src/index.ts"
       ],
@@ -28,7 +35,9 @@
       "@saas-frontend/activity-log/data-access": [
         "libs/activity-log/data-access/src/index.ts"
       ],
-      "@saas-frontend/auth/data-access": ["libs/auth/data-access/src/index.ts"],
+      "@saas-frontend/auth/data-access": [
+        "libs/auth/data-access/src/index.ts"
+      ],
       "@saas-frontend/billing/data-access": [
         "libs/billing/data-access/src/index.ts"
       ],
@@ -50,10 +59,18 @@
       "@saas-frontend/tasks/data-access": [
         "libs/tasks/data-access/src/index.ts"
       ],
+      "@saas-frontend/planning/data-access": [
+        "libs/planning/data-access/src/index.ts"
+      ],
+      "@saas-frontend/planning/feature": [
+        "libs/planning/feature/src/index.ts"
+      ],
       "@saas-frontend/activity-log/feature": [
         "libs/activity-log/feature/src/index.ts"
       ],
-      "@saas-frontend/billing/feature": ["libs/billing/feature/src/index.ts"],
+      "@saas-frontend/billing/feature": [
+        "libs/billing/feature/src/index.ts"
+      ],
       "@saas-frontend/memberships/feature": [
         "libs/memberships/feature/src/index.ts"
       ],
@@ -63,10 +80,18 @@
       "@saas-frontend/organizations/feature-settings": [
         "libs/organizations/feature-settings/src/index.ts"
       ],
-      "@saas-frontend/storage/feature": ["libs/storage/feature/src/index.ts"],
-      "auth/Routes": ["apps/auth/src/app/remote-entry/entry.routes.ts"],
-      "platform/Routes": ["apps/platform/src/app/remote-entry/entry.routes.ts"],
-      "admin/Routes": ["apps/admin/src/app/remote-entry/entry.routes.ts"]
+      "@saas-frontend/storage/feature": [
+        "libs/storage/feature/src/index.ts"
+      ],
+      "auth/Routes": [
+        "apps/auth/src/app/remote-entry/entry.routes.ts"
+      ],
+      "platform/Routes": [
+        "apps/platform/src/app/remote-entry/entry.routes.ts"
+      ],
+      "admin/Routes": [
+        "apps/admin/src/app/remote-entry/entry.routes.ts"
+      ]
     }
   }
 }
