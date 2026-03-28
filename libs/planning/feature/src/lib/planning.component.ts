@@ -10,6 +10,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import type {
   CalendarOptions,
+  DateSelectArg,
   DatesSetArg,
   EventClickArg,
   EventDropArg,
@@ -232,10 +233,13 @@ export class PlanningComponent implements OnInit {
     },
     events: this.#calendarEvents(),
     selectable: this.canManage(),
+    selectMirror: true,
+    unselectAuto: true,
     height: 'auto',
     datesSet: (arg: DatesSetArg) => this.#onDatesSet(arg),
     eventClick: (arg: EventClickArg) => this.#onEventClick(arg),
     dateClick: (arg: DateClickArg) => this.#onDateClick(arg),
+    select: (arg: DateSelectArg) => this.#onSelect(arg),
     eventDrop: (arg: EventDropArg) => void this.#onEventDrop(arg),
     eventResize: (arg: EventResizeDoneArg) => void this.#onEventResize(arg),
   }));
@@ -319,6 +323,48 @@ export class PlanningComponent implements OnInit {
 
     this.form.startUtc = start.toISOString();
     this.form.endUtc = end.toISOString();
+    this.editMode.set(false);
+    this.createDialogVisible.set(true);
+  }
+
+  #onSelect(arg: DateSelectArg): void {
+    if (!this.canManage()) return;
+    this.#resetForm();
+
+    let start = arg.start;
+    let end = arg.end;
+
+    if (arg.allDay) {
+      // Month view / all-day row: user dragged across date cells.
+      // arg.end is exclusive (next day at 00:00) → subtract 1 ms to get the
+      // last selected day, then set 09:00–10:00 on the first day.
+      start = new Date(arg.start);
+      start.setHours(9, 0, 0, 0);
+      // Keep the full-day span only when more than one day was selected.
+      const spanDays =
+        (arg.end.getTime() - arg.start.getTime()) / (24 * 60 * 60 * 1000);
+      if (spanDays > 1) {
+        // Multi-day drag → use all-day mode spanning [arg.start, arg.end)
+        this.form.isAllDay = true;
+        // For all-day events pass midnight-to-midnight boundaries
+        this.form.startUtc = arg.start.toISOString();
+        // end is already exclusive next-day 00:00 from FC, but our backend
+        // stores inclusive end; subtract 1 ms so we land on the last day
+        const inclusiveEnd = new Date(arg.end.getTime() - 1);
+        inclusiveEnd.setHours(23, 59, 59, 0);
+        this.form.endUtc = inclusiveEnd.toISOString();
+      } else {
+        // Single-day click resolved as dateClick already; use 1-hour slot
+        end = new Date(start.getTime() + 60 * 60_000);
+        this.form.startUtc = start.toISOString();
+        this.form.endUtc = end.toISOString();
+      }
+    } else {
+      // Time-grid drag: arg.start / arg.end are exact UTC moments
+      this.form.startUtc = start.toISOString();
+      this.form.endUtc = end.toISOString();
+    }
+
     this.editMode.set(false);
     this.createDialogVisible.set(true);
   }
