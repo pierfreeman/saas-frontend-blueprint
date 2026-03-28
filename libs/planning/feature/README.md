@@ -50,6 +50,25 @@ FullCalendar with **month / week / day** views. Deep-link support: `?eventId=<uu
 - End-type radio: Never / After N occurrences / On date
 - Two-way `[(rrule)]` binding: parses with `RRule.fromString()`, emits with `new RRule(opts).toString()`
 
+### Reminder notifications
+
+The create/edit form exposes a **Reminder** `p-select` dropdown driven by the `REMINDER_OPTIONS` preset list:
+
+| Label             | Value (`reminderMinutes`) |
+| ----------------- | ------------------------- |
+| No reminder       | `null`                    |
+| 5 minutes before  | `5`                       |
+| 10 minutes before | `10`                      |
+| 15 minutes before | `15`                      |
+| 30 minutes before | `30`                      |
+| 1 hour before     | `60`                      |
+| 2 hours before    | `120`                     |
+| 1 day before      | `1440`                    |
+
+The detail dialog shows a bell-icon row with a human-readable label (e.g. _"Reminder: 1 hour before"_) when `event.reminderMinutes` is set. Clearing the reminder (selecting "No reminder") sends `reminderMinutes: null` in the update DTO.
+
+> **TODO (deferred):** custom reminder values (free-text minutes) are not yet supported — only the preset options above.
+
 ### Permissions
 
 | Action                  | Condition                                               |
@@ -64,12 +83,13 @@ FullCalendar with **month / week / day** views. Deep-link support: `?eventId=<uu
 
 ## Utilities (`planning.utils.ts`)
 
-| Export             | Kind      | Description                                                                  |
-| ------------------ | --------- | ---------------------------------------------------------------------------- |
-| `EventForm`        | Interface | Internal form model (title, startUtc, endUtc, isAllDay, eventTimezone, …)    |
-| `browserTimezone`  | Function  | Returns `Intl.DateTimeFormat().resolvedOptions().timeZone`, fallback `'UTC'` |
-| `TIMEZONE_OPTIONS` | Constant  | All IANA timezones as `{ label: 'Zone (GMT±N)', value: 'Zone' }[]`           |
-| `toUtcIso`         | Function  | Normalises a datetime-local string to a full ISO 8601 UTC string             |
+| Export             | Kind      | Description                                                                                |
+| ------------------ | --------- | ------------------------------------------------------------------------------------------ |
+| `EventForm`        | Interface | Internal form model (title, startUtc, endUtc, isAllDay, eventTimezone, reminderMinutes, …) |
+| `browserTimezone`  | Function  | Returns `Intl.DateTimeFormat().resolvedOptions().timeZone`, fallback `'UTC'`               |
+| `TIMEZONE_OPTIONS` | Constant  | All IANA timezones as `{ label: 'Zone (GMT±N)', value: 'Zone' }[]`                         |
+| `REMINDER_OPTIONS` | Constant  | Preset reminder choices as `{ label: string, value: number \| null }[]`                    |
+| `toUtcIso`         | Function  | Normalises a datetime-local string to a full ISO 8601 UTC string                           |
 
 ---
 
@@ -80,3 +100,5 @@ npx nx run planning-feature:test
 ```
 
 51 tests in `planning-rrule-builder.component.spec.ts` cover parse, build, round-trip and all interaction methods.
+
+11 tests in `planning-reminders.spec.ts` cover `REMINDER_OPTIONS` shape invariants and `PlanningDetailDialogComponent.formatReminder()` for all presets.

@@ -20,6 +20,7 @@ import {
   type EventForm,
   browserTimezone,
   TIMEZONE_OPTIONS,
+  REMINDER_OPTIONS,
 } from './planning.utils';
 import { PlanningRruleBuilderComponent } from './planning-rrule-builder.component';
 
@@ -34,6 +35,7 @@ const DEFAULT_FORM: EventForm = {
   rrule: '',
   attendeeIds: [],
   notifyAttendees: false,
+  reminderMinutes: null,
 };
 
 const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
@@ -211,6 +213,19 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
           />
         </div>
 
+        <!-- Reminder -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700">Reminder</label>
+          <p-select
+            [(ngModel)]="form.reminderMinutes"
+            [options]="reminderOptions"
+            optionLabel="label"
+            optionValue="value"
+            [fluid]="true"
+            appendTo="body"
+          />
+        </div>
+
         <!-- Notify attendees (edit mode only) -->
         @if (editMode) {
           <div class="flex items-center gap-2">
@@ -262,6 +277,7 @@ export class PlanningEventFormDialogComponent implements OnChanges {
   @Output() readonly draftChanged = new EventEmitter<EventForm>();
 
   protected readonly timezoneOptions = TIMEZONE_OPTIONS;
+  protected readonly reminderOptions = REMINDER_OPTIONS;
 
   protected form: EventForm = { ...DEFAULT_FORM };
   protected startDate: Date | null = null;
@@ -322,7 +338,8 @@ export class PlanningEventFormDialogComponent implements OnChanges {
       f.rrule !== i.rrule ||
       attendeesChanged ||
       startIso !== i.startUtc ||
-      endIso !== i.endUtc
+      endIso !== i.endUtc ||
+      f.reminderMinutes !== i.reminderMinutes
     );
   }
 

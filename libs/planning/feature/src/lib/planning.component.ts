@@ -62,6 +62,7 @@ const DEFAULT_FORM: EventForm = {
   rrule: '',
   attendeeIds: [],
   notifyAttendees: false,
+  reminderMinutes: null,
 };
 
 @Component({
@@ -351,6 +352,7 @@ export class PlanningComponent implements OnInit {
         version: this.editingVersion(),
         attendeeIds: form.attendeeIds,
         notifyAttendees: form.notifyAttendees,
+        reminderMinutes: form.reminderMinutes,
       };
       const result = await this.store.updateEvent(orgId, eventId, dto);
       if (!result) {
@@ -375,6 +377,7 @@ export class PlanningComponent implements OnInit {
         eventTimezone: form.eventTimezone,
         rrule: form.rrule || undefined,
         attendeeIds: form.attendeeIds.length > 0 ? form.attendeeIds : undefined,
+        reminderMinutes: form.reminderMinutes ?? undefined,
       };
       const created = await this.store.createEvent(orgId, dto);
       if (!created) {
@@ -406,6 +409,7 @@ export class PlanningComponent implements OnInit {
       rrule: evt.rrule ?? '',
       attendeeIds: evt.attendees.map((a) => a.userId),
       notifyAttendees: false,
+      reminderMinutes: evt.reminderMinutes ?? null,
     };
     this.conflictCount.set(0);
     this.conflictPreview.set([]);

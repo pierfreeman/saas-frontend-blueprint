@@ -9,7 +9,20 @@ export interface EventForm {
   rrule: string;
   attendeeIds: string[];
   notifyAttendees: boolean;
+  reminderMinutes: number | null;
 }
+
+/** Reminder preset options for the form dropdown. */
+export const REMINDER_OPTIONS: { label: string; value: number | null }[] = [
+  { label: 'No reminder', value: null },
+  { label: '5 minutes before', value: 5 },
+  { label: '10 minutes before', value: 10 },
+  { label: '15 minutes before', value: 15 },
+  { label: '30 minutes before', value: 30 },
+  { label: '1 hour before', value: 60 },
+  { label: '2 hours before', value: 120 },
+  { label: '1 day before', value: 1440 },
+];
 
 /**
  * Returns the browser's local IANA timezone (e.g. 'Europe/Rome').

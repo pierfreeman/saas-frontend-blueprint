@@ -22,6 +22,8 @@ export interface CreateEventDto {
   rrule?: string;
   rruleUntilUtc?: string;
   attendeeIds?: string[];
+  /** Minutes before event start to send a reminder notification. Omit for no reminder. */
+  reminderMinutes?: number | null;
 }
 
 export interface UpdateEventDto {
@@ -39,6 +41,8 @@ export interface UpdateEventDto {
   attendeeIds?: string[];
   /** When true, all current attendees receive an "event updated" notification. */
   notifyAttendees?: boolean;
+  /** Minutes before event start to send a reminder. Pass null to clear the reminder. */
+  reminderMinutes?: number | null;
 }
 
 export interface RsvpDto {
@@ -110,6 +114,7 @@ export interface EventDetail {
   updatedAt: string;
   attendees: EventAttendee[];
   exceptions: EventException[];
+  reminderMinutes: number | null;
 }
 
 /** Expanded occurrence — returned by GET / (list with from/to range query) */

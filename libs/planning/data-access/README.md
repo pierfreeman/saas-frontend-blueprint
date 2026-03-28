@@ -8,22 +8,22 @@ HTTP client and signals-based store for the org planning/calendar endpoints.
 
 ## Exports
 
-| Symbol                    | Kind    | Description                                                            |
-| ------------------------- | ------- | ---------------------------------------------------------------------- |
-| `PlanningApi`             | Service | HTTP client for all planning operations                                |
-| `PlanningStore`           | Store   | Signals-based state management (no NgRx)                               |
-| `CreateEventDto`          | Type    | Payload for creating a new event                                       |
-| `UpdateEventDto`          | Type    | Payload for updating an event (must include `version`)                 |
-| `RsvpDto`                 | Type    | Payload for submitting an RSVP (`status`: ACCEPTED/DECLINED/TENTATIVE) |
-| `CreateEventExceptionDto` | Type    | Payload for overriding a single occurrence of a recurring event        |
-| `ListEventsParams`        | Type    | Query params for `listEvents` (`from`, `to`)                           |
-| `ListConflictsParams`     | Type    | Query params for `listConflicts` (`start`, `end`)                      |
-| `EventDetail`             | Type    | Full event shape returned by `getEvent`                                |
-| `EventOccurrence`         | Type    | Expanded occurrence shape returned by list endpoints                   |
-| `EventAttendee`           | Type    | Attendee shape (userId, status, …)                                     |
-| `EventException`          | Type    | Single-occurrence exception shape                                      |
-| `DeleteEventResponse`     | Type    | Delete response (`{ id }`)                                             |
-| `RSVPStatus`              | Type    | `'ACCEPTED' \| 'DECLINED' \| 'TENTATIVE'`                              |
+| Symbol                    | Kind    | Description                                                                                       |
+| ------------------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `PlanningApi`             | Service | HTTP client for all planning operations                                                           |
+| `PlanningStore`           | Store   | Signals-based state management (no NgRx)                                                          |
+| `CreateEventDto`          | Type    | Payload for creating a new event (includes optional `reminderMinutes: 1–1440`)                    |
+| `UpdateEventDto`          | Type    | Payload for updating an event (must include `version`; supports `reminderMinutes: null` to clear) |
+| `RsvpDto`                 | Type    | Payload for submitting an RSVP (`status`: ACCEPTED/DECLINED/TENTATIVE)                            |
+| `CreateEventExceptionDto` | Type    | Payload for overriding a single occurrence of a recurring event                                   |
+| `ListEventsParams`        | Type    | Query params for `listEvents` (`from`, `to`)                                                      |
+| `ListConflictsParams`     | Type    | Query params for `listConflicts` (`start`, `end`)                                                 |
+| `EventDetail`             | Type    | Full event shape returned by `getEvent` (includes `reminderMinutes: number \| null`)              |
+| `EventOccurrence`         | Type    | Expanded occurrence shape returned by list endpoints                                              |
+| `EventAttendee`           | Type    | Attendee shape (userId, status, …)                                                                |
+| `EventException`          | Type    | Single-occurrence exception shape                                                                 |
+| `DeleteEventResponse`     | Type    | Delete response (`{ id }`)                                                                        |
+| `RSVPStatus`              | Type    | `'ACCEPTED' \| 'DECLINED' \| 'TENTATIVE'`                                                         |
 
 ---
 

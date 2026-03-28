@@ -71,6 +71,14 @@ import type { MembershipSummary } from '@saas-frontend/memberships/data-access';
                 <span>{{ event.location }}</span>
               </div>
             }
+            @if (event.reminderMinutes) {
+              <div class="flex items-center gap-1">
+                <i class="pi pi-bell text-surface-400"></i>
+                <span
+                  >Reminder: {{ formatReminder(event.reminderMinutes) }}</span
+                >
+              </div>
+            }
             @if (event.description) {
               <div class="flex items-start gap-1">
                 <i class="pi pi-align-left text-surface-400 mt-0.5"></i>
@@ -235,6 +243,13 @@ export class PlanningDetailDialogComponent implements OnChanges {
     if (!m?.user) return userId;
     const name = [m.user.firstName, m.user.lastName].filter(Boolean).join(' ');
     return name || m.user.email || userId;
+  }
+
+  protected formatReminder(minutes: number): string {
+    if (minutes < 60) return `${minutes} minutes before`;
+    if (minutes === 60) return '1 hour before';
+    if (minutes < 1440) return `${minutes / 60} hours before`;
+    return '1 day before';
   }
 
   protected memberInitials(userId: string): string {
