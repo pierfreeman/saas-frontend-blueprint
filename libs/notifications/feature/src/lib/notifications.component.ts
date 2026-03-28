@@ -113,7 +113,13 @@ function entityRef(n: NotificationRecord): { type: string; id: string } | null {
       <!-- Notification list -->
       @for (n of notifications(); track n.id) {
         <div
-          class="flex items-start gap-3 p-4 rounded-lg border border-surface-200 bg-surface-0 hover:bg-surface-50 transition-colors group"
+          class="flex items-start gap-3 p-4 rounded-lg border transition-colors"
+          [class.bg-primary-50]="!n.readAt"
+          [class.border-primary-200]="!n.readAt"
+          [class.hover:bg-primary-100]="!n.readAt"
+          [class.bg-surface-0]="!!n.readAt"
+          [class.border-surface-200]="!!n.readAt"
+          [class.hover:bg-surface-50]="!!n.readAt"
           [class.cursor-pointer]="isClickable(n)"
           (click)="handleClick(n)"
         >
@@ -135,24 +141,26 @@ function entityRef(n: NotificationRecord): { type: string; id: string } | null {
           <div class="flex-1 min-w-0">
             <div class="flex items-start justify-between gap-2">
               <p
-                class="m-0 text-sm text-surface-800"
+                class="m-0 text-sm"
+                [class.text-surface-800]="!n.readAt"
+                [class.text-surface-600]="!!n.readAt"
                 [class.font-semibold]="!n.readAt"
               >
                 {{ n.title }}
               </p>
-              <span (click)="$event.stopPropagation()">
-                <p-button
-                  icon="pi pi-trash"
-                  [text]="true"
-                  [rounded]="true"
-                  severity="danger"
-                  size="small"
-                  class="opacity-0 group-hover:opacity-100 transition-opacity"
-                  (onClick)="deleteNotification(n.id)"
-                />
+              <span
+                class="text-[10px] font-medium uppercase tracking-wide"
+                [class.text-primary-700]="!n.readAt"
+                [class.text-surface-400]="!!n.readAt"
+              >
+                {{ !n.readAt ? 'Unread' : 'Read' }}
               </span>
             </div>
-            <p class="m-0 mt-0.5 text-sm text-surface-500 line-clamp-2">
+            <p
+              class="m-0 mt-0.5 text-sm line-clamp-2"
+              [class.text-surface-600]="!n.readAt"
+              [class.text-surface-500]="!!n.readAt"
+            >
               {{ n.body }}
             </p>
             <p class="m-0 mt-1 text-xs text-surface-400">
@@ -274,18 +282,6 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         this.markingAll.set(false);
       },
       error: () => this.markingAll.set(false),
-    });
-  }
-
-  deleteNotification(id: string): void {
-    this.#api.deleteNotification(id).subscribe({
-      next: () => {
-        this.notifications.update((list) => list.filter((n) => n.id !== id));
-        this.total.update((t) => Math.max(0, t - 1));
-      },
-      error: () => {
-        /* swallow – UI is not affected by failed delete */
-      },
     });
   }
 

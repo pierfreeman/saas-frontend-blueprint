@@ -20,8 +20,9 @@ export class NotificationsApi {
   ): Observable<NotificationList> {
     let params = new HttpParams();
     if (query?.orgId !== undefined) params = params.set('orgId', query.orgId);
-    if (query?.unreadOnly !== undefined)
-      params = params.set('unreadOnly', String(query.unreadOnly));
+    // Send this flag only when true to avoid backend truthy parsing pitfalls
+    // with a literal "false" query-string value.
+    if (query?.unreadOnly === true) params = params.set('unreadOnly', 'true');
     if (query?.limit !== undefined) params = params.set('limit', query.limit);
     if (query?.offset !== undefined)
       params = params.set('offset', query.offset);

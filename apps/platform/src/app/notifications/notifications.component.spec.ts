@@ -50,7 +50,6 @@ describe('NotificationsComponent', () => {
       getNotifications: getNotificationsMock,
       markAsRead: vi.fn(() => of(undefined)),
       markManyAsRead: vi.fn(() => of(undefined)),
-      deleteNotification: vi.fn(() => of(undefined)),
     } as unknown as NotificationsApi;
 
     const mockSocket = {
@@ -244,24 +243,17 @@ describe('NotificationsComponent', () => {
     });
   });
 
-  // ── deleteNotification() ──────────────────────────────────────────────────
+  // ── handleClick() ─────────────────────────────────────────────────────────
 
-  describe('deleteNotification()', () => {
-    it('removes the deleted notification from the list', () => {
-      setup([makeNotification({ id: 'n1' }), makeNotification({ id: 'n2' })]);
+  describe('handleClick()', () => {
+    it('marks an unread notification as read and keeps it visible in the list', () => {
+      setup([makeNotification({ id: 'n1', readAt: null })]);
 
-      component.deleteNotification('n1');
+      component.handleClick(component.notifications()[0]);
 
-      expect(component.notifications().map((n) => n.id)).toEqual(['n2']);
-    });
-
-    it('decrements the total by one', () => {
-      setup([makeNotification({ id: 'n1' })]);
-      const before = component.total();
-
-      component.deleteNotification('n1');
-
-      expect(component.total()).toBe(Math.max(0, before - 1));
+      expect(component.notifications()).toHaveLength(1);
+      expect(component.notifications()[0].id).toBe('n1');
+      expect(component.notifications()[0].readAt).not.toBeNull();
     });
   });
 
