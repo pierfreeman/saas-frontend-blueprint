@@ -143,8 +143,7 @@ export class DashboardComponent implements OnInit {
   readonly loadingStorage = signal(true);
 
   readonly email = () => this.#authStore.currentUser()?.email ?? '';
-  readonly name = () =>
-    this.#authStore.currentUser()?.email?.split('@')[0] ?? '';
+  readonly name = () => this.#authStore.currentUser()?.firstName ?? '';
 
   readonly planLabel = () => {
     const sub = this.subscription();
