@@ -13,9 +13,14 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { MemberMultiselectComponent } from '@saas-frontend/memberships/ui';
 import type { MembershipSummary } from '@saas-frontend/memberships/data-access';
-import { type EventForm } from './planning.utils';
+import {
+  type EventForm,
+  browserTimezone,
+  TIMEZONE_OPTIONS,
+} from './planning.utils';
 import { PlanningRruleBuilderComponent } from './planning-rrule-builder.component';
 
 const DEFAULT_FORM: EventForm = {
@@ -25,7 +30,7 @@ const DEFAULT_FORM: EventForm = {
   isAllDay: false,
   description: '',
   location: '',
-  eventTimezone: 'UTC',
+  eventTimezone: browserTimezone(),
   rrule: '',
   attendeeIds: [],
   notifyAttendees: false,
@@ -44,6 +49,7 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
     DatePickerModule,
     DialogModule,
     InputTextModule,
+    SelectModule,
     MemberMultiselectComponent,
     PlanningRruleBuilderComponent,
   ],
@@ -57,6 +63,29 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
       [draggable]="false"
     >
       <div class="flex flex-col gap-4 pt-2">
+        @if (checkingConflicts) {
+          <div
+            class="rounded-lg border border-surface-200 bg-surface-50 px-3 py-2 text-xs text-surface-600"
+          >
+            Checking conflicts...
+          </div>
+        } @else if (conflictCount > 0) {
+          <div
+            class="rounded-lg border border-orange-300 bg-orange-50 px-3 py-2 text-xs text-orange-800"
+          >
+            {{ conflictCount }} potential
+            {{ conflictCount === 1 ? 'conflict' : 'conflicts' }} found in this
+            time range.
+            @if (conflictPreview.length > 0) {
+              <ul class="mt-2 ml-4 list-disc">
+                @for (line of conflictPreview; track $index) {
+                  <li>{{ line }}</li>
+                }
+              </ul>
+            }
+          </div>
+        }
+
         <!-- Title -->
         <div class="flex flex-col gap-1">
           <label class="text-sm font-medium text-surface-700" for="evtTitle">
@@ -110,6 +139,7 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
           </label>
           <p-datepicker
             [(ngModel)]="endDate"
+            (ngModelChange)="onEndChange($event)"
             [showTime]="!form.isAllDay"
             [hourFormat]="'24'"
             [showButtonBar]="true"
@@ -119,6 +149,21 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
             dateFormat="dd/mm/yy"
             appendTo="body"
             [minDate]="startDate ?? undefined"
+          />
+        </div>
+
+        <!-- Timezone -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700">Timezone</label>
+          <p-select
+            [(ngModel)]="form.eventTimezone"
+            [options]="timezoneOptions"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            [fluid]="true"
+            appendTo="body"
           />
         </div>
 
@@ -207,10 +252,16 @@ export class PlanningEventFormDialogComponent implements OnChanges {
 
   @Input() editMode = false;
   @Input() saving = false;
+  @Input() checkingConflicts = false;
+  @Input() conflictCount = 0;
+  @Input() conflictPreview: string[] = [];
   @Input() initialForm: EventForm = { ...DEFAULT_FORM };
   @Input() members: MembershipSummary[] = [];
 
   @Output() readonly submitted = new EventEmitter<EventForm>();
+  @Output() readonly draftChanged = new EventEmitter<EventForm>();
+
+  protected readonly timezoneOptions = TIMEZONE_OPTIONS;
 
   protected form: EventForm = { ...DEFAULT_FORM };
   protected startDate: Date | null = null;
@@ -221,6 +272,7 @@ export class PlanningEventFormDialogComponent implements OnChanges {
       this.form = { ...this.initialForm };
       this.startDate = this.#parseIso(this.initialForm.startUtc);
       this.endDate = this.#parseIso(this.initialForm.endUtc);
+      this.#emitDraftChanged();
     }
   }
 
@@ -231,6 +283,12 @@ export class PlanningEventFormDialogComponent implements OnChanges {
     if (!this.endDate || this.endDate <= date) {
       this.endDate = new Date(date.getTime() + DEFAULT_EVENT_DURATION_MS);
     }
+    this.#emitDraftChanged();
+  }
+
+  protected onEndChange(date: Date | null): void {
+    this.endDate = date;
+    this.#emitDraftChanged();
   }
 
   protected onAllDayToggle(isAllDay: boolean): void {
@@ -241,6 +299,7 @@ export class PlanningEventFormDialogComponent implements OnChanges {
       this.startDate = s;
       this.endDate = new Date(s.getTime() + DEFAULT_EVENT_DURATION_MS);
     }
+    this.#emitDraftChanged();
   }
 
   protected cancel(): void {
@@ -280,5 +339,13 @@ export class PlanningEventFormDialogComponent implements OnChanges {
     if (!iso) return null;
     const d = new Date(iso);
     return isNaN(d.getTime()) ? null : d;
+  }
+
+  #emitDraftChanged(): void {
+    this.draftChanged.emit({
+      ...this.form,
+      startUtc: this.startDate?.toISOString() ?? '',
+      endUtc: this.endDate?.toISOString() ?? '',
+    });
   }
 }

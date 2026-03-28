@@ -8,6 +8,7 @@ import type {
   RsvpDto,
   CreateEventExceptionDto,
   ListEventsParams,
+  ListConflictsParams,
   EventDetail,
   EventOccurrence,
   EventAttendee,
@@ -29,6 +30,19 @@ export class PlanningApi {
       .set('to', params.to);
     return this.#http.get<EventOccurrence[]>(
       `${this.#base}/organizations/${orgId}/planning/events`,
+      { params: httpParams },
+    );
+  }
+
+  listConflicts(
+    orgId: string,
+    params: ListConflictsParams,
+  ): Observable<EventOccurrence[]> {
+    const httpParams = new HttpParams()
+      .set('start', params.start)
+      .set('end', params.end);
+    return this.#http.get<EventOccurrence[]>(
+      `${this.#base}/organizations/${orgId}/planning/events/conflicts`,
       { params: httpParams },
     );
   }

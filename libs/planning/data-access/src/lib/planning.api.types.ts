@@ -60,6 +60,11 @@ export interface ListEventsParams {
   to: string;
 }
 
+export interface ListConflictsParams {
+  start: string;
+  end: string;
+}
+
 // ── Response types ────────────────────────────────────────────────────────────
 
 export interface EventAttendee {

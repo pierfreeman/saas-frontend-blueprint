@@ -126,6 +126,40 @@ describe('PlanningApi', () => {
     });
   });
 
+  describe('listConflicts()', () => {
+    it('sends GET /organizations/:orgId/planning/events/conflicts with start/end params', () => {
+      api
+        .listConflicts(ORG_ID, {
+          start: '2026-04-01T09:00:00Z',
+          end: '2026-04-01T10:00:00Z',
+        })
+        .subscribe();
+      const req = controller.expectOne(
+        (r) =>
+          r.url ===
+            `${BASE}/organizations/${ORG_ID}/planning/events/conflicts` &&
+          r.params.get('start') === '2026-04-01T09:00:00Z' &&
+          r.params.get('end') === '2026-04-01T10:00:00Z',
+      );
+      expect(req.request.method).toBe('GET');
+      req.flush([mockOccurrence]);
+    });
+
+    it('returns the list of conflicting occurrences', () => {
+      let result: unknown;
+      api
+        .listConflicts(ORG_ID, {
+          start: '2026-04-01T09:00:00Z',
+          end: '2026-04-01T10:00:00Z',
+        })
+        .subscribe((list) => (result = list));
+      controller
+        .expectOne((r) => r.url.includes('/planning/events/conflicts'))
+        .flush([mockOccurrence]);
+      expect(result).toEqual([mockOccurrence]);
+    });
+  });
+
   describe('getEvent()', () => {
     it('sends GET /organizations/:orgId/planning/events/:id', () => {
       api.getEvent(ORG_ID, EVENT_ID).subscribe();

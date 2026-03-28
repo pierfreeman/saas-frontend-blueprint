@@ -27,6 +27,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import {
+  PlanningApi,
   PlanningStore,
   type EventOccurrence,
   type EventDetail,
@@ -34,6 +35,7 @@ import {
   type UpdateEventDto,
   type RSVPStatus,
 } from '@saas-frontend/planning/data-access';
+import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import {
   MembershipsStore,
@@ -47,7 +49,7 @@ import {
 import { PlanningEventFormDialogComponent } from './planning-event-form-dialog.component';
 import { PlanningDetailDialogComponent } from './planning-detail-dialog.component';
 import { PlanningExceptionDialogComponent } from './planning-exception-dialog.component';
-import { type EventForm, toUtcIso } from './planning.utils';
+import { type EventForm, toUtcIso, browserTimezone } from './planning.utils';
 
 const DEFAULT_FORM: EventForm = {
   title: '',
@@ -56,7 +58,7 @@ const DEFAULT_FORM: EventForm = {
   isAllDay: false,
   description: '',
   location: '',
-  eventTimezone: 'UTC',
+  eventTimezone: browserTimezone(),
   rrule: '',
   attendeeIds: [],
   notifyAttendees: false,
@@ -118,8 +120,12 @@ const DEFAULT_FORM: EventForm = {
       (visibleChange)="createDialogVisible.set($event)"
       [editMode]="editMode()"
       [saving]="saving()"
+      [checkingConflicts]="checkingConflicts()"
+      [conflictCount]="conflictCount()"
+      [conflictPreview]="conflictPreview()"
       [initialForm]="form"
       [members]="members()"
+      (draftChanged)="onFormDraftChanged($event)"
       (submitted)="submitForm($event)"
     />
 
@@ -149,6 +155,7 @@ const DEFAULT_FORM: EventForm = {
 })
 export class PlanningComponent implements OnInit {
   readonly store = inject(PlanningStore);
+  readonly #planningApi = inject(PlanningApi);
   readonly #authStore = inject(AuthStore);
   readonly #membershipsStore = inject(MembershipsStore);
   readonly #orgsStore = inject(OrganizationsStore);
@@ -190,6 +197,11 @@ export class PlanningComponent implements OnInit {
   protected selectedOccurrence = signal<EventOccurrence | null>(null);
   protected editingEventId = signal<string | null>(null);
   protected editingVersion = signal<number>(0);
+  protected checkingConflicts = signal(false);
+  protected conflictCount = signal(0);
+  protected conflictPreview = signal<string[]>([]);
+  #conflictTimer: ReturnType<typeof setTimeout> | null = null;
+  #conflictReqSeq = 0;
 
   // ── Event form (pre-populated for create/edit; passed as initialForm input) ─
   protected form: EventForm = { ...DEFAULT_FORM };
@@ -317,6 +329,10 @@ export class PlanningComponent implements OnInit {
     this.createDialogVisible.set(true);
   }
 
+  protected onFormDraftChanged(form: EventForm): void {
+    this.#scheduleConflictCheck(form);
+  }
+
   protected async submitForm(form: EventForm): Promise<void> {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId || !form.title.trim()) return;
@@ -391,6 +407,8 @@ export class PlanningComponent implements OnInit {
       attendeeIds: evt.attendees.map((a) => a.userId),
       notifyAttendees: false,
     };
+    this.conflictCount.set(0);
+    this.conflictPreview.set([]);
     this.editMode.set(true);
     this.createDialogVisible.set(true);
   }
@@ -521,5 +539,83 @@ export class PlanningComponent implements OnInit {
     this.form = { ...DEFAULT_FORM };
     this.editingEventId.set(null);
     this.editingVersion.set(0);
+    this.checkingConflicts.set(false);
+    this.conflictCount.set(0);
+    this.conflictPreview.set([]);
+    if (this.#conflictTimer) {
+      clearTimeout(this.#conflictTimer);
+      this.#conflictTimer = null;
+    }
+  }
+
+  #scheduleConflictCheck(form: EventForm): void {
+    if (this.#conflictTimer) {
+      clearTimeout(this.#conflictTimer);
+    }
+    this.#conflictTimer = setTimeout(() => {
+      void this.#runConflictCheck(form);
+    }, 250);
+  }
+
+  async #runConflictCheck(form: EventForm): Promise<void> {
+    const orgId = this.#orgsStore.activeOrgId();
+    const start = toUtcIso(form.startUtc);
+    const end = toUtcIso(form.endUtc);
+
+    if (!orgId || !start || !end || end <= start) {
+      this.conflictCount.set(0);
+      this.conflictPreview.set([]);
+      this.checkingConflicts.set(false);
+      return;
+    }
+
+    const reqId = ++this.#conflictReqSeq;
+    this.checkingConflicts.set(true);
+
+    try {
+      const list = await firstValueFrom(
+        this.#planningApi.listConflicts(orgId, { start, end }),
+      );
+
+      if (reqId !== this.#conflictReqSeq) return;
+
+      const currentEventId = this.editingEventId();
+      const filtered = currentEventId
+        ? list.filter((occ) => occ.eventId !== currentEventId)
+        : list;
+
+      this.conflictCount.set(filtered.length);
+      this.conflictPreview.set(
+        filtered.slice(0, 3).map((occ) => this.#formatConflictPreviewLine(occ)),
+      );
+    } catch {
+      if (reqId !== this.#conflictReqSeq) return;
+      this.conflictCount.set(0);
+      this.conflictPreview.set([]);
+    } finally {
+      if (reqId === this.#conflictReqSeq) {
+        this.checkingConflicts.set(false);
+      }
+    }
+  }
+
+  #formatConflictPreviewLine(occ: EventOccurrence): string {
+    const tz = occ.eventTimezone;
+    const fmt = new Intl.DateTimeFormat(undefined, {
+      timeZone: tz,
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+    const timeFmt = new Intl.DateTimeFormat(undefined, {
+      timeZone: tz,
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const startLabel = fmt.format(new Date(occ.startUtc));
+    const endLabel = timeFmt.format(new Date(occ.endUtc));
+    return `${occ.title} (${startLabel} – ${endLabel})`;
   }
 }
