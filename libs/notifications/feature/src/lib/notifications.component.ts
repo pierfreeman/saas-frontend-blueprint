@@ -8,6 +8,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   NotificationRecord,
   NotificationsApi,
@@ -22,6 +23,7 @@ const PAGE_SIZE = 20;
 
 /** Map notification type to a PrimeIcons icon class. */
 function typeIcon(type: string): string {
+  if (type.startsWith('event.')) return 'pi-calendar';
   if (type.includes('billing') || type.includes('payment'))
     return 'pi-credit-card';
   if (type.includes('invite') || type.includes('member')) return 'pi-users';
@@ -31,6 +33,22 @@ function typeIcon(type: string): string {
   if (type.includes('alert') || type.includes('warn'))
     return 'pi-exclamation-triangle';
   return 'pi-bell';
+}
+
+/** Extract a typed entityRef from notification metadata if present. */
+function entityRef(n: NotificationRecord): { type: string; id: string } | null {
+  const ref = (n.metadata as Record<string, unknown> | null)?.['entityRef'];
+  if (
+    ref &&
+    typeof ref === 'object' &&
+    'type' in ref &&
+    'id' in ref &&
+    typeof (ref as Record<string, unknown>)['type'] === 'string' &&
+    typeof (ref as Record<string, unknown>)['id'] === 'string'
+  ) {
+    return ref as { type: string; id: string };
+  }
+  return null;
 }
 
 @Component({
@@ -96,8 +114,8 @@ function typeIcon(type: string): string {
       @for (n of notifications(); track n.id) {
         <div
           class="flex items-start gap-3 p-4 rounded-lg border border-surface-200 bg-surface-0 hover:bg-surface-50 transition-colors group"
-          [class.cursor-pointer]="!n.readAt"
-          (click)="!n.readAt && markAsRead(n)"
+          [class.cursor-pointer]="isClickable(n)"
+          (click)="handleClick(n)"
         >
           <!-- Unread indicator dot -->
           <div class="mt-2.5 w-2 flex-shrink-0">
@@ -166,6 +184,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   readonly #api = inject(NotificationsApi);
   readonly #socket = inject(NotificationsSocketService);
   readonly #orgsStore = inject(OrganizationsStore);
+  readonly #router = inject(Router);
 
   readonly notifications = signal<NotificationRecord[]>([]);
   readonly total = signal(0);
@@ -188,6 +207,8 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   readonly skeletons = new Array(6);
 
   readonly typeIcon = typeIcon;
+  readonly isClickable = (n: NotificationRecord): boolean =>
+    !n.readAt || entityRef(n) !== null;
 
   ngOnInit(): void {
     this.#load(true);
@@ -266,6 +287,19 @@ export class NotificationsComponent implements OnInit, OnDestroy {
         /* swallow – UI is not affected by failed delete */
       },
     });
+  }
+
+  handleClick(n: NotificationRecord): void {
+    if (!n.readAt) {
+      this.markAsRead(n);
+    }
+    const ref = entityRef(n);
+    if (!ref) return;
+    if (ref.type === 'event') {
+      void this.#router.navigate(['/planning'], {
+        queryParams: { eventId: ref.id },
+      });
+    }
   }
 
   #load(reset: boolean): void {

@@ -3,8 +3,10 @@ import {
   Component,
   computed,
   inject,
+  OnInit,
   signal,
 } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import type {
   CalendarOptions,
@@ -145,13 +147,15 @@ const DEFAULT_FORM: EventForm = {
     />
   `,
 })
-export class PlanningComponent {
+export class PlanningComponent implements OnInit {
   readonly store = inject(PlanningStore);
   readonly #authStore = inject(AuthStore);
   readonly #membershipsStore = inject(MembershipsStore);
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #permissions = inject(PermissionsService);
   readonly #toast = inject(MessageService);
+  readonly #route = inject(ActivatedRoute);
+  readonly #router = inject(Router);
 
   readonly loading = this.store.loadingList;
   readonly saving = computed(
@@ -222,6 +226,51 @@ export class PlanningComponent {
     eventDrop: (arg: EventDropArg) => void this.#onEventDrop(arg),
     eventResize: (arg: EventResizeDoneArg) => void this.#onEventResize(arg),
   }));
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    const eventId = this.#route.snapshot.queryParamMap.get('eventId');
+    if (eventId) {
+      void this.#openEventById(eventId);
+      // Remove query param from URL without adding a history entry
+      void this.#router.navigate([], {
+        queryParams: {},
+        replaceUrl: true,
+        relativeTo: this.#route,
+      });
+    }
+  }
+
+  async #openEventById(eventId: string): Promise<void> {
+    const orgId = this.#orgsStore.activeOrgId();
+    if (!orgId) return;
+    await this.store.loadEventDetail(orgId, eventId);
+    const detail = this.store.selectedEvent();
+    if (!detail) return;
+    // Build a minimal EventOccurrence stub from the EventDetail so the
+    // detail dialog can display while the full detail is already loaded.
+    const stub: EventOccurrence = {
+      eventId: detail.id,
+      originalStartUtc: detail.startUtc,
+      startUtc: detail.startUtc,
+      endUtc: detail.endUtc,
+      title: detail.title,
+      description: detail.description,
+      location: detail.location,
+      isAllDay: detail.isAllDay,
+      eventTimezone: detail.eventTimezone,
+      rrule: detail.rrule,
+      isRecurring: !!detail.rrule,
+      isException: false,
+      isCancelled: !!detail.deletedAt,
+      createdByUserId: detail.createdByUserId,
+      orgId: detail.orgId,
+      version: detail.version,
+      attendees: detail.attendees,
+    };
+    this.selectedOccurrence.set(stub);
+    this.detailDialogVisible.set(true);
+  }
 
   // ── FullCalendar callbacks ─────────────────────────────────────────────────
   #onDatesSet(arg: DatesSetArg): void {

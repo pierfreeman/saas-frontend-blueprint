@@ -301,8 +301,11 @@ export class PlanningRruleBuilderComponent implements OnChanges {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const opts: Record<string, any> = {
       freq: FREQ_RRULE[state.freq],
-      interval: state.interval,
     };
+    // Omit interval when it's the default (1) to keep strings compact
+    if (state.interval > 1) {
+      opts['interval'] = state.interval;
+    }
     if (state.freq === 'weekly' && state.byweekday.length > 0) {
       opts['byweekday'] = state.byweekday;
     }
