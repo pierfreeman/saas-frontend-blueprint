@@ -192,7 +192,8 @@ const DEFAULT_STATE: RruleState = {
             [disabled]="state.endType !== 'until'"
             dateFormat="dd/mm/yy"
             [showButtonBar]="true"
-            [showOnFocus]="false"
+            [showOnFocus]="true"
+            [showIcon]="true"
             appendTo="body"
             (ngModelChange)="onUntilChange()"
           />
