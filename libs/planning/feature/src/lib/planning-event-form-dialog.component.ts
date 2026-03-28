@@ -16,6 +16,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MemberMultiselectComponent } from '@saas-frontend/memberships/ui';
 import type { MembershipSummary } from '@saas-frontend/memberships/data-access';
 import { type EventForm } from './planning.utils';
+import { PlanningRruleBuilderComponent } from './planning-rrule-builder.component';
 
 const DEFAULT_FORM: EventForm = {
   title: '',
@@ -44,6 +45,7 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
     DialogModule,
     InputTextModule,
     MemberMultiselectComponent,
+    PlanningRruleBuilderComponent,
   ],
   template: `
     <p-dialog
@@ -147,18 +149,10 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
           ></textarea>
         </div>
 
-        <!-- Recurrence (RRULE) — plain text input; visual builder UI is deferred -->
+        <!-- Recurrence (RRULE) — visual builder -->
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-surface-700" for="evtRrule">
-            Recurrence (RRULE)
-          </label>
-          <input
-            id="evtRrule"
-            pInputText
-            [(ngModel)]="form.rrule"
-            placeholder="e.g. FREQ=WEEKLY;BYDAY=MO,WE,FR"
-            class="w-full"
-          />
+          <label class="text-sm font-medium text-surface-700">Recurrence</label>
+          <app-planning-rrule-builder [(rrule)]="form.rrule" />
         </div>
 
         <!-- Attendees -->
