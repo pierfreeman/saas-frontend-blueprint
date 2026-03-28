@@ -49,6 +49,7 @@ function makeQuota(
 
 function setup(opts: {
   email?: string;
+  firstName?: string;
   memberCount?: number;
   subscription?: SubscriptionResponse | null;
   maxSeats?: number;
@@ -58,6 +59,7 @@ function setup(opts: {
 }) {
   const {
     email = 'alice@example.com',
+    firstName = 'Alice',
     memberCount = 5,
     subscription = makeSubscription(),
     maxSeats = 10,
@@ -67,7 +69,7 @@ function setup(opts: {
   } = opts;
 
   const mockAuth = {
-    currentUser: signal({ email }),
+    currentUser: signal({ email, firstName }),
   } as unknown as AuthStore;
 
   const mockOrgs = {
@@ -249,9 +251,9 @@ describe('DashboardComponent', () => {
       expect(component.email()).toBe('bob@test.com');
     });
 
-    it('name returns the part before the @ sign', () => {
-      const { component } = setup({ email: 'charlie@example.com' });
-      expect(component.name()).toBe('charlie');
+    it('name returns the firstName of the current user', () => {
+      const { component } = setup({ firstName: 'Charlie' });
+      expect(component.name()).toBe('Charlie');
     });
   });
 });
