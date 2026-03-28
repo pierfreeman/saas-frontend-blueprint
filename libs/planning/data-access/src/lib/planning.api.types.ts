@@ -37,6 +37,8 @@ export interface UpdateEventDto {
   version: number;
   /** Replaces the full invited-attendee list (set semantics). Creator is always kept. */
   attendeeIds?: string[];
+  /** When true, all current attendees receive an "event updated" notification. */
+  notifyAttendees?: boolean;
 }
 
 export interface RsvpDto {

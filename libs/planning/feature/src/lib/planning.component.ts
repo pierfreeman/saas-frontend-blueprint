@@ -57,6 +57,7 @@ const DEFAULT_FORM: EventForm = {
   eventTimezone: 'UTC',
   rrule: '',
   attendeeIds: [],
+  notifyAttendees: false,
 };
 
 @Component({
@@ -127,7 +128,7 @@ const DEFAULT_FORM: EventForm = {
       [occurrence]="selectedOccurrence()"
       [loadingDetail]="store.loadingDetail()"
       [saving]="saving()"
-      [canManage]="canManage()"
+      [canManage]="canEditSelected()"
       [members]="members()"
       (edit)="openEditFromDetail($event)"
       (deleted)="deleteCurrentEvent($event)"
@@ -164,8 +165,17 @@ export class PlanningComponent {
   // True for events the current user may drag/resize: admin/owner OR creator
   readonly #canEditOccurrence = computed(() => {
     const uid = this.#authStore.currentUser()?.id;
-    const manage = this.canManage();
-    return (occ: EventOccurrence) => manage || occ.createdByUserId === uid;
+    const canEditAny = this.#permissions
+      .currentUserPermissions()
+      .has(PERMISSIONS.PLANNING_MANAGE_ANY);
+    return (occ: EventOccurrence) => canEditAny || occ.createdByUserId === uid;
+  });
+
+  /** True when the currently-selected occurrence can be edited/deleted by this user. */
+  readonly canEditSelected = computed(() => {
+    const occ = this.selectedOccurrence();
+    if (!occ) return false;
+    return this.#canEditOccurrence()(occ);
   });
 
   // ── Dialog visibility ──────────────────────────────────────────────────────
@@ -275,6 +285,7 @@ export class PlanningComponent {
         rrule: form.rrule || undefined,
         version: this.editingVersion(),
         attendeeIds: form.attendeeIds,
+        notifyAttendees: form.notifyAttendees,
       };
       const result = await this.store.updateEvent(orgId, eventId, dto);
       if (!result) {
@@ -329,6 +340,7 @@ export class PlanningComponent {
       eventTimezone: evt.eventTimezone,
       rrule: evt.rrule ?? '',
       attendeeIds: evt.attendees.map((a) => a.userId),
+      notifyAttendees: false,
     };
     this.editMode.set(true);
     this.createDialogVisible.set(true);

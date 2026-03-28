@@ -27,6 +27,7 @@ const DEFAULT_FORM: EventForm = {
   eventTimezone: 'UTC',
   rrule: '',
   attendeeIds: [],
+  notifyAttendees: false,
 };
 
 const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
@@ -169,12 +170,34 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
           />
         </div>
 
+        <!-- Notify attendees (edit mode only) -->
+        @if (editMode) {
+          <div class="flex items-center gap-2">
+            <p-checkbox
+              [(ngModel)]="form.notifyAttendees"
+              [binary]="true"
+              inputId="evtNotify"
+              [disabled]="!isDirty"
+            />
+            <label
+              for="evtNotify"
+              class="text-sm"
+              [class.text-surface-400]="!isDirty"
+              [class.text-surface-700]="isDirty"
+            >
+              Notify attendees of this update
+            </label>
+          </div>
+        }
+
         <div class="flex justify-end gap-2 pt-2">
           <p-button label="Cancel" severity="secondary" (onClick)="cancel()" />
           <p-button
             [label]="editMode ? 'Save changes' : 'Create'"
             [loading]="saving"
-            [disabled]="!form.title.trim() || !startDate"
+            [disabled]="
+              !form.title.trim() || !startDate || (editMode && !isDirty)
+            "
             (onClick)="submit()"
           />
         </div>
@@ -226,6 +249,26 @@ export class PlanningEventFormDialogComponent implements OnChanges {
 
   protected cancel(): void {
     this.visibleChange.emit(false);
+  }
+
+  protected get isDirty(): boolean {
+    const f = this.form;
+    const i = this.initialForm;
+    const startIso = this.startDate?.toISOString() ?? '';
+    const endIso = this.endDate?.toISOString() ?? '';
+    const attendeesChanged =
+      f.attendeeIds.length !== i.attendeeIds.length ||
+      [...f.attendeeIds].sort().join() !== [...i.attendeeIds].sort().join();
+    return (
+      f.title.trim() !== i.title.trim() ||
+      f.description !== i.description ||
+      f.location !== i.location ||
+      f.isAllDay !== i.isAllDay ||
+      f.rrule !== i.rrule ||
+      attendeesChanged ||
+      startIso !== i.startUtc ||
+      endIso !== i.endUtc
+    );
   }
 
   protected submit(): void {

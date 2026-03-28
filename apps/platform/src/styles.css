@@ -1,2 +1,8 @@
 @import 'tailwindcss';
 @import 'tailwindcss-primeui';
+
+/* FullCalendar: keep pointer cursor on all events regardless of drag/resize
+   editability, since every event is clickable (opens detail dialog). */
+.fc-event {
+  cursor: pointer !important;
+}
