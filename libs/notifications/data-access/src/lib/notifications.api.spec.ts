@@ -39,7 +39,9 @@ describe('NotificationsApi', () => {
         })
         .subscribe();
 
-      const req = controller.expectOne(`${BASE}/notifications`);
+      const req = controller.expectOne(
+        (r) => r.url === `${BASE}/notifications`,
+      );
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('orgId')).toBe('org-1');
       expect(req.request.params.get('limit')).toBe('20');
@@ -57,7 +59,9 @@ describe('NotificationsApi', () => {
         })
         .subscribe();
 
-      const req = controller.expectOne(`${BASE}/notifications`);
+      const req = controller.expectOne(
+        (r) => r.url === `${BASE}/notifications`,
+      );
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('orgId')).toBe('org-1');
       expect(req.request.params.get('unreadOnly')).toBe('true');
