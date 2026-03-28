@@ -17,40 +17,37 @@ import type {
   EventInput,
 } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
 import type {
   DateClickArg,
   EventResizeDoneArg,
 } from '@fullcalendar/interaction';
-import { ButtonModule } from 'primeng/button';
-import { SkeletonModule } from 'primeng/skeleton';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import interactionPlugin from '@fullcalendar/interaction';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { MembershipsStore } from '@saas-frontend/memberships/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import {
   PlanningApi,
   PlanningStore,
-  type EventOccurrence,
-  type EventDetail,
   type CreateEventDto,
-  type UpdateEventDto,
+  type EventDetail,
+  type EventOccurrence,
   type RSVPStatus,
+  type UpdateEventDto,
 } from '@saas-frontend/planning/data-access';
-import { firstValueFrom } from 'rxjs';
-import { AuthStore } from '@saas-frontend/auth/data-access';
 import {
-  MembershipsStore,
-  type MembershipSummary,
-} from '@saas-frontend/memberships/data-access';
-import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
-import {
-  PermissionsService,
   PERMISSIONS,
+  PermissionsService,
 } from '@saas-frontend/shared/util-rbac';
-import { PlanningEventFormDialogComponent } from './planning-event-form-dialog.component';
+import { MessageService } from 'primeng/api';
+import { ButtonModule } from 'primeng/button';
+import { SkeletonModule } from 'primeng/skeleton';
+import { ToastModule } from 'primeng/toast';
+import { firstValueFrom } from 'rxjs';
 import { PlanningDetailDialogComponent } from './planning-detail-dialog.component';
+import { PlanningEventFormDialogComponent } from './planning-event-form-dialog.component';
 import { PlanningExceptionDialogComponent } from './planning-exception-dialog.component';
-import { type EventForm, toUtcIso, browserTimezone } from './planning.utils';
+import { browserTimezone, toUtcIso, type EventForm } from './planning.utils';
 
 const DEFAULT_FORM: EventForm = {
   title: '',
