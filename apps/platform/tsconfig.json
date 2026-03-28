@@ -60,6 +60,9 @@
       "@saas-frontend/memberships/feature": [
         "../../libs/memberships/feature/src/index.ts"
       ],
+      "@saas-frontend/memberships/ui": [
+        "../../libs/memberships/ui/src/index.ts"
+      ],
       "@saas-frontend/notifications/feature": [
         "../../libs/notifications/feature/src/index.ts"
       ],

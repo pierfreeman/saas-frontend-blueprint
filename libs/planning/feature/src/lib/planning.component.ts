@@ -10,12 +10,16 @@ import type {
   CalendarOptions,
   DatesSetArg,
   EventClickArg,
+  EventDropArg,
   EventInput,
 } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { DateClickArg } from '@fullcalendar/interaction';
+import type {
+  DateClickArg,
+  EventResizeDoneArg,
+} from '@fullcalendar/interaction';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ToastModule } from 'primeng/toast';
@@ -28,6 +32,11 @@ import {
   type UpdateEventDto,
   type RSVPStatus,
 } from '@saas-frontend/planning/data-access';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import {
+  MembershipsStore,
+  type MembershipSummary,
+} from '@saas-frontend/memberships/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import {
   PermissionsService,
@@ -47,6 +56,7 @@ const DEFAULT_FORM: EventForm = {
   location: '',
   eventTimezone: 'UTC',
   rrule: '',
+  attendeeIds: [],
 };
 
 @Component({
@@ -106,6 +116,7 @@ const DEFAULT_FORM: EventForm = {
       [editMode]="editMode()"
       [saving]="saving()"
       [initialForm]="form"
+      [members]="members()"
       (submitted)="submitForm($event)"
     />
 
@@ -117,6 +128,7 @@ const DEFAULT_FORM: EventForm = {
       [loadingDetail]="store.loadingDetail()"
       [saving]="saving()"
       [canManage]="canManage()"
+      [members]="members()"
       (edit)="openEditFromDetail($event)"
       (deleted)="deleteCurrentEvent($event)"
       (rsvp)="sendRsvp($event)"
@@ -134,6 +146,8 @@ const DEFAULT_FORM: EventForm = {
 })
 export class PlanningComponent {
   readonly store = inject(PlanningStore);
+  readonly #authStore = inject(AuthStore);
+  readonly #membershipsStore = inject(MembershipsStore);
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #permissions = inject(PermissionsService);
   readonly #toast = inject(MessageService);
@@ -145,6 +159,14 @@ export class PlanningComponent {
   readonly canManage = computed(() =>
     this.#permissions.currentUserPermissions().has(PERMISSIONS.PLANNING_MANAGE),
   );
+  protected readonly members = this.#membershipsStore.memberships;
+
+  // True for events the current user may drag/resize: admin/owner OR creator
+  readonly #canEditOccurrence = computed(() => {
+    const uid = this.#authStore.currentUser()?.id;
+    const manage = this.canManage();
+    return (occ: EventOccurrence) => manage || occ.createdByUserId === uid;
+  });
 
   // ── Dialog visibility ──────────────────────────────────────────────────────
   protected createDialogVisible = signal(false);
@@ -159,17 +181,19 @@ export class PlanningComponent {
   protected form: EventForm = { ...DEFAULT_FORM };
 
   // ── Calendar events (derived from store) ───────────────────────────────────
-  readonly #calendarEvents = computed<EventInput[]>(() =>
-    this.store.occurrences().map((occ) => ({
+  readonly #calendarEvents = computed<EventInput[]>(() => {
+    const canEdit = this.#canEditOccurrence();
+    return this.store.occurrences().map((occ) => ({
       id: `${occ.eventId}__${occ.originalStartUtc}`,
       title: occ.isCancelled ? `[Cancelled] ${occ.title}` : occ.title,
       start: occ.startUtc,
       end: occ.endUtc,
       allDay: occ.isAllDay,
       color: occ.isCancelled ? '#9ca3af' : undefined,
+      editable: canEdit(occ),
       extendedProps: { occurrence: occ },
-    })),
-  );
+    }));
+  });
 
   readonly calendarOptions = computed<CalendarOptions>(() => ({
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
@@ -180,12 +204,13 @@ export class PlanningComponent {
       right: 'dayGridMonth,timeGridWeek,timeGridDay',
     },
     events: this.#calendarEvents(),
-    editable: false,
     selectable: this.canManage(),
     height: 'auto',
     datesSet: (arg: DatesSetArg) => this.#onDatesSet(arg),
     eventClick: (arg: EventClickArg) => this.#onEventClick(arg),
     dateClick: (arg: DateClickArg) => this.#onDateClick(arg),
+    eventDrop: (arg: EventDropArg) => void this.#onEventDrop(arg),
+    eventResize: (arg: EventResizeDoneArg) => void this.#onEventResize(arg),
   }));
 
   // ── FullCalendar callbacks ─────────────────────────────────────────────────
@@ -249,6 +274,7 @@ export class PlanningComponent {
         location: form.location || undefined,
         rrule: form.rrule || undefined,
         version: this.editingVersion(),
+        attendeeIds: form.attendeeIds,
       };
       const result = await this.store.updateEvent(orgId, eventId, dto);
       if (!result) {
@@ -272,8 +298,17 @@ export class PlanningComponent {
         location: form.location || undefined,
         eventTimezone: form.eventTimezone,
         rrule: form.rrule || undefined,
+        attendeeIds: form.attendeeIds.length > 0 ? form.attendeeIds : undefined,
       };
-      await this.store.createEvent(orgId, dto);
+      const created = await this.store.createEvent(orgId, dto);
+      if (!created) {
+        this.#toast.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to create event. Please try again.',
+        });
+        return;
+      }
     }
 
     this.createDialogVisible.set(false);
@@ -293,6 +328,7 @@ export class PlanningComponent {
       location: evt.location ?? '',
       eventTimezone: evt.eventTimezone,
       rrule: evt.rrule ?? '',
+      attendeeIds: evt.attendees.map((a) => a.userId),
     };
     this.editMode.set(true);
     this.createDialogVisible.set(true);
@@ -342,6 +378,80 @@ export class PlanningComponent {
     const result = await this.store.createException(orgId, occ.eventId, dto);
     if (result) {
       this.exceptionDialogVisible.set(false);
+    }
+  }
+
+  // ── Drag-and-drop / resize ─────────────────────────────────────────────────
+  async #onEventDrop(arg: EventDropArg): Promise<void> {
+    const occ = arg.event.extendedProps['occurrence'] as EventOccurrence;
+    const start = arg.event.start;
+    const orgId = this.#orgsStore.activeOrgId();
+
+    if (!this.#canEditOccurrence()(occ) || !start || !orgId) {
+      arg.revert();
+      return;
+    }
+
+    const dto: UpdateEventDto = {
+      start: start.toISOString(),
+      end: arg.event.end?.toISOString(),
+      version: occ.version,
+    };
+
+    const result = await this.store.updateEvent(orgId, occ.eventId, dto);
+    if (!result) {
+      arg.revert();
+      const err = this.store.error() as { status?: number } | null;
+      this.#toast.add(
+        err?.status === 409
+          ? {
+              severity: 'warn',
+              summary: 'Conflict',
+              detail: 'Event was modified by another user, please refresh.',
+            }
+          : {
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Could not reschedule event.',
+            },
+      );
+    }
+  }
+
+  async #onEventResize(arg: EventResizeDoneArg): Promise<void> {
+    const occ = arg.event.extendedProps['occurrence'] as EventOccurrence;
+    const start = arg.event.start;
+    const end = arg.event.end;
+    const orgId = this.#orgsStore.activeOrgId();
+
+    if (!this.#canEditOccurrence()(occ) || !start || !end || !orgId) {
+      arg.revert();
+      return;
+    }
+
+    const dto: UpdateEventDto = {
+      start: start.toISOString(),
+      end: end.toISOString(),
+      version: occ.version,
+    };
+
+    const result = await this.store.updateEvent(orgId, occ.eventId, dto);
+    if (!result) {
+      arg.revert();
+      const err = this.store.error() as { status?: number } | null;
+      this.#toast.add(
+        err?.status === 409
+          ? {
+              severity: 'warn',
+              summary: 'Conflict',
+              detail: 'Event was modified by another user, please refresh.',
+            }
+          : {
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Could not resize event.',
+            },
+      );
     }
   }
 

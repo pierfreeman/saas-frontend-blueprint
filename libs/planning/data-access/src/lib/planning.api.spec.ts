@@ -57,7 +57,7 @@ const mockAttendee = {
   id: 'att-1',
   eventId: EVENT_ID,
   userId: 'user-1',
-  status: 'ACCEPTED' as const,
+  status: 'YES' as const,
   createdAt: '2026-03-28T00:00:00.000Z',
   updatedAt: '2026-03-28T00:00:00.000Z',
 };
@@ -191,7 +191,7 @@ describe('PlanningApi', () => {
 
   describe('rsvp()', () => {
     it('sends POST /organizations/:orgId/planning/events/:id/rsvp with dto', () => {
-      const dto = { status: 'ACCEPTED' as const };
+      const dto = { status: 'YES' as const };
       api.rsvp(ORG_ID, EVENT_ID, dto).subscribe();
       const req = controller.expectOne(
         `${BASE}/organizations/${ORG_ID}/planning/events/${EVENT_ID}/rsvp`,

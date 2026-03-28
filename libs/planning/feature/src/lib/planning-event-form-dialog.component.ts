@@ -13,6 +13,8 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { MemberMultiselectComponent } from '@saas-frontend/memberships/ui';
+import type { MembershipSummary } from '@saas-frontend/memberships/data-access';
 import { type EventForm } from './planning.utils';
 
 const DEFAULT_FORM: EventForm = {
@@ -24,6 +26,7 @@ const DEFAULT_FORM: EventForm = {
   location: '',
   eventTimezone: 'UTC',
   rrule: '',
+  attendeeIds: [],
 };
 
 const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
@@ -39,6 +42,7 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
     DatePickerModule,
     DialogModule,
     InputTextModule,
+    MemberMultiselectComponent,
   ],
   template: `
     <p-dialog
@@ -156,6 +160,15 @@ const DEFAULT_EVENT_DURATION_MS = 60 * 60 * 1000; // 60 minutes
           />
         </div>
 
+        <!-- Attendees -->
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700">Attendees</label>
+          <app-member-multiselect
+            [members]="members"
+            [(ngModel)]="form.attendeeIds"
+          />
+        </div>
+
         <div class="flex justify-end gap-2 pt-2">
           <p-button label="Cancel" severity="secondary" (onClick)="cancel()" />
           <p-button
@@ -176,6 +189,7 @@ export class PlanningEventFormDialogComponent implements OnChanges {
   @Input() editMode = false;
   @Input() saving = false;
   @Input() initialForm: EventForm = { ...DEFAULT_FORM };
+  @Input() members: MembershipSummary[] = [];
 
   @Output() readonly submitted = new EventEmitter<EventForm>();
 

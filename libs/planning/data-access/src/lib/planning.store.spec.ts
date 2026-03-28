@@ -55,7 +55,7 @@ const mockAttendee = {
   id: 'att-1',
   eventId: EVENT_ID,
   userId: 'user-1',
-  status: 'ACCEPTED',
+  status: 'YES',
   createdAt: '2026-03-28T00:00:00.000Z',
   updatedAt: '2026-03-28T00:00:00.000Z',
 } as never;
@@ -275,7 +275,7 @@ describe('PlanningStore', () => {
   // ── rsvp() ─────────────────────────────────────────────────────────────────
   describe('rsvp()', () => {
     it('returns the attendee and refreshes event detail', async () => {
-      const result = await store.rsvp(ORG_ID, EVENT_ID, { status: 'ACCEPTED' });
+      const result = await store.rsvp(ORG_ID, EVENT_ID, { status: 'YES' });
       expect(result).toEqual(mockAttendee);
       expect(store.selectedEvent()).toEqual(mockEventDetail);
     });
@@ -294,7 +294,7 @@ describe('PlanningStore', () => {
         ],
       });
       store = TestBed.inject(PlanningStore);
-      const result = await store.rsvp(ORG_ID, EVENT_ID, { status: 'ACCEPTED' });
+      const result = await store.rsvp(ORG_ID, EVENT_ID, { status: 'YES' });
       expect(result).toBeNull();
       expect(store.error()).toEqual(error);
     });

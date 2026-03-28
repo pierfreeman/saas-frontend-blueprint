@@ -7,7 +7,7 @@
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
-export type RSVPStatus = 'ACCEPTED' | 'DECLINED' | 'TENTATIVE';
+export type RSVPStatus = 'YES' | 'NO' | 'MAYBE' | 'PENDING';
 
 // ── Request DTOs ──────────────────────────────────────────────────────────────
 
@@ -21,6 +21,7 @@ export interface CreateEventDto {
   eventTimezone?: string;
   rrule?: string;
   rruleUntilUtc?: string;
+  attendeeIds?: string[];
 }
 
 export interface UpdateEventDto {
@@ -34,6 +35,8 @@ export interface UpdateEventDto {
   rrule?: string;
   rruleUntilUtc?: string;
   version: number;
+  /** Replaces the full invited-attendee list (set semantics). Creator is always kept. */
+  attendeeIds?: string[];
 }
 
 export interface RsvpDto {

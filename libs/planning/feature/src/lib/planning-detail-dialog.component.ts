@@ -3,6 +3,7 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   Output,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
@@ -15,6 +16,7 @@ import {
   type EventOccurrence,
   type RSVPStatus,
 } from '@saas-frontend/planning/data-access';
+import type { MembershipSummary } from '@saas-frontend/memberships/data-access';
 
 @Component({
   selector: 'app-planning-detail-dialog',
@@ -83,10 +85,27 @@ import {
               <p class="text-sm font-medium text-surface-700 m-0">
                 Attendees ({{ event.attendees.length }})
               </p>
-              <ul class="list-none p-0 m-0 flex flex-col gap-1">
+              <ul class="list-none p-0 m-0 flex flex-col gap-2">
                 @for (att of event.attendees; track att.id) {
-                  <li class="flex items-center justify-between text-sm">
-                    <span class="text-surface-700">{{ att.userId }}</span>
+                  <li class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                      @if (memberMap.get(att.userId)?.user?.pictureUrl) {
+                        <img
+                          [src]="memberMap.get(att.userId)!.user!.pictureUrl!"
+                          alt=""
+                          class="w-7 h-7 rounded-full object-cover shrink-0"
+                        />
+                      } @else {
+                        <span
+                          class="w-7 h-7 rounded-full bg-surface-300 flex items-center justify-center text-xs font-semibold text-surface-700 shrink-0"
+                        >
+                          {{ memberInitials(att.userId) }}
+                        </span>
+                      }
+                      <span class="text-sm text-surface-700 truncate">
+                        {{ memberDisplayName(att.userId) }}
+                      </span>
+                    </div>
                     <p-tag
                       [value]="att.status"
                       [severity]="rsvpSeverity(att.status)"
@@ -106,21 +125,21 @@ import {
                 severity="success"
                 size="small"
                 [loading]="saving"
-                (onClick)="rsvp.emit('ACCEPTED')"
+                (onClick)="rsvp.emit('YES')"
               />
               <p-button
-                label="Tentative"
+                label="Maybe"
                 severity="warn"
                 size="small"
                 [loading]="saving"
-                (onClick)="rsvp.emit('TENTATIVE')"
+                (onClick)="rsvp.emit('MAYBE')"
               />
               <p-button
                 label="Decline"
                 severity="danger"
                 size="small"
                 [loading]="saving"
-                (onClick)="rsvp.emit('DECLINED')"
+                (onClick)="rsvp.emit('NO')"
               />
             </div>
           </div>
@@ -189,7 +208,7 @@ import {
     </p-dialog>
   `,
 })
-export class PlanningDetailDialogComponent {
+export class PlanningDetailDialogComponent implements OnChanges {
   @Input() visible = false;
   @Output() readonly visibleChange = new EventEmitter<boolean>();
 
@@ -198,18 +217,42 @@ export class PlanningDetailDialogComponent {
   @Input() loadingDetail = false;
   @Input() saving = false;
   @Input() canManage = false;
+  @Input() members: MembershipSummary[] = [];
 
   @Output() readonly edit = new EventEmitter<EventDetail>();
   @Output() readonly deleted = new EventEmitter<EventDetail>();
   @Output() readonly rsvp = new EventEmitter<RSVPStatus>();
   @Output() readonly openException = new EventEmitter<void>();
 
+  protected memberMap = new Map<string, MembershipSummary>();
+
+  ngOnChanges(): void {
+    this.memberMap = new Map(this.members.map((m) => [m.userId ?? '', m]));
+  }
+
+  protected memberDisplayName(userId: string): string {
+    const m = this.memberMap.get(userId);
+    if (!m?.user) return userId;
+    const name = [m.user.firstName, m.user.lastName].filter(Boolean).join(' ');
+    return name || m.user.email || userId;
+  }
+
+  protected memberInitials(userId: string): string {
+    const m = this.memberMap.get(userId);
+    if (!m?.user) return '?';
+    const first = m.user.firstName?.[0] ?? '';
+    const last = m.user.lastName?.[0] ?? '';
+    return (
+      (first + last).toUpperCase() || m.user.email?.[0]?.toUpperCase() || '?'
+    );
+  }
+
   protected rsvpSeverity(
     status: string,
   ): 'success' | 'warn' | 'danger' | 'secondary' {
-    if (status === 'ACCEPTED') return 'success';
-    if (status === 'TENTATIVE') return 'warn';
-    if (status === 'DECLINED') return 'danger';
-    return 'secondary';
+    if (status === 'YES') return 'success';
+    if (status === 'MAYBE') return 'warn';
+    if (status === 'NO') return 'danger';
+    return 'secondary'; // PENDING
   }
 }

@@ -7,6 +7,7 @@ export interface EventForm {
   location: string;
   eventTimezone: string;
   rrule: string;
+  attendeeIds: string[];
 }
 
 export function toLocalDatetimeInput(utcIso: string): string {
