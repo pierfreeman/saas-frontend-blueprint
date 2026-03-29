@@ -373,7 +373,8 @@ export class ActivityLogComponent implements OnInit {
     const last = member?.user?.lastName?.trim() ?? '';
     const fullName = [first, last].filter(Boolean).join(' ').trim();
 
-    if (fullName) return `${fullName} (${actorId})`;
+    if (fullName) return `${fullName}`;
+    if (member?.user?.email) return `${member.user.email}`;
     return actorId;
   }
 
