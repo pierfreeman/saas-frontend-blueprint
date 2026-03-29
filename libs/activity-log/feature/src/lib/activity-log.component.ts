@@ -15,6 +15,7 @@ import {
 } from '@saas-frontend/activity-log/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
+import { MembershipsStore } from '@saas-frontend/memberships/data-access';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -190,6 +191,23 @@ function actionMeta(action: string): {
                   <td class="text-sm">
                     @if (row.actorRole) {
                       <span class="text-surface-600">{{ row.actorRole }}</span>
+                      @if (row.actorId) {
+                        <div
+                          class="text-surface-500 text-xs"
+                          [pTooltip]="row.actorId"
+                          tooltipPosition="top"
+                        >
+                          {{ actorDisplay(row) }}
+                        </div>
+                      }
+                    } @else if (row.actorId) {
+                      <span
+                        class="text-surface-500"
+                        [pTooltip]="row.actorId"
+                        tooltipPosition="top"
+                      >
+                        {{ actorDisplay(row) }}
+                      </span>
                     } @else {
                       <span class="text-surface-300 italic">system</span>
                     }
@@ -263,6 +281,7 @@ export class ActivityLogComponent implements OnInit {
   readonly #api = inject(ActivityLogApi);
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #ent = inject(EntitlementsStore);
+  readonly #membershipsStore = inject(MembershipsStore);
 
   readonly canViewActivityLog = this.#ent.canUseAdvancedAnalytics;
 
@@ -293,7 +312,10 @@ export class ActivityLogComponent implements OnInit {
 
   ngOnInit(): void {
     const orgId = this.#orgId();
-    if (orgId) this.#ent.loadEntitlements(orgId);
+    if (orgId) {
+      this.#ent.loadEntitlements(orgId);
+      void this.#membershipsStore.loadMemberships(orgId);
+    }
     this.#load(0);
   }
 
@@ -338,6 +360,21 @@ export class ActivityLogComponent implements OnInit {
     } catch {
       return '';
     }
+  }
+
+  actorDisplay(row: ActivityLogRecord): string {
+    const actorId = row.actorId;
+    if (!actorId) return 'system';
+
+    const member = this.#membershipsStore
+      .memberships()
+      .find((m) => m.userId === actorId);
+    const first = member?.user?.firstName?.trim() ?? '';
+    const last = member?.user?.lastName?.trim() ?? '';
+    const fullName = [first, last].filter(Boolean).join(' ').trim();
+
+    if (fullName) return `${fullName} (${actorId})`;
+    return actorId;
   }
 
   #toApiDate(value: Date | null): string {
