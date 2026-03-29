@@ -6,11 +6,16 @@
     "target": "ES2022",
     "declaration": true
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
+    "src/test-setup.ts",
     "src/environments/environment.prod.ts"
   ],
-  "files": ["src/app/remote-entry/entry.routes.ts"]
+  "files": [
+    "src/app/remote-entry/entry.routes.ts"
+  ]
 }

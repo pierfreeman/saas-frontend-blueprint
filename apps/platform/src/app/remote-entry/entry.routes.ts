@@ -20,6 +20,10 @@ import {
   EntitlementsApi,
   EntitlementsStore,
 } from '@saas-frontend/entitlements/data-access';
+import {
+  PlanningApi,
+  PlanningStore,
+} from '@saas-frontend/planning/data-access';
 import { PermissionsService } from '@saas-frontend/shared/util-rbac';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrgContextService } from '@saas-frontend/shared/util-org-context';
@@ -79,6 +83,8 @@ export const PLATFORM_ROUTES: Route[] = [
       EntitlementsApi,
       EntitlementsStore,
       StorageApi,
+      PlanningApi,
+      PlanningStore,
       PermissionsService,
     ],
     children: [
@@ -150,6 +156,14 @@ export const PLATFORM_ROUTES: Route[] = [
               ),
           },
         ],
+      },
+      {
+        path: 'planning',
+        /* v8 ignore next 3 */
+        loadChildren: () =>
+          import('@saas-frontend/planning/feature').then(
+            (m) => m.FEATURE_PLANNING_ROUTES,
+          ),
       },
       {
         path: 'notifications',

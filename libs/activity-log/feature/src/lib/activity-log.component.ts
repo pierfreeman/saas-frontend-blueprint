@@ -15,8 +15,10 @@ import {
 } from '@saas-frontend/activity-log/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
+import { MembershipsStore } from '@saas-frontend/memberships/data-access';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
@@ -55,6 +57,7 @@ function actionMeta(action: string): {
     FormsModule,
     RouterLink,
     CardModule,
+    DatePickerModule,
     TableModule,
     TagModule,
     InputTextModule,
@@ -93,18 +96,31 @@ function actionMeta(action: string): {
               <label class="text-xs text-surface-500 font-medium"
                 >From date</label
               >
-              <input
-                pInputText
-                type="date"
-                size="small"
+              <p-datepicker
                 [(ngModel)]="fromDate"
+                [showIcon]="true"
+                [showButtonBar]="true"
+                [showOnFocus]="true"
+                [fluid]="true"
+                dateFormat="yy-mm-dd"
+                appendTo="body"
+                [maxDate]="toDate ?? undefined"
               />
             </div>
             <div class="flex flex-col gap-1">
               <label class="text-xs text-surface-500 font-medium"
                 >To date</label
               >
-              <input pInputText type="date" size="small" [(ngModel)]="toDate" />
+              <p-datepicker
+                [(ngModel)]="toDate"
+                [showIcon]="true"
+                [showButtonBar]="true"
+                [showOnFocus]="true"
+                [fluid]="true"
+                dateFormat="yy-mm-dd"
+                appendTo="body"
+                [minDate]="fromDate ?? undefined"
+              />
             </div>
             <p-button
               label="Apply"
@@ -175,6 +191,23 @@ function actionMeta(action: string): {
                   <td class="text-sm">
                     @if (row.actorRole) {
                       <span class="text-surface-600">{{ row.actorRole }}</span>
+                      @if (row.actorId) {
+                        <div
+                          class="text-surface-500 text-xs"
+                          [pTooltip]="row.actorId"
+                          tooltipPosition="top"
+                        >
+                          {{ actorDisplay(row) }}
+                        </div>
+                      }
+                    } @else if (row.actorId) {
+                      <span
+                        class="text-surface-500"
+                        [pTooltip]="row.actorId"
+                        tooltipPosition="top"
+                      >
+                        {{ actorDisplay(row) }}
+                      </span>
                     } @else {
                       <span class="text-surface-300 italic">system</span>
                     }
@@ -248,6 +281,7 @@ export class ActivityLogComponent implements OnInit {
   readonly #api = inject(ActivityLogApi);
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #ent = inject(EntitlementsStore);
+  readonly #membershipsStore = inject(MembershipsStore);
 
   readonly canViewActivityLog = this.#ent.canUseAdvancedAnalytics;
 
@@ -260,8 +294,8 @@ export class ActivityLogComponent implements OnInit {
 
   // filter state (v-model)
   actionFilter = '';
-  fromDate = '';
-  toDate = '';
+  fromDate: Date | null = null;
+  toDate: Date | null = null;
 
   // active applied filters
   readonly #activeFilters = signal<{
@@ -278,7 +312,10 @@ export class ActivityLogComponent implements OnInit {
 
   ngOnInit(): void {
     const orgId = this.#orgId();
-    if (orgId) this.#ent.loadEntitlements(orgId);
+    if (orgId) {
+      this.#ent.loadEntitlements(orgId);
+      void this.#membershipsStore.loadMemberships(orgId);
+    }
     this.#load(0);
   }
 
@@ -289,16 +326,16 @@ export class ActivityLogComponent implements OnInit {
   applyFilters(): void {
     this.#activeFilters.set({
       action: this.actionFilter.trim(),
-      fromDate: this.fromDate,
-      toDate: this.toDate,
+      fromDate: this.#toApiDate(this.fromDate),
+      toDate: this.#toApiDate(this.toDate),
     });
     this.#load(0);
   }
 
   resetFilters(): void {
     this.actionFilter = '';
-    this.fromDate = '';
-    this.toDate = '';
+    this.fromDate = null;
+    this.toDate = null;
     this.#activeFilters.set({ action: '', fromDate: '', toDate: '' });
     this.#load(0);
   }
@@ -323,6 +360,30 @@ export class ActivityLogComponent implements OnInit {
     } catch {
       return '';
     }
+  }
+
+  actorDisplay(row: ActivityLogRecord): string {
+    const actorId = row.actorId;
+    if (!actorId) return 'system';
+
+    const member = this.#membershipsStore
+      .memberships()
+      .find((m) => m.userId === actorId);
+    const first = member?.user?.firstName?.trim() ?? '';
+    const last = member?.user?.lastName?.trim() ?? '';
+    const fullName = [first, last].filter(Boolean).join(' ').trim();
+
+    if (fullName) return `${fullName}`;
+    if (member?.user?.email) return `${member.user.email}`;
+    return actorId;
+  }
+
+  #toApiDate(value: Date | null): string {
+    if (!value) return '';
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, '0');
+    const day = String(value.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   #load(offset: number): void {
