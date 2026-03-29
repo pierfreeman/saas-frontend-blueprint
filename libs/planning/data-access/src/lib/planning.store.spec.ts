@@ -82,6 +82,7 @@ function makeMockApi(overrides: Record<string, unknown> = {}) {
     deleteEvent: vi.fn(() => of({ message: 'Event deleted' })),
     rsvp: vi.fn(() => of(mockAttendee)),
     createException: vi.fn(() => of(mockException)),
+    splitSeries: vi.fn(() => of(mockEventDetail)),
     ...overrides,
   } as unknown as PlanningApi;
 }
@@ -329,6 +330,69 @@ describe('PlanningStore', () => {
       store = TestBed.inject(PlanningStore);
       const result = await store.createException(ORG_ID, EVENT_ID, {
         originalStartUtc: 'x',
+      });
+      expect(result).toBeNull();
+      expect(store.error()).toEqual(error);
+    });
+  });
+
+  // ── splitSeries() ─────────────────────────────────────────────────────────
+  describe('splitSeries()', () => {
+    it('returns the new tail event, sets selectedEvent, and reloads occurrences', async () => {
+      await store.loadOccurrences(ORG_ID, FROM, TO);
+      const dto = { originalStartUtc: '2026-04-08T09:00:00.000Z', version: 1 };
+      const result = await store.splitSeries(ORG_ID, EVENT_ID, dto);
+      expect(result).toEqual(mockEventDetail);
+      expect(store.selectedEvent()).toEqual(mockEventDetail);
+      expect(store.loadingMutation()).toBe(false);
+    });
+
+    it('sets loadingMutation to false after success', async () => {
+      const dto = { originalStartUtc: '2026-04-08T09:00:00.000Z', version: 1 };
+      await store.splitSeries(ORG_ID, EVENT_ID, dto);
+      expect(store.loadingMutation()).toBe(false);
+    });
+
+    it('returns null and stores error on failure (409 conflict)', async () => {
+      const error = { status: 409, message: 'Version conflict' };
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          {
+            provide: PlanningApi,
+            useValue: makeMockApi({
+              splitSeries: vi.fn(() => throwError(() => error)),
+            }),
+          },
+        ],
+      });
+      store = TestBed.inject(PlanningStore);
+      const result = await store.splitSeries(ORG_ID, EVENT_ID, {
+        originalStartUtc: '2026-04-08T09:00:00.000Z',
+        version: 99,
+      });
+      expect(result).toBeNull();
+      expect(store.error()).toEqual(error);
+      expect(store.loadingMutation()).toBe(false);
+    });
+
+    it('returns null and stores error on 400 (non-valid occurrence)', async () => {
+      const error = { status: 400, message: 'Invalid occurrence' };
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          {
+            provide: PlanningApi,
+            useValue: makeMockApi({
+              splitSeries: vi.fn(() => throwError(() => error)),
+            }),
+          },
+        ],
+      });
+      store = TestBed.inject(PlanningStore);
+      const result = await store.splitSeries(ORG_ID, EVENT_ID, {
+        originalStartUtc: '2099-01-01T00:00:00.000Z',
+        version: 1,
       });
       expect(result).toBeNull();
       expect(store.error()).toEqual(error);

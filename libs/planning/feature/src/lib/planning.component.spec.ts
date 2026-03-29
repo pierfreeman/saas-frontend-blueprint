@@ -44,6 +44,7 @@ type PlanningAny = {
     startUtc: string;
     endUtc: string;
     title: string;
+    recurrenceScope?: 'this' | 'thisAndFollowing';
   }): Promise<void>;
 } & PlanningComponent;
 
@@ -136,6 +137,7 @@ describe('PlanningComponent', () => {
     deleteEvent: vi.fn().mockResolvedValue(true),
     rsvp: vi.fn().mockResolvedValue(undefined),
     createException: vi.fn().mockResolvedValue({ id: 'ex-1' }),
+    splitSeries: vi.fn().mockResolvedValue({ id: 'tail-1' }),
   };
 
   const planningApiMock = {
@@ -510,6 +512,269 @@ describe('PlanningComponent', () => {
 
     expect(comp.conflictCount()).toBe(0);
     expect(comp.conflictPreview()).toEqual([]);
+    expect(comp.checkingConflicts()).toBe(false);
+    vi.useRealTimers();
+  });
+
+  // ── saving() computed ───────────────────────────────────────────────────────
+
+  it('saving() returns true when loadingMutation is true', () => {
+    loadingMutation.set(true);
+    loadingDetail.set(false);
+    expect(comp.saving()).toBe(true);
+  });
+
+  it('saving() returns true when loadingDetail is true and mutation is false', () => {
+    loadingMutation.set(false);
+    loadingDetail.set(true);
+    expect(comp.saving()).toBe(true);
+  });
+
+  it('saving() returns false when both are false', () => {
+    loadingMutation.set(false);
+    loadingDetail.set(false);
+    expect(comp.saving()).toBe(false);
+  });
+
+  // ── canEditSelected() computed ──────────────────────────────────────────────
+
+  it('canEditSelected() returns false when no occurrence is selected', () => {
+    comp.selectedOccurrence.set(null);
+    expect(comp.canEditSelected()).toBe(false);
+  });
+
+  it('canEditSelected() returns true when user has PLANNING_MANAGE_ANY', () => {
+    permissionsSet.add(PERMISSIONS.PLANNING_MANAGE_ANY);
+    comp.selectedOccurrence.set(
+      makeOccurrence({ createdByUserId: 'other-user' }),
+    );
+    expect(comp.canEditSelected()).toBe(true);
+  });
+
+  it('canEditSelected() returns true when user is creator of the occurrence', () => {
+    comp.selectedOccurrence.set(makeOccurrence({ createdByUserId: 'user-1' }));
+    expect(comp.canEditSelected()).toBe(true);
+  });
+
+  it('canEditSelected() returns false when user is not creator and lacks MANAGE_ANY', () => {
+    comp.selectedOccurrence.set(
+      makeOccurrence({ createdByUserId: 'other-user' }),
+    );
+    expect(comp.canEditSelected()).toBe(false);
+  });
+
+  // ── select() — single-day allDay and time-grid branches ────────────────────
+
+  it('select single-day allDay creates a 1-hour slot (not all-day)', () => {
+    const select = comp.calendarOptions().select;
+    select?.({
+      start: new Date('2026-01-07T00:00:00.000Z'),
+      end: new Date('2026-01-08T00:00:00.000Z'), // spanDays = 1 → else branch
+      allDay: true,
+    } as never);
+
+    const startMs = new Date(comp.form.startUtc).getTime();
+    const endMs = new Date(comp.form.endUtc).getTime();
+    expect(endMs - startMs).toBe(60 * 60 * 1000);
+    expect(comp.createDialogVisible()).toBe(true);
+  });
+
+  it('select non-allDay (time-grid drag) sets exact start/end from arg', () => {
+    const select = comp.calendarOptions().select;
+    select?.({
+      start: new Date('2026-01-07T10:00:00.000Z'),
+      end: new Date('2026-01-07T11:30:00.000Z'),
+      allDay: false,
+    } as never);
+
+    expect(comp.form.startUtc).toBe('2026-01-07T10:00:00.000Z');
+    expect(comp.form.endUtc).toBe('2026-01-07T11:30:00.000Z');
+    expect(comp.createDialogVisible()).toBe(true);
+  });
+
+  // ── submitException — thisAndFollowing paths ────────────────────────────────
+
+  it('submitException thisAndFollowing + isCancelled: true calls updateEvent with rruleUntilUtc', async () => {
+    comp.exceptionDialogVisible.set(true);
+    comp.selectedOccurrence.set(
+      makeOccurrence({
+        originalStartUtc: '2026-04-06T10:00:00.000Z',
+        version: 3,
+      }),
+    );
+    storeMock.updateEvent.mockResolvedValueOnce({ id: 'ok' });
+
+    await comp.submitException({
+      recurrenceScope: 'thisAndFollowing',
+      isCancelled: true,
+      startUtc: '',
+      endUtc: '',
+      title: '',
+    });
+
+    expect(storeMock.updateEvent).toHaveBeenCalledWith(
+      'org-1',
+      'event-1',
+      expect.objectContaining({ rruleUntilUtc: expect.any(String) }),
+    );
+    expect(comp.exceptionDialogVisible()).toBe(false);
+  });
+
+  it('submitException thisAndFollowing + isCancelled: true + updateEvent fails keeps dialog open', async () => {
+    comp.exceptionDialogVisible.set(true);
+    comp.selectedOccurrence.set(makeOccurrence());
+    storeMock.updateEvent.mockResolvedValueOnce(null);
+
+    await comp.submitException({
+      recurrenceScope: 'thisAndFollowing',
+      isCancelled: true,
+      startUtc: '',
+      endUtc: '',
+      title: '',
+    });
+
+    expect(comp.exceptionDialogVisible()).toBe(true);
+  });
+
+  it('submitException thisAndFollowing + isCancelled: false calls splitSeries and closes dialog', async () => {
+    comp.exceptionDialogVisible.set(true);
+    comp.selectedOccurrence.set(makeOccurrence());
+    storeMock.splitSeries.mockResolvedValueOnce({ id: 'tail-1' });
+
+    await comp.submitException({
+      recurrenceScope: 'thisAndFollowing',
+      isCancelled: false,
+      startUtc: '2026-04-06T14:00',
+      endUtc: '2026-04-06T15:00',
+      title: 'New tail',
+    });
+
+    expect(storeMock.splitSeries).toHaveBeenCalledWith(
+      'org-1',
+      'event-1',
+      expect.objectContaining({ originalStartUtc: expect.any(String) }),
+    );
+    expect(comp.exceptionDialogVisible()).toBe(false);
+  });
+
+  it('submitException thisAndFollowing + isCancelled: false + splitSeries fails keeps dialog open', async () => {
+    comp.exceptionDialogVisible.set(true);
+    comp.selectedOccurrence.set(makeOccurrence());
+    storeMock.splitSeries.mockResolvedValueOnce(null);
+
+    await comp.submitException({
+      recurrenceScope: 'thisAndFollowing',
+      isCancelled: false,
+      startUtc: '',
+      endUtc: '',
+      title: '',
+    });
+
+    expect(comp.exceptionDialogVisible()).toBe(true);
+  });
+
+  // ── eventDrop / eventResize — guard branches ────────────────────────────────
+
+  it('eventDrop reverts immediately when user cannot edit the occurrence', async () => {
+    // No PLANNING_MANAGE_ANY, and different creator — canEditOccurrence = false
+    const revert = vi.fn();
+    const eventDrop = comp.calendarOptions().eventDrop;
+    await eventDrop?.({
+      event: {
+        start: new Date('2026-01-06T10:00:00.000Z'),
+        end: null,
+        extendedProps: {
+          occurrence: makeOccurrence({ createdByUserId: 'other-user' }),
+        },
+      },
+      revert,
+    } as never);
+
+    expect(revert).toHaveBeenCalledOnce();
+    expect(storeMock.updateEvent).not.toHaveBeenCalled();
+  });
+
+  it('eventDrop reverts when start is null', async () => {
+    permissionsSet.add(PERMISSIONS.PLANNING_MANAGE_ANY);
+    const revert = vi.fn();
+    const eventDrop = comp.calendarOptions().eventDrop;
+    await eventDrop?.({
+      event: {
+        start: null,
+        end: null,
+        extendedProps: { occurrence: makeOccurrence() },
+      },
+      revert,
+    } as never);
+
+    expect(revert).toHaveBeenCalledOnce();
+  });
+
+  it('eventResize reverts immediately when user cannot edit the occurrence', async () => {
+    const revert = vi.fn();
+    const eventResize = comp.calendarOptions().eventResize;
+    await eventResize?.({
+      event: {
+        start: new Date('2026-01-06T10:00:00.000Z'),
+        end: new Date('2026-01-06T11:00:00.000Z'),
+        extendedProps: {
+          occurrence: makeOccurrence({ createdByUserId: 'other-user' }),
+        },
+      },
+      revert,
+    } as never);
+
+    expect(revert).toHaveBeenCalledOnce();
+    expect(storeMock.updateEvent).not.toHaveBeenCalled();
+  });
+
+  it('eventResize reverts when end is null', async () => {
+    permissionsSet.add(PERMISSIONS.PLANNING_MANAGE_ANY);
+    const revert = vi.fn();
+    const eventResize = comp.calendarOptions().eventResize;
+    await eventResize?.({
+      event: {
+        start: new Date('2026-01-06T10:00:00.000Z'),
+        end: null,
+        extendedProps: { occurrence: makeOccurrence() },
+      },
+      revert,
+    } as never);
+
+    expect(revert).toHaveBeenCalledOnce();
+  });
+
+  // ── #resetForm — timer clearing (lines 632-633) ─────────────────────────────
+
+  it('resetForm clears an active conflict check timer', async () => {
+    vi.useFakeTimers();
+    comp.onFormDraftChanged(makeForm()); // sets #conflictTimer
+    comp.openCreateDialog(); // calls #resetForm → clears timer
+    await vi.advanceTimersByTimeAsync(500);
+    expect(planningApiMock.listConflicts).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  // ── #scheduleConflictCheck — double-call clears previous timer (line 639) ───
+
+  it('onFormDraftChanged called twice rapidly only fires one conflict check', async () => {
+    vi.useFakeTimers();
+    planningApiMock.listConflicts.mockReturnValue(of([]));
+    comp.onFormDraftChanged(makeForm());
+    comp.onFormDraftChanged(makeForm()); // cancels first timer
+    await vi.advanceTimersByTimeAsync(500);
+    expect(planningApiMock.listConflicts).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  // ── #runConflictCheck — early return when dates are invalid (lines 652-655) ─
+
+  it('conflict check skips API call when form start/end are empty', async () => {
+    vi.useFakeTimers();
+    comp.onFormDraftChanged(makeForm({ startUtc: '', endUtc: '' }));
+    await vi.advanceTimersByTimeAsync(300);
+    expect(planningApiMock.listConflicts).not.toHaveBeenCalled();
+    expect(comp.conflictCount()).toBe(0);
     expect(comp.checkingConflicts()).toBe(false);
     vi.useRealTimers();
   });

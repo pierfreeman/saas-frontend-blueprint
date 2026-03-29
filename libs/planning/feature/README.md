@@ -9,13 +9,13 @@ Angular feature library for the org planning/calendar UI. Implements the full ca
 
 ## Components
 
-| Component                          | Selector                         | Description                                                                                    |
-| ---------------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `PlanningComponent`                | `app-planning`                   | Root feature component. FullCalendar + all dialogs + live conflict checking.                   |
-| `PlanningEventFormDialogComponent` | `app-planning-event-form-dialog` | Create / edit dialog. RRULE builder, attendee multiselect, timezone selector, conflict banner. |
-| `PlanningDetailDialogComponent`    | `app-planning-detail-dialog`     | Event detail overlay. RSVP buttons, edit/delete actions gated on `canEditSelected`.            |
-| `PlanningExceptionDialogComponent` | `app-planning-exception-dialog`  | Single-occurrence override dialog (reschedule or cancel one occurrence).                       |
-| `PlanningRruleBuilderComponent`    | `app-planning-rrule-builder`     | Visual RRULE builder with two-way `[(rrule)]` binding. 51 unit tests.                          |
+| Component                          | Selector                         | Description                                                                                         |
+| ---------------------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `PlanningComponent`                | `app-planning`                   | Root feature component. FullCalendar + all dialogs + live conflict checking.                        |
+| `PlanningEventFormDialogComponent` | `app-planning-event-form-dialog` | Create / edit dialog. RRULE builder, attendee multiselect, timezone selector, conflict banner.      |
+| `PlanningDetailDialogComponent`    | `app-planning-detail-dialog`     | Event detail overlay. RSVP buttons, edit/delete actions gated on `canEditSelected`.                 |
+| `PlanningExceptionDialogComponent` | `app-planning-exception-dialog`  | Occurrence override dialog. Supports scope: **This occurrence only** or **This and all following**. |
+| `PlanningRruleBuilderComponent`    | `app-planning-rrule-builder`     | Visual RRULE builder with two-way `[(rrule)]` binding. 51 unit tests.                               |
 
 ---
 
@@ -49,6 +49,15 @@ FullCalendar with **month / week / day** views. Deep-link support: `?eventId=<uu
 - By-day pill buttons (Mo–Su), visible for weekly only; always keeps ≥ 1 selected
 - End-type radio: Never / After N occurrences / On date
 - Two-way `[(rrule)]` binding: parses with `RRule.fromString()`, emits with `new RRule(opts).toString()`
+
+### "This and Following" series split
+
+`PlanningExceptionDialogComponent` exposes an **Apply to** radio group:
+
+- **This occurrence only** → calls `store.createException()` (single `EventException` upsert)
+- **This and all following occurrences** → two sub-paths:
+  - **Cancel** (checkbox checked) → calls `store.updateEvent({ rruleUntilUtc })`, setting the series end to 1 ms before the split occurrence. `RecurrenceService` on the backend caps expansion at this value even when the RRULE string has no `UNTIL` clause.
+  - **Reschedule / rename** (checkbox unchecked) → calls `store.splitSeries()` which hits `POST /:id/split`. The original series is truncated and a new tail event is created starting at the split point (with optional new `startUtc`, `endUtc`, or `title`).
 
 ### Reminder notifications
 
@@ -99,6 +108,14 @@ The detail dialog shows a bell-icon row with a human-readable label (e.g. _"Remi
 npx nx run planning-feature:test
 ```
 
-51 tests in `planning-rrule-builder.component.spec.ts` cover parse, build, round-trip and all interaction methods.
+179 tests across 7 spec files:
 
-11 tests in `planning-reminders.spec.ts` cover `REMINDER_OPTIONS` shape invariants and `PlanningDetailDialogComponent.formatReminder()` for all presets.
+| Spec file                                      | Tests | Covers                                                                                        |
+| ---------------------------------------------- | ----: | --------------------------------------------------------------------------------------------- |
+| `planning-rrule-builder.component.spec.ts`     |    51 | RRULE parse, build, round-trip and all interaction paths                                      |
+| `planning-reminders.spec.ts`                   |    36 | `REMINDER_OPTIONS` shape invariants, `formatReminder()` for all presets                       |
+| `planning-event-form-dialog.component.spec.ts` |    30 | Form dialog rendering, timezone selector, conflict banner                                     |
+| `planning.component.spec.ts`                   |    43 | Calendar callbacks, dialogs, split-series paths, conflict debounce, guard branches            |
+| `planning-exception-dialog.component.spec.ts`  |     9 | Exception dialog form reset, scope radio, submit                                              |
+| `planning.utils.spec.ts`                       |     8 | `browserTimezone`, `toUtcIso`, `toLocalDatetimeInput`, `REMINDER_OPTIONS`, `TIMEZONE_OPTIONS` |
+| `planning.utils.module-init.spec.ts`           |     2 | `TIMEZONE_OPTIONS` fallback branches (`supportedValuesOf` / `DateTimeFormat` throws)          |

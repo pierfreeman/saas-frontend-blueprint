@@ -59,6 +59,16 @@ export interface CreateEventExceptionDto {
   location?: string;
 }
 
+export interface SplitSeriesDto {
+  originalStartUtc: string;
+  version: number;
+  title?: string;
+  description?: string | null;
+  location?: string | null;
+  startUtc?: string;
+  endUtc?: string;
+}
+
 export interface ListEventsParams {
   from: string;
   to: string;

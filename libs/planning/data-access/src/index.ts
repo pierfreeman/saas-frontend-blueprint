@@ -5,6 +5,7 @@ export type {
   UpdateEventDto,
   RsvpDto,
   CreateEventExceptionDto,
+  SplitSeriesDto,
   ListEventsParams,
   ListConflictsParams,
   EventDetail,

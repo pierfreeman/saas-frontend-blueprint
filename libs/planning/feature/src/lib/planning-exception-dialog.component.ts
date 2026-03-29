@@ -13,14 +13,18 @@ import { ButtonModule } from 'primeng/button';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { type EventOccurrence } from '@saas-frontend/planning/data-access';
 import { toLocalDatetimeInput } from './planning.utils';
 
-interface ExceptionForm {
+export type RecurrenceScope = 'this' | 'thisAndFollowing';
+
+export interface ExceptionForm {
   isCancelled: boolean;
   startUtc: string;
   endUtc: string;
   title: string;
+  recurrenceScope: RecurrenceScope;
 }
 
 @Component({
@@ -34,6 +38,7 @@ interface ExceptionForm {
     CheckboxModule,
     DialogModule,
     InputTextModule,
+    RadioButtonModule,
   ],
   template: `
     <p-dialog
@@ -51,6 +56,33 @@ interface ExceptionForm {
           <strong>{{ occurrence?.originalStartUtc | date: 'medium' }}</strong>
         </p>
 
+        <!-- Recurrence scope -->
+        <div class="flex flex-col gap-2">
+          <span class="text-sm font-medium text-surface-700">Apply to</span>
+          <div class="flex items-center gap-2">
+            <p-radioButton
+              name="recurrenceScope"
+              value="this"
+              [(ngModel)]="exceptionForm.recurrenceScope"
+              inputId="scopeThis"
+            />
+            <label for="scopeThis" class="text-sm text-surface-700">
+              This occurrence only
+            </label>
+          </div>
+          <div class="flex items-center gap-2">
+            <p-radioButton
+              name="recurrenceScope"
+              value="thisAndFollowing"
+              [(ngModel)]="exceptionForm.recurrenceScope"
+              inputId="scopeFollowing"
+            />
+            <label for="scopeFollowing" class="text-sm text-surface-700">
+              This and all following occurrences
+            </label>
+          </div>
+        </div>
+
         <!-- Cancel occurrence -->
         <div class="flex items-center gap-2">
           <p-checkbox
@@ -59,7 +91,11 @@ interface ExceptionForm {
             inputId="excCancel"
           />
           <label for="excCancel" class="text-sm text-surface-700">
-            Cancel this occurrence
+            @if (exceptionForm.recurrenceScope === 'thisAndFollowing') {
+              Cancel this and all following occurrences (end series)
+            } @else {
+              Cancel this occurrence
+            }
           </label>
         </div>
 
@@ -129,6 +165,7 @@ export class PlanningExceptionDialogComponent implements OnChanges {
     startUtc: '',
     endUtc: '',
     title: '',
+    recurrenceScope: 'this',
   };
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -139,6 +176,7 @@ export class PlanningExceptionDialogComponent implements OnChanges {
         startUtc: occ ? toLocalDatetimeInput(occ.startUtc) : '',
         endUtc: occ ? toLocalDatetimeInput(occ.endUtc) : '',
         title: '',
+        recurrenceScope: 'this',
       };
     }
   }

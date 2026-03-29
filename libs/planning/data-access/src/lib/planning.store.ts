@@ -6,6 +6,7 @@ import type {
   UpdateEventDto,
   RsvpDto,
   CreateEventExceptionDto,
+  SplitSeriesDto,
   EventDetail,
   EventOccurrence,
   EventAttendee,
@@ -158,6 +159,28 @@ export class PlanningStore {
       await this.loadEventDetail(orgId, eventId);
       await this.#reloadOccurrences();
       return exception;
+    } catch (err) {
+      this.error.set(err as ApiError);
+      return null;
+    } finally {
+      this.loadingMutation.set(false);
+    }
+  }
+
+  async splitSeries(
+    orgId: string,
+    eventId: string,
+    dto: SplitSeriesDto,
+  ): Promise<EventDetail | null> {
+    this.loadingMutation.set(true);
+    this.error.set(null);
+    try {
+      const result = await firstValueFrom(
+        this.#api.splitSeries(orgId, eventId, dto),
+      );
+      this.selectedEvent.set(result);
+      await this.#reloadOccurrences();
+      return result;
     } catch (err) {
       this.error.set(err as ApiError);
       return null;

@@ -251,4 +251,37 @@ describe('PlanningApi', () => {
       req.flush(mockException);
     });
   });
+
+  describe('splitSeries()', () => {
+    it('sends POST /organizations/:orgId/planning/events/:id/split with dto', () => {
+      const dto = {
+        originalStartUtc: '2026-04-08T09:00:00.000Z',
+        version: 1,
+        title: 'New tail title',
+      };
+      api.splitSeries(ORG_ID, EVENT_ID, dto).subscribe();
+      const req = controller.expectOne(
+        `${BASE}/organizations/${ORG_ID}/planning/events/${EVENT_ID}/split`,
+      );
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(dto);
+      req.flush(mockEventDetail);
+    });
+
+    it('returns the newly created tail EventDetail', () => {
+      let result: unknown;
+      api
+        .splitSeries(ORG_ID, EVENT_ID, {
+          originalStartUtc: '2026-04-08T09:00:00.000Z',
+          version: 1,
+        })
+        .subscribe((r) => (result = r));
+      controller
+        .expectOne(
+          `${BASE}/organizations/${ORG_ID}/planning/events/${EVENT_ID}/split`,
+        )
+        .flush(mockEventDetail);
+      expect(result).toEqual(mockEventDetail);
+    });
+  });
 });

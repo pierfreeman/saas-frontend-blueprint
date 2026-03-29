@@ -33,6 +33,7 @@ import {
   type EventDetail,
   type EventOccurrence,
   type RSVPStatus,
+  type SplitSeriesDto,
   type UpdateEventDto,
 } from '@saas-frontend/planning/data-access';
 import {
@@ -46,7 +47,10 @@ import { ToastModule } from 'primeng/toast';
 import { firstValueFrom } from 'rxjs';
 import { PlanningDetailDialogComponent } from './planning-detail-dialog.component';
 import { PlanningEventFormDialogComponent } from './planning-event-form-dialog.component';
-import { PlanningExceptionDialogComponent } from './planning-exception-dialog.component';
+import {
+  PlanningExceptionDialogComponent,
+  type ExceptionForm,
+} from './planning-exception-dialog.component';
 import { browserTimezone, toUtcIso, type EventForm } from './planning.utils';
 
 const DEFAULT_FORM: EventForm = {
@@ -481,15 +485,50 @@ export class PlanningComponent implements OnInit {
     this.exceptionDialogVisible.set(true);
   }
 
-  protected async submitException(data: {
-    isCancelled: boolean;
-    startUtc: string;
-    endUtc: string;
-    title: string;
-  }): Promise<void> {
+  protected async submitException(data: ExceptionForm): Promise<void> {
     const orgId = this.#orgsStore.activeOrgId();
     const occ = this.selectedOccurrence();
     if (!orgId || !occ) return;
+
+    if (data.recurrenceScope === 'thisAndFollowing') {
+      // "This and Following" path — call the split endpoint.
+      const splitDto: SplitSeriesDto = {
+        originalStartUtc: occ.originalStartUtc,
+        version: occ.version,
+        ...(data.isCancelled
+          ? {}
+          : {
+              startUtc: toUtcIso(data.startUtc) || undefined,
+              endUtc: toUtcIso(data.endUtc) || undefined,
+              title: data.title || undefined,
+            }),
+      };
+      if (data.isCancelled) {
+        // End the series at the split point by updating rruleUntilUtc.
+        const untilUtc = new Date(
+          new Date(occ.originalStartUtc).getTime() - 1,
+        ).toISOString();
+        const result = await this.store.updateEvent(orgId, occ.eventId, {
+          version: occ.version,
+          rruleUntilUtc: untilUtc,
+        });
+        if (result) {
+          this.exceptionDialogVisible.set(false);
+        }
+      } else {
+        const result = await this.store.splitSeries(
+          orgId,
+          occ.eventId,
+          splitDto,
+        );
+        if (result) {
+          this.exceptionDialogVisible.set(false);
+        }
+      }
+      return;
+    }
+
+    // "This only" path — create a single exception.
     const dto = {
       originalStartUtc: occ.originalStartUtc,
       isCancelled: data.isCancelled,

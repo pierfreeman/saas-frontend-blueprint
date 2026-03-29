@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SimpleChange, SimpleChanges } from '@angular/core';
-import { PlanningExceptionDialogComponent } from './planning-exception-dialog.component';
+import {
+  PlanningExceptionDialogComponent,
+  type RecurrenceScope,
+} from './planning-exception-dialog.component';
 
 // Access protected members without TypeScript errors.
 type ExcAny = {
@@ -9,6 +12,7 @@ type ExcAny = {
     startUtc: string;
     endUtc: string;
     title: string;
+    recurrenceScope: RecurrenceScope;
   };
   occurrence: {
     startUtc: string;
@@ -49,6 +53,14 @@ describe('PlanningExceptionDialogComponent', () => {
       expect(comp.exceptionForm.startUtc).toBe('');
       expect(comp.exceptionForm.endUtc).toBe('');
       expect(comp.exceptionForm.title).toBe('');
+      expect(comp.exceptionForm.recurrenceScope).toBe('this');
+    });
+
+    it('defaults recurrenceScope to "this" on each open', () => {
+      comp.exceptionForm.recurrenceScope = 'thisAndFollowing';
+      comp.occurrence = null;
+      open();
+      expect(comp.exceptionForm.recurrenceScope).toBe('this');
     });
 
     it('populates startUtc and endUtc from occurrence when visible becomes true', () => {
@@ -93,6 +105,7 @@ describe('PlanningExceptionDialogComponent', () => {
         startUtc: '2026-01-12T10:00',
         endUtc: '2026-01-12T11:00',
         title: 'Override title',
+        recurrenceScope: 'this',
       };
       comp.submit();
       expect(comp.submitted.emit).toHaveBeenCalledWith({
@@ -100,6 +113,7 @@ describe('PlanningExceptionDialogComponent', () => {
         startUtc: '2026-01-12T10:00',
         endUtc: '2026-01-12T11:00',
         title: 'Override title',
+        recurrenceScope: 'this',
       });
     });
 
@@ -112,7 +126,23 @@ describe('PlanningExceptionDialogComponent', () => {
         startUtc: '',
         endUtc: '',
         title: '',
+        recurrenceScope: 'this',
       });
+    });
+
+    it('emits submitted with recurrenceScope="thisAndFollowing" when set', () => {
+      comp.occurrence = null;
+      open();
+      comp.exceptionForm.recurrenceScope = 'thisAndFollowing';
+      comp.exceptionForm.isCancelled = false;
+      comp.exceptionForm.title = 'New tail';
+      comp.submit();
+      expect(comp.submitted.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          recurrenceScope: 'thisAndFollowing',
+          title: 'New tail',
+        }),
+      );
     });
   });
 });

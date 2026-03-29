@@ -7,6 +7,7 @@ import type {
   UpdateEventDto,
   RsvpDto,
   CreateEventExceptionDto,
+  SplitSeriesDto,
   ListEventsParams,
   ListConflictsParams,
   EventDetail,
@@ -95,6 +96,17 @@ export class PlanningApi {
   ): Observable<EventException> {
     return this.#http.post<EventException>(
       `${this.#base}/organizations/${orgId}/planning/events/${eventId}/exceptions`,
+      dto,
+    );
+  }
+
+  splitSeries(
+    orgId: string,
+    eventId: string,
+    dto: SplitSeriesDto,
+  ): Observable<EventDetail> {
+    return this.#http.post<EventDetail>(
+      `${this.#base}/organizations/${orgId}/planning/events/${eventId}/split`,
       dto,
     );
   }
