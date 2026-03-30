@@ -59,6 +59,7 @@ import { tenantInterceptor } from '@saas-frontend/organizations/data-access';
 import { errorInterceptor } from '@saas-frontend/shared/util-error';
 import { environment } from 'src/environments/environment';
 import { AppInitService } from './app-init.service';
+import { RemoteConfigService } from './remote-config.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -102,6 +103,11 @@ export const appConfig: ApplicationConfig = {
         ],
       },
     }),
+    // Runs in parallel with AppInitService.initialize().
+    // Fetches /remotes.json and registers remote entry URLs with the MF runtime
+    // so loadChildren can resolve any remote URL defined in the config file,
+    // without requiring a shell rebuild.
+    provideAppInitializer(() => inject(RemoteConfigService).loadConfig()),
     provideAppInitializer(() => inject(AppInitService).initialize()),
   ],
 };
