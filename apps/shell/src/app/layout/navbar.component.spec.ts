@@ -1,0 +1,175 @@
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { AuthService } from '@auth0/auth0-angular';
+import { AuthStore } from '@saas-frontend/auth/data-access';
+import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { OrgContextService } from '@saas-frontend/shared/util-org-context';
+import { describe, expect, it, vi } from 'vitest';
+import { NavbarComponent } from './navbar.component';
+
+// ── Setup helper ──────────────────────────────────────────────────────────────
+
+function setup(
+  opts: {
+    canManage?: boolean;
+    email?: string;
+    pictureUrl?: string | null;
+  } = {},
+) {
+  const {
+    canManage = false,
+    email = 'alice@example.com',
+    pictureUrl = null,
+  } = opts;
+
+  const mockAuth = {
+    logout: vi.fn(),
+  } as unknown as AuthService;
+
+  const mockAuthStore = {
+    currentUser: signal({ email, pictureUrl }),
+    clearUser: vi.fn(),
+  } as unknown as AuthStore;
+
+  const mockOrgsStore = {
+    clearActiveOrg: vi.fn(),
+  } as unknown as OrganizationsStore;
+
+  const mockOrgContext = {
+    canManageOrg: signal(canManage),
+  } as unknown as OrgContextService;
+
+  TestBed.configureTestingModule({
+    imports: [NavbarComponent],
+    providers: [
+      provideRouter([{ path: '**', redirectTo: '' }]),
+      { provide: AuthService, useValue: mockAuth },
+      { provide: AuthStore, useValue: mockAuthStore },
+      { provide: OrganizationsStore, useValue: mockOrgsStore },
+      { provide: OrgContextService, useValue: mockOrgContext },
+    ],
+  });
+
+  const fixture = TestBed.createComponent(NavbarComponent);
+  const component = fixture.componentInstance;
+  fixture.detectChanges();
+
+  return { fixture, component, mockAuth, mockAuthStore, mockOrgsStore };
+}
+
+// ── Suite ─────────────────────────────────────────────────────────────────────
+
+describe('NavbarComponent', () => {
+  // ── mobileMenuOpen ──────────────────────────────────────────────────────────
+
+  describe('mobileMenuOpen', () => {
+    it('starts as false', () => {
+      const { component } = setup();
+      expect(component.mobileMenuOpen()).toBe(false);
+    });
+
+    it('toggleMobileMenu() sets it to true when false', () => {
+      const { component } = setup();
+      component.toggleMobileMenu();
+      expect(component.mobileMenuOpen()).toBe(true);
+    });
+
+    it('toggleMobileMenu() sets it back to false on second call', () => {
+      const { component } = setup();
+      component.toggleMobileMenu();
+      component.toggleMobileMenu();
+      expect(component.mobileMenuOpen()).toBe(false);
+    });
+
+    it('closes on NavigationEnd event', async () => {
+      const { component } = setup();
+      component.mobileMenuOpen.set(true);
+
+      const router = TestBed.inject(Router);
+      await router.navigateByUrl('/');
+      expect(component.mobileMenuOpen()).toBe(false);
+    });
+  });
+
+  // ── navigateTo ──────────────────────────────────────────────────────────────
+
+  describe('navigateTo()', () => {
+    it('navigates to the given path', async () => {
+      const { component } = setup();
+      const router = TestBed.inject(Router);
+      const spy = vi.spyOn(router, 'navigateByUrl');
+      component.navigateTo('/personal-settings');
+      expect(spy).toHaveBeenCalledWith('/personal-settings');
+    });
+  });
+
+  // ── mobilLogout ─────────────────────────────────────────────────────────────
+
+  describe('mobilLogout()', () => {
+    it('clears user and org state', () => {
+      const { component, mockAuthStore, mockOrgsStore } = setup();
+      component.mobilLogout();
+      expect(mockAuthStore.clearUser).toHaveBeenCalled();
+      expect(mockOrgsStore.clearActiveOrg).toHaveBeenCalled();
+    });
+
+    it('calls Auth0 logout', () => {
+      const { component, mockAuth } = setup();
+      component.mobilLogout();
+      expect(mockAuth.logout).toHaveBeenCalledWith({ openUrl: false });
+    });
+
+    it('redirects to /auth', () => {
+      const { component } = setup();
+      const router = TestBed.inject(Router);
+      const spy = vi.spyOn(router, 'navigateByUrl');
+      component.mobilLogout();
+      expect(spy).toHaveBeenCalledWith('/auth');
+    });
+  });
+
+  // ── avatarLabel ─────────────────────────────────────────────────────────────
+
+  describe('avatarLabel()', () => {
+    it('returns the uppercase first letter of the email', () => {
+      const { component } = setup({ email: 'bob@example.com' });
+      expect(component.avatarLabel()).toBe('B');
+    });
+
+    it('returns "?" when email is empty', () => {
+      const { component } = setup({ email: '' });
+      expect(component.avatarLabel()).toBe('?');
+    });
+  });
+
+  // ── avatarPicture ────────────────────────────────────────────────────────────
+
+  describe('avatarPicture()', () => {
+    it('returns null when no pictureUrl is set', () => {
+      const { component } = setup({ pictureUrl: null });
+      expect(component.avatarPicture()).toBeNull();
+    });
+
+    it('returns the pictureUrl when set', () => {
+      const { component } = setup({
+        pictureUrl: 'https://example.com/pic.jpg',
+      });
+      expect(component.avatarPicture()).toBe('https://example.com/pic.jpg');
+    });
+  });
+
+  // ── showOrgSettings ─────────────────────────────────────────────────────────
+
+  describe('showOrgSettings()', () => {
+    it('returns true when canManageOrg is true', () => {
+      const { component } = setup({ canManage: true });
+      expect(component.showOrgSettings()).toBe(true);
+    });
+
+    it('returns false when canManageOrg is false', () => {
+      const { component } = setup({ canManage: false });
+      expect(component.showOrgSettings()).toBe(false);
+    });
+  });
+});

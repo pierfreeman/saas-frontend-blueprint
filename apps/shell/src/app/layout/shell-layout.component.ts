@@ -29,7 +29,8 @@ function typeIcon(type: string): string {
     return 'pi-credit-card';
   if (type.includes('invite') || type.includes('member')) return 'pi-users';
   if (type.includes('org')) return 'pi-building';
-  if (type.includes('export') || type.includes('download')) return 'pi-download';
+  if (type.includes('export') || type.includes('download'))
+    return 'pi-download';
   if (type.includes('alert') || type.includes('warn'))
     return 'pi-exclamation-triangle';
   return 'pi-bell';
@@ -63,8 +64,18 @@ function entityRef(n: NotificationRecord): { type: string; id: string } | null {
       <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
         <!-- Topbar -->
         <header
-          class="flex items-center gap-3 px-6 h-16 bg-surface-0 border-b border-surface-200 shrink-0"
+          class="flex items-center gap-3 px-4 lg:px-6 h-16 bg-surface-0 border-b border-surface-200 shrink-0"
         >
+          <!-- Hamburger (mobile only) -->
+          <button
+            type="button"
+            class="flex lg:hidden items-center justify-center w-9 h-9 rounded-lg text-surface-500 hover:bg-surface-100 hover:text-surface-700 transition-colors shrink-0"
+            aria-label="Open menu"
+            (click)="navbar()?.toggleMobileMenu()"
+          >
+            <i class="pi pi-bars text-lg"></i>
+          </button>
+
           <!-- Org name (left) -->
           <span class="text-sm font-medium text-surface-500 mr-auto truncate">
             {{ orgName() }}
@@ -139,7 +150,9 @@ function entityRef(n: NotificationRecord): { type: string; id: string } | null {
                       >
                         <div class="mt-2 w-2 flex-shrink-0">
                           @if (!n.readAt) {
-                            <span class="block w-2 h-2 rounded-full bg-primary"></span>
+                            <span
+                              class="block w-2 h-2 rounded-full bg-primary"
+                            ></span>
                           }
                         </div>
 
@@ -147,7 +160,9 @@ function entityRef(n: NotificationRecord): { type: string; id: string } | null {
                           class="w-8 h-8 rounded-full bg-surface-100 flex items-center justify-center flex-shrink-0"
                         >
                           <i
-                            class="pi {{ typeIcon(n.type) }} text-xs text-surface-500"
+                            class="pi {{
+                              typeIcon(n.type)
+                            }} text-xs text-surface-500"
                           ></i>
                         </div>
 
@@ -169,7 +184,9 @@ function entityRef(n: NotificationRecord): { type: string; id: string } | null {
                               {{ !n.readAt ? 'Unread' : 'Read' }}
                             </span>
                           </div>
-                          <p class="m-0 mt-0.5 text-xs text-surface-500 line-clamp-2">
+                          <p
+                            class="m-0 mt-0.5 text-xs text-surface-500 line-clamp-2"
+                          >
                             {{ n.body }}
                           </p>
                           <p class="m-0 mt-1 text-[11px] text-surface-400">
@@ -202,7 +219,10 @@ export class ShellLayoutComponent implements OnDestroy {
   readonly #orgsStore = inject(OrganizationsStore);
   readonly #subs = new Subscription();
 
-  readonly notificationsMenu = viewChild<ElementRef<HTMLElement>>('notificationsMenu');
+  readonly notificationsMenu =
+    viewChild<ElementRef<HTMLElement>>('notificationsMenu');
+
+  readonly navbar = viewChild(NavbarComponent);
 
   readonly unreadCount = signal(0);
   readonly notificationsOpen = signal(false);
