@@ -268,12 +268,12 @@ export class NavbarComponent {
     {
       label: 'Personal Settings',
       icon: 'pi pi-user',
-      command: () => void this.#router.navigate(['/personal-settings']),
+      command: () => this.#router.navigate(['/personal-settings']),
     },
     {
       label: 'Switch organization',
       icon: 'pi pi-building',
-      command: () => void this.#router.navigate(['/org/select']),
+      command: () => this.#router.navigate(['/org/select']),
     },
     { separator: true },
     {
