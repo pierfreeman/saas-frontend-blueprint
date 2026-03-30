@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Routes } from '@angular/router';
-import { init } from '@module-federation/runtime';
+import { init, registerRemotes } from '@module-federation/runtime';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { RemoteUnavailableComponent } from './remote-unavailable/remote-unavailable.component';
@@ -44,13 +44,16 @@ export class RemoteConfigService {
       this.#config = await firstValueFrom(
         this.#http.get<RemotesConfig>('/remotes.json'),
       );
-      init({
-        name: 'shell',
-        remotes: Object.entries(this.#config).map(([name, entry]) => ({
-          name,
-          entry,
-        })),
-      });
+      const remotes = Object.entries(this.#config).map(([name, entry]) => ({
+        name,
+        entry,
+      }));
+      // init() creates the MF runtime instance (no-op if already created by webpack).
+      // registerRemotes with force:true overrides the localhost URLs that webpack
+      // compiled into the bundle at build time, replacing them with the real
+      // production URLs loaded from /remotes.json.
+      init({ name: 'shell', remotes });
+      registerRemotes(remotes, { force: true });
     } catch (error) {
       // A failed config fetch means each remote will load from the URL webpack
       // resolved at build time (localhost defaults in dev, or last known prod
