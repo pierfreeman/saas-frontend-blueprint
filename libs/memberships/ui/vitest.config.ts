@@ -27,10 +27,10 @@ export default defineConfig(async () => {
       watch: false,
       coverage: {
         provider: 'v8',
-        reportsDirectory: resolve(root, 'coverage/planning-feature'),
+        reportsDirectory: resolve(root, 'coverage/memberships-ui'),
         reporter: ['text', 'lcov', 'html'],
-        include: ['src/**/*.ts'],
-        exclude: ['src/**/*.spec.ts', 'src/**/index.ts', 'src/**/*.routes.ts'],
+        include: ['src/lib/**/*.ts'],
+        exclude: ['src/**/*.spec.ts'],
         thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
       },
     },
