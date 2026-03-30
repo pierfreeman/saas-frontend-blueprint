@@ -16,6 +16,11 @@ export const PERMISSIONS = {
   // Analytics
   ANALYTICS_VIEW: 'analytics.view',
   ANALYTICS_EXPORT: 'analytics.export',
+
+  // Planning / Calendar
+  PLANNING_MANAGE: 'planning.manage',
+  /** Can edit/delete ANY event (not just own). ADMIN and OWNER only. */
+  PLANNING_MANAGE_ANY: 'planning.manage_any',
 } as const;
 
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -35,6 +40,8 @@ export const ROLE_PERMISSION_MAP: Record<MembershipRole, Permission[]> = {
     PERMISSIONS.AUDIT_READ,
     PERMISSIONS.ANALYTICS_VIEW,
     PERMISSIONS.ANALYTICS_EXPORT,
+    PERMISSIONS.PLANNING_MANAGE,
+    PERMISSIONS.PLANNING_MANAGE_ANY,
   ],
   ADMIN: [
     PERMISSIONS.ORG_MANAGE,
@@ -44,7 +51,13 @@ export const ROLE_PERMISSION_MAP: Record<MembershipRole, Permission[]> = {
     PERMISSIONS.ORG_READ,
     PERMISSIONS.AUDIT_READ,
     PERMISSIONS.ANALYTICS_VIEW,
+    PERMISSIONS.PLANNING_MANAGE,
+    PERMISSIONS.PLANNING_MANAGE_ANY,
   ],
-  MEMBER: [PERMISSIONS.ORG_READ, PERMISSIONS.ANALYTICS_VIEW],
+  MEMBER: [
+    PERMISSIONS.ORG_READ,
+    PERMISSIONS.ANALYTICS_VIEW,
+    PERMISSIONS.PLANNING_MANAGE,
+  ],
   READ_ONLY: [PERMISSIONS.ORG_READ],
 };

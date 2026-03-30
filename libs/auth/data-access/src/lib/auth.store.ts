@@ -41,4 +41,8 @@ export class AuthStore {
     this.setUser(updated);
     return updated;
   }
+
+  async requestPasswordChange(): Promise<void> {
+    await firstValueFrom(this.#api.requestPasswordChange());
+  }
 }

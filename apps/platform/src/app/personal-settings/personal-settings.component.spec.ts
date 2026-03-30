@@ -20,6 +20,7 @@ function setup(user: User | null = baseUser) {
   const mockStore = {
     currentUser,
     updateProfile: vi.fn(() => Promise.resolve(user ?? baseUser)),
+    requestPasswordChange: vi.fn(() => Promise.resolve()),
   } as unknown as AuthStore;
 
   TestBed.configureTestingModule({
@@ -231,6 +232,106 @@ describe('PersonalSettingsComponent', () => {
       await component.save();
 
       expect(component.saving()).toBe(false);
+    });
+  });
+
+  describe('authProvider()', () => {
+    it('returns "password" for auth0| accounts', () => {
+      const { component } = setup({ ...baseUser, auth0Id: 'auth0|123' });
+      expect(component.authProvider()).toBe('password');
+    });
+
+    it('returns "google" for google-oauth2| accounts', () => {
+      const { component } = setup({
+        ...baseUser,
+        auth0Id: 'google-oauth2|123',
+      });
+      expect(component.authProvider()).toBe('google');
+    });
+
+    it('returns "passwordless" for other account types', () => {
+      const { component } = setup({ ...baseUser, auth0Id: 'email|abc' });
+      expect(component.authProvider()).toBe('passwordless');
+    });
+
+    it('returns "passwordless" when no user is logged in', () => {
+      const { component } = setup(null);
+      expect(component.authProvider()).toBe('passwordless');
+    });
+  });
+
+  describe('requestPasswordReset()', () => {
+    it('calls authStore.requestPasswordChange', async () => {
+      const { component, mockStore } = setup();
+      await component.requestPasswordReset();
+      expect(mockStore.requestPasswordChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows a success toast on success', async () => {
+      const { component, toast } = setup();
+      await component.requestPasswordReset();
+      expect(toast.add).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'success' }),
+      );
+    });
+
+    it('shows an error toast when requestPasswordChange throws', async () => {
+      const currentUser = signal<User | null>(baseUser);
+      const mockStore = {
+        currentUser,
+        updateProfile: vi.fn(() => Promise.resolve(baseUser)),
+        requestPasswordChange: vi.fn(() =>
+          Promise.reject(new Error('Auth0 error')),
+        ),
+      } as unknown as AuthStore;
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [PersonalSettingsComponent],
+        providers: [{ provide: AuthStore, useValue: mockStore }],
+      });
+
+      const fixture = TestBed.createComponent(PersonalSettingsComponent);
+      const component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const toast = fixture.debugElement.injector.get(MessageService);
+      vi.spyOn(toast, 'add');
+
+      await component.requestPasswordReset();
+
+      expect(toast.add).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error' }),
+      );
+    });
+
+    it('resets requestingPasswordReset to false after success', async () => {
+      const { component } = setup();
+      await component.requestPasswordReset();
+      expect(component.requestingPasswordReset()).toBe(false);
+    });
+
+    it('resets requestingPasswordReset to false after error', async () => {
+      const currentUser = signal<User | null>(baseUser);
+      const mockStore = {
+        currentUser,
+        updateProfile: vi.fn(() => Promise.resolve(baseUser)),
+        requestPasswordChange: vi.fn(() => Promise.reject(new Error('fail'))),
+      } as unknown as AuthStore;
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [PersonalSettingsComponent],
+        providers: [{ provide: AuthStore, useValue: mockStore }],
+      });
+
+      const fixture = TestBed.createComponent(PersonalSettingsComponent);
+      const component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      await component.requestPasswordReset();
+
+      expect(component.requestingPasswordReset()).toBe(false);
     });
   });
 });

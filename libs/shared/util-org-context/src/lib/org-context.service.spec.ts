@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { OrgContextService } from './org-context.service';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';

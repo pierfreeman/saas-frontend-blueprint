@@ -65,4 +65,18 @@ describe('AuthApi', () => {
       req.flush(mockUser);
     });
   });
+
+  describe('requestPasswordChange()', () => {
+    it('sends POST /auth/me/change-password with an empty body', () => {
+      let resolved = false;
+      api.requestPasswordChange().subscribe(() => (resolved = true));
+
+      const req = controller.expectOne(`${BASE}/auth/me/change-password`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({});
+      req.flush(null, { status: 204, statusText: 'No Content' });
+
+      expect(resolved).toBe(true);
+    });
+  });
 });

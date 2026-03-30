@@ -253,6 +253,30 @@ Add a `routerLink` anchor to `apps/shell/src/app/layout/navbar.component.ts` in 
 
 Create `{feature}.component.spec.ts` alongside the component file. See [§8 Testing conventions](#8-testing-conventions).
 
+### Sub-components in feature libraries
+
+Feature components may be split into focused sub-components when the root component **exceeds ~400 lines** or contains **3 or more self-contained template sections** (e.g., multiple independent dialogs or major panels). This is intentionally a high bar — most features should remain a single component.
+
+When splitting is warranted:
+
+- Place sub-components **alongside** the root component in the same `src/lib/` directory.
+- Each sub-component must follow all existing conventions: `standalone: true`, `ChangeDetectionStrategy.OnPush`, inline template, `inject()` for DI.
+- Extract shared types, interfaces, and pure helpers into a co-located `{feature}.utils.ts` file to avoid circular imports between the root and its sub-components.
+- **Do not export** sub-components from the library barrel (`index.ts`). They are internal implementation details — the route lazy-loads only the root component.
+- Sub-components are **"dumb" presentation components**: they receive data via `@Input()` and emit events via `@Output()`. The root component owns all store injections and handles every async mutation.
+- Use the standard Angular two-way binding pattern for modal visibility: `@Input() visible = false` + `@Output() readonly visibleChange = new EventEmitter<boolean>()`, then bind with `[(visible)]` in the parent template.
+
+**Updated file structure for a feature lib with sub-components:**
+
+```
+libs/{domain}/feature/src/
+  lib/
+    {feature}.component.ts               ← root component (orchestration, store, calendar, etc.)
+    {feature}.utils.ts                   ← shared interfaces and pure helpers (optional)
+    {feature}-{section}-dialog.component.ts  ← sub-component dialog (optional, repeat as needed)
+  index.ts                               ← exports only the root component and routes
+```
+
 ---
 
 ## 5. Adding a new data-access library

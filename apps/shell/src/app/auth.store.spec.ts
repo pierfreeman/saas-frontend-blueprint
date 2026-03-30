@@ -10,6 +10,7 @@ function mockApi(overrides: Partial<InstanceType<typeof AuthApi>> = {}) {
   return {
     getMe: vi.fn(() => of(mockUser)),
     updateMe: vi.fn(() => of(mockUser)),
+    requestPasswordChange: vi.fn(() => of(undefined)),
     ...overrides,
   } as unknown as AuthApi;
 }
@@ -118,6 +119,56 @@ describe('AuthStore', () => {
 
       await expect(store.updateProfile({ firstName: 'X' })).rejects.toThrow(
         'Network error',
+      );
+    });
+  });
+
+  describe('requestPasswordChange', () => {
+    it('calls api.requestPasswordChange and resolves', async () => {
+      const api = mockApi({
+        requestPasswordChange: vi.fn(() => of(undefined)),
+      });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthApi, useValue: api }],
+      });
+      store = TestBed.inject(AuthStore);
+
+      await store.requestPasswordChange();
+
+      expect(api.requestPasswordChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not modify currentUser', async () => {
+      const api = mockApi({
+        requestPasswordChange: vi.fn(() => of(undefined)),
+      });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthApi, useValue: api }],
+      });
+      store = TestBed.inject(AuthStore);
+      store.setUser(mockUser);
+
+      await store.requestPasswordChange();
+
+      expect(store.currentUser()).toEqual(mockUser);
+    });
+
+    it('propagates API errors', async () => {
+      const api = mockApi({
+        requestPasswordChange: vi.fn(() =>
+          throwError(() => new Error('Auth0 error')),
+        ),
+      });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthApi, useValue: api }],
+      });
+      store = TestBed.inject(AuthStore);
+
+      await expect(store.requestPasswordChange()).rejects.toThrow(
+        'Auth0 error',
       );
     });
   });

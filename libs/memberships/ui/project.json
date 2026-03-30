@@ -1,0 +1,24 @@
+{
+  "name": "memberships-ui",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/memberships/ui/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["type:ui", "scope:memberships"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx vitest run --config libs/memberships/ui/vitest.config.ts"
+      },
+      "configurations": {
+        "coverage": {
+          "command": "npx vitest run --config libs/memberships/ui/vitest.config.ts --coverage"
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,7 @@
 # saas-frontend-blueprint
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pierfreeman_saas-frontend-blueprint&metric=alert_status&token=6b063929024d089faeac87874c12276a4f07c546)](https://sonarcloud.io/summary/new_code?id=pierfreeman_saas-frontend-blueprint) [![CI](https://github.com/pierfreeman/saas-frontend-blueprint/actions/workflows/ci.yml/badge.svg)](https://github.com/pierfreeman/saas-frontend-blueprint/actions/workflows/ci.yml)
+
 Production-ready multi-tenant SaaS frontend built as an [Nx](https://nx.dev) monorepo using **Angular 21 Module Federation**.
 
 Four independently deployable micro-frontends (MFEs) share a single shell host, a unified design system (PrimeNG + Tailwind v4), and a type-safe API client layer coded against the backend OpenAPI schema.
@@ -20,7 +22,7 @@ Designed to pair with [saas-backend-blueprint](../saas-backend-blueprint).
 | State management | Angular Signals (no NgRx)                                    |
 | Authentication   | Auth0 (`@auth0/auth0-angular`) — RS256, PKCE, silent refresh |
 | HTTP client      | Angular `HttpClient` + functional interceptors               |
-| Type safety      | OpenAPI-aligned types (`@saas-frontend/shared/util-types`)             |
+| Type safety      | OpenAPI-aligned types (`@saas-frontend/shared/util-types`)   |
 | Testing          | Vitest 4 + Angular Testing Library                           |
 | Bundler          | Webpack 5 (MF bundles), Vite (unit tests)                    |
 | Lint             | ESLint + `angular-eslint`                                    |
@@ -39,6 +41,7 @@ Designed to pair with [saas-backend-blueprint](../saas-backend-blueprint).
 - 🎨 **Shared design system** — PrimeNG Aura theme, Tailwind utility classes, `tailwindcss-primeui` color palette integration
 - 🧩 **Module Federation** — each MFE is independently built and deployable; the shell composes them at runtime
 - 🔒 **Route guards** — `authGuard` (Auth0 session) + `orgGuard` (active org required before accessing platform routes)
+- 📅 **Planning / Calendar** — FullCalendar with month/week/day views, recurring events (RRULE builder), drag-and-drop rescheduling, RSVP, live conflict checking, per-occurrence exceptions, This-and-Following series splitting, IANA timezone selector, event reminder presets
 
 ---
 
@@ -66,6 +69,9 @@ libs/
     data-access/  — EntitlementsApi, type aliases
   notifications/
     data-access/  — NotificationsApi, type aliases
+  planning/
+    data-access/  — PlanningApi, PlanningStore, planning API types
+    feature/      — FullCalendar UI, RRULE builder, dialogs, conflict checking, reminders
   storage/
     data-access/  — StorageApi (presigned upload/download), type aliases
   tasks/
@@ -213,8 +219,8 @@ Every API request passes through these functional interceptors (registered in sh
 
 ### State management
 
-| Store                | Lib                              | Persistence      | Key signals                                    |
-| -------------------- | -------------------------------- | ---------------- | ---------------------------------------------- |
+| Store                | Lib                                        | Persistence      | Key signals                                    |
+| -------------------- | ------------------------------------------ | ---------------- | ---------------------------------------------- |
 | `AuthStore`          | `@saas-frontend/auth/data-access`          | `sessionStorage` | `currentUser`, `isLoggedIn`                    |
 | `OrganizationsStore` | `@saas-frontend/organizations/data-access` | `localStorage`   | `activeOrgId`, `activeOrgName`, `hasActiveOrg` |
 
@@ -283,18 +289,20 @@ All page components follow this pattern:
 
 ## Libraries
 
-| Import path                      | README                                        | Description                                                   |
-| -------------------------------- | --------------------------------------------- | ------------------------------------------------------------- |
-| `@saas-frontend/auth/data-access`          | [→](libs/auth/data-access/README.md)          | `AuthStore`, `AuthApi` — user identity and session            |
-| `@saas-frontend/organizations/data-access` | [→](libs/organizations/data-access/README.md) | `OrganizationsStore`, `OrganizationsApi`, `tenantInterceptor` |
-| `@saas-frontend/memberships/data-access`   | [→](libs/memberships/data-access/README.md)   | `MembershipsApi` — CRUD for org members                       |
-| `@saas-frontend/billing/data-access`       | [→](libs/billing/data-access/README.md)       | `BillingApi` — subscription, checkout, portal, cancel         |
-| `@saas-frontend/activity-log/data-access`  | [→](libs/activity-log/data-access/README.md)  | `ActivityLogApi` — paginated org activity log                 |
-| `@saas-frontend/entitlements/data-access`  | [→](libs/entitlements/data-access/README.md)  | `EntitlementsApi` — plan-based feature flags                  |
-| `@saas-frontend/notifications/data-access` | [→](libs/notifications/data-access/README.md) | `NotificationsApi` — in-app notifications                     |
-| `@saas-frontend/storage/data-access`       | [→](libs/storage/data-access/README.md)       | `StorageApi` — presigned upload/download URLs                 |
-| `@saas-frontend/tasks/data-access`         | [→](libs/tasks/data-access/README.md)         | `TasksApi` — background job status tracking                   |
-| `@saas-frontend/shared/util-types`         | [→](libs/shared/util-types/README.md)         | `API_BASE_URL` token, OpenAPI-aligned TypeScript types        |
+| Import path                                | README                                        | Description                                                                           |
+| ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `@saas-frontend/auth/data-access`          | [→](libs/auth/data-access/README.md)          | `AuthStore`, `AuthApi` — user identity and session                                    |
+| `@saas-frontend/organizations/data-access` | [→](libs/organizations/data-access/README.md) | `OrganizationsStore`, `OrganizationsApi`, `tenantInterceptor`                         |
+| `@saas-frontend/memberships/data-access`   | [→](libs/memberships/data-access/README.md)   | `MembershipsApi` — CRUD for org members                                               |
+| `@saas-frontend/billing/data-access`       | [→](libs/billing/data-access/README.md)       | `BillingApi` — subscription, checkout, portal, cancel                                 |
+| `@saas-frontend/activity-log/data-access`  | [→](libs/activity-log/data-access/README.md)  | `ActivityLogApi` — paginated org activity log                                         |
+| `@saas-frontend/entitlements/data-access`  | [→](libs/entitlements/data-access/README.md)  | `EntitlementsApi` — plan-based feature flags                                          |
+| `@saas-frontend/notifications/data-access` | [→](libs/notifications/data-access/README.md) | `NotificationsApi` — in-app notifications                                             |
+| `@saas-frontend/planning/data-access`      | [→](libs/planning/data-access/README.md)      | `PlanningApi`, `PlanningStore` — calendar events CRUD, RSVP, series split             |
+| `@saas-frontend/planning/feature`          | [→](libs/planning/feature/README.md)          | Full calendar UI — FullCalendar, RRULE builder, This-and-Following split, reminder UX |
+| `@saas-frontend/storage/data-access`       | [→](libs/storage/data-access/README.md)       | `StorageApi` — presigned upload/download URLs                                         |
+| `@saas-frontend/tasks/data-access`         | [→](libs/tasks/data-access/README.md)         | `TasksApi` — background job status tracking                                           |
+| `@saas-frontend/shared/util-types`         | [→](libs/shared/util-types/README.md)         | `API_BASE_URL` token, OpenAPI-aligned TypeScript types                                |
 
 ---
 
