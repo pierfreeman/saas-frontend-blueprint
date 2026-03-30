@@ -1,5 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { AuthStore } from '@saas-frontend/auth/data-access';
@@ -170,6 +171,67 @@ describe('NavbarComponent', () => {
     it('returns false when canManageOrg is false', () => {
       const { component } = setup({ canManage: false });
       expect(component.showOrgSettings()).toBe(false);
+    });
+  });
+
+  // ── avatarMenuItems commands ─────────────────────────────────────────────────
+
+  describe('avatarMenuItems commands', () => {
+    it('Personal Settings command navigates to /personal-settings', () => {
+      const { component } = setup();
+      const router = TestBed.inject(Router);
+      const spy = vi.spyOn(router, 'navigate');
+      component.avatarMenuItems[0].command!({});
+      expect(spy).toHaveBeenCalledWith(['/personal-settings']);
+    });
+
+    it('Switch organization command navigates to /org/select', () => {
+      const { component } = setup();
+      const router = TestBed.inject(Router);
+      const spy = vi.spyOn(router, 'navigate');
+      component.avatarMenuItems[1].command!({});
+      expect(spy).toHaveBeenCalledWith(['/org/select']);
+    });
+
+    it('Logout command (index 3, after separator) calls logout flow', () => {
+      const { component, mockAuth, mockAuthStore, mockOrgsStore } = setup();
+      const router = TestBed.inject(Router);
+      const spy = vi.spyOn(router, 'navigateByUrl');
+      component.avatarMenuItems[3].command!({});
+      expect(mockAuthStore.clearUser).toHaveBeenCalled();
+      expect(mockOrgsStore.clearActiveOrg).toHaveBeenCalled();
+      expect(mockAuth.logout).toHaveBeenCalledWith({ openUrl: false });
+      expect(spy).toHaveBeenCalledWith('/auth');
+    });
+  });
+
+  // ── mobile drawer template bindings ─────────────────────────────────────────
+
+  describe('mobile drawer template bindings', () => {
+    it('visibleChange=false on drawer closes mobileMenuOpen', () => {
+      const { fixture, component } = setup();
+      component.mobileMenuOpen.set(true);
+      fixture.detectChanges();
+      const drawer = fixture.debugElement.query(By.css('p-drawer'));
+      drawer.triggerEventHandler('visibleChange', false);
+      expect(component.mobileMenuOpen()).toBe(false);
+    });
+
+    it('Personal Settings button in drawer triggers navigateTo', () => {
+      const { fixture } = setup();
+      const router = TestBed.inject(Router);
+      const spy = vi.spyOn(router, 'navigateByUrl');
+      // Open drawer to ensure content is rendered
+      fixture.componentInstance.mobileMenuOpen.set(true);
+      fixture.detectChanges();
+      const buttons = fixture.debugElement.queryAll(
+        By.css('button[type="button"]'),
+      );
+      const btn = buttons.find((b) =>
+        b.nativeElement.textContent.includes('Personal Settings'),
+      );
+      btn?.triggerEventHandler('click', null);
+      expect(spy).toHaveBeenCalledWith('/personal-settings');
     });
   });
 });
