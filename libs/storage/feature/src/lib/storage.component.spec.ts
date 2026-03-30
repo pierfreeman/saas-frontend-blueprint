@@ -2,25 +2,31 @@ import { TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
-import { StorageApi, FileMetadata, StorageQuotaResponse } from '@saas-frontend/storage/data-access';
+import {
+  StorageApi,
+  FileMetadata,
+  StorageQuotaResponse,
+} from '@saas-frontend/storage/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { StorageComponent } from './storage.component';
 
-const mockFile = (overrides: Partial<FileMetadata> = {}): FileMetadata => ({
-  id: 'file-1',
-  filename: 'document.pdf',
-  mimeType: 'application/pdf',
-  size: '1024000',
-  status: 'COMPLETED',
-  createdAt: '2026-03-29T10:00:00.000Z',
-  updatedAt: '2026-03-29T10:00:00.000Z',
-  ...overrides,
-}) as FileMetadata;
+const mockFile = (overrides: Partial<FileMetadata> = {}): FileMetadata =>
+  ({
+    id: 'file-1',
+    filename: 'document.pdf',
+    mimeType: 'application/pdf',
+    size: '1024000',
+    status: 'COMPLETED',
+    createdAt: '2026-03-29T10:00:00.000Z',
+    updatedAt: '2026-03-29T10:00:00.000Z',
+    ...overrides,
+  }) as FileMetadata;
 
-const mockQuota = (used: number, limit: number): StorageQuotaResponse => ({
-  storageUsedBytes: String(used),
-  storageLimitBytes: String(limit),
-}) as StorageQuotaResponse;
+const mockQuota = (used: number, limit: number): StorageQuotaResponse =>
+  ({
+    storageUsedBytes: String(used),
+    storageLimitBytes: String(limit),
+  }) as StorageQuotaResponse;
 
 describe('StorageComponent', () => {
   let component: StorageComponent;
@@ -29,12 +35,21 @@ describe('StorageComponent', () => {
 
   function createStorageApiMock() {
     return {
-      generateUploadUrl: vi.fn(() => of({ uploadUrl: 'https://s3.amazonaws.com/upload', fileId: 'file-new' })),
+      generateUploadUrl: vi.fn(() =>
+        of({
+          uploadUrl: 'https://s3.amazonaws.com/upload',
+          fileId: 'file-new',
+        }),
+      ),
       confirmUpload: vi.fn(() => of({ message: 'Upload confirmed' })),
-      getDownloadUrl: vi.fn(() => of({ downloadUrl: 'https://s3.amazonaws.com/download' })),
+      getDownloadUrl: vi.fn(() =>
+        of({ downloadUrl: 'https://s3.amazonaws.com/download' }),
+      ),
       listFiles: vi.fn(() => of([mockFile()])),
       deleteFile: vi.fn(() => of(undefined)),
-      getStorageQuota: vi.fn(() => of(mockQuota(50 * 1024 * 1024, 100 * 1024 * 1024))),
+      getStorageQuota: vi.fn(() =>
+        of(mockQuota(50 * 1024 * 1024, 100 * 1024 * 1024)),
+      ),
       getFile: vi.fn(() => of(mockFile())),
     } as unknown as StorageApi;
   }
@@ -140,7 +155,9 @@ describe('StorageComponent', () => {
     });
 
     it('keeps file in files list on error', async () => {
-      storageApiMock.deleteFile = vi.fn(() => throwError(() => new Error('Delete failed')));
+      storageApiMock.deleteFile = vi.fn(() =>
+        throwError(() => new Error('Delete failed')),
+      );
       const file = mockFile({ id: 'file-1' });
       component.files.set([file]);
 
@@ -175,7 +192,9 @@ describe('StorageComponent', () => {
     });
 
     it('sets hasMore to true when result length equals PAGE_SIZE', async () => {
-      const files = Array.from({ length: 20 }, (_, i) => mockFile({ id: `file-${i}` }));
+      const files = Array.from({ length: 20 }, (_, i) =>
+        mockFile({ id: `file-${i}` }),
+      );
       storageApiMock.listFiles = vi.fn(() => of(files));
 
       await component.loadMore();
@@ -184,7 +203,9 @@ describe('StorageComponent', () => {
     });
 
     it('sets hasMore to false when result length is less than PAGE_SIZE', async () => {
-      const files = Array.from({ length: 10 }, (_, i) => mockFile({ id: `file-${i}` }));
+      const files = Array.from({ length: 10 }, (_, i) =>
+        mockFile({ id: `file-${i}` }),
+      );
       storageApiMock.listFiles = vi.fn(() => of(files));
 
       await component.loadMore();
@@ -198,7 +219,9 @@ describe('StorageComponent', () => {
     });
 
     it('sets loadingMore to false after error', async () => {
-      storageApiMock.listFiles = vi.fn(() => throwError(() => new Error('Load failed')));
+      storageApiMock.listFiles = vi.fn(() =>
+        throwError(() => new Error('Load failed')),
+      );
 
       await component.loadMore();
       expect(component.loadingMore()).toBe(false);
@@ -286,7 +309,7 @@ describe('StorageComponent', () => {
 
     it('sets uploadError when generateUploadUrl fails', async () => {
       storageApiMock.generateUploadUrl = vi.fn(() =>
-        throwError(() => new Error('URL generation failed'))
+        throwError(() => new Error('URL generation failed')),
       );
 
       await component.onFileSelected(mockInput);
@@ -327,12 +350,115 @@ describe('StorageComponent', () => {
 
     it('silently ignores errors', async () => {
       storageApiMock.getDownloadUrl = vi.fn(() =>
-        throwError(() => new Error('Download failed'))
+        throwError(() => new Error('Download failed')),
       );
       const file = mockFile({ id: 'file-1' });
 
       await expect(component.downloadFile(file)).resolves.not.toThrow();
       expect(windowOpenSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── formatBytes() ──────────────────────────────────────────────────────────
+  describe('formatBytes()', () => {
+    it('returns — for null', () => {
+      expect(component.formatBytes(null)).toBe('—');
+    });
+
+    it('returns — for non-numeric string', () => {
+      expect(component.formatBytes('abc')).toBe('—');
+    });
+
+    it('returns bytes for values < 1024', () => {
+      expect(component.formatBytes('512')).toBe('512 B');
+    });
+
+    it('returns KB for values < 1 MB', () => {
+      expect(component.formatBytes('2048')).toBe('2.0 KB');
+    });
+
+    it('returns MB for values < 1 GB', () => {
+      expect(component.formatBytes('5242880')).toBe('5.0 MB');
+    });
+
+    it('returns GB for values >= 1 GB', () => {
+      expect(component.formatBytes('2147483648')).toBe('2.00 GB');
+    });
+  });
+
+  // ── mimeIcon() ─────────────────────────────────────────────────────────────
+  describe('mimeIcon()', () => {
+    it('returns pi-file for null', () => {
+      expect(component.mimeIcon(null)).toBe('pi pi-file');
+    });
+
+    it('returns pi-image for image/* types', () => {
+      expect(component.mimeIcon('image/png')).toBe('pi pi-image');
+    });
+
+    it('returns pi-video for video/* types', () => {
+      expect(component.mimeIcon('video/mp4')).toBe('pi pi-video');
+    });
+
+    it('returns pi-volume-up for audio/* types', () => {
+      expect(component.mimeIcon('audio/mpeg')).toBe('pi pi-volume-up');
+    });
+
+    it('returns pi-file-pdf for pdf types', () => {
+      expect(component.mimeIcon('application/pdf')).toBe('pi pi-file-pdf');
+    });
+
+    it('returns pi-file-plus for zip types', () => {
+      expect(component.mimeIcon('application/zip')).toBe('pi pi-file-plus');
+    });
+
+    it('returns pi-file-plus for tar types', () => {
+      expect(component.mimeIcon('application/x-tar')).toBe('pi pi-file-plus');
+    });
+
+    it('returns pi-file-plus for gzip types', () => {
+      expect(component.mimeIcon('application/gzip')).toBe('pi pi-file-plus');
+    });
+
+    it('returns pi-table for spreadsheet types', () => {
+      expect(
+        component.mimeIcon(
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ),
+      ).toBe('pi pi-table');
+    });
+
+    it('returns pi-table for excel types', () => {
+      expect(component.mimeIcon('application/vnd.ms-excel')).toBe(
+        'pi pi-table',
+      );
+    });
+
+    it('returns pi-table for csv types', () => {
+      expect(component.mimeIcon('text/csv')).toBe('pi pi-table');
+    });
+
+    it('returns pi-file for unknown types', () => {
+      expect(component.mimeIcon('text/plain')).toBe('pi pi-file');
+    });
+  });
+
+  // ── statusSeverity() ───────────────────────────────────────────────────────
+  describe('statusSeverity()', () => {
+    it('returns success for COMPLETED', () => {
+      expect(component.statusSeverity('COMPLETED')).toBe('success');
+    });
+
+    it('returns warn for PENDING', () => {
+      expect(component.statusSeverity('PENDING')).toBe('warn');
+    });
+
+    it('returns secondary for EXPIRED', () => {
+      expect(component.statusSeverity('EXPIRED')).toBe('secondary');
+    });
+
+    it('returns danger for ABORTED', () => {
+      expect(component.statusSeverity('ABORTED')).toBe('danger');
     });
   });
 });
