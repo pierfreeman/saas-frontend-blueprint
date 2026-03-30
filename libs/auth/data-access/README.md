@@ -8,11 +8,12 @@ Signal-based user identity store and HTTP client for the `/auth` backend endpoin
 
 ## Exports
 
-| Symbol      | Kind       | Description                                                                  |
-| ----------- | ---------- | ---------------------------------------------------------------------------- |
-| `AuthStore` | Service    | Reactive store for the current user — signals + `sessionStorage` persistence |
-| `AuthApi`   | Service    | HTTP client for `GET /auth/me`                                               |
-| `User`      | Type alias | Backend user profile shape                                                   |
+| Symbol             | Kind       | Description                                                                  |
+| ------------------ | ---------- | ---------------------------------------------------------------------------- |
+| `AuthStore`        | Service    | Reactive store for the current user — signals + `sessionStorage` persistence |
+| `AuthApi`          | Service    | HTTP client for `/auth` endpoints                                            |
+| `User`             | Type alias | Backend user profile shape                                                   |
+| `UpdateProfileDto` | Type alias | Payload shape for `AuthApi.updateMe()`                                       |
 
 ---
 
@@ -39,7 +40,13 @@ On startup the store reads from `sessionStorage` key `saas.currentUser`. The `Us
 ```ts
 setUser(user: User): void
 clearUser(): void
+async updateProfile(dto: UpdateProfileDto): Promise<User>
+async requestPasswordChange(): Promise<void>
 ```
+
+`updateProfile` calls `PATCH /auth/me`, updates `currentUser`, and persists to `sessionStorage`.
+
+`requestPasswordChange` calls `POST /auth/me/change-password`. Only valid for email/password Auth0 accounts (`auth0|` prefix). Resolves with `void` on success.
 
 ### Usage
 
@@ -62,11 +69,13 @@ Root-level singleton. Requires `API_BASE_URL` and `HttpClient` in the injector.
 
 ### Methods
 
-| Method    | HTTP           | Description                                                                                       |
-| --------- | -------------- | ------------------------------------------------------------------------------------------------- |
-| `getMe()` | `GET /auth/me` | Syncs the Auth0 identity with the backend DB (upsert on first login) and returns the user profile |
+| Method                    | HTTP                            | Description                                                                                       |
+| ------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `getMe()`                 | `GET /auth/me`                  | Syncs the Auth0 identity with the backend DB (upsert on first login) and returns the user profile |
+| `updateMe(dto)`           | `PATCH /auth/me`                | Updates the current user's profile fields (`firstName`, `lastName`, `pictureUrl`)                 |
+| `requestPasswordChange()` | `POST /auth/me/change-password` | Sends an Auth0 password reset email. Only for `auth0                                              | ` database accounts (HTTP 204) |
 
-Returns `Observable<User>`.
+`getMe()` and `updateMe()` return `Observable<User>`. `requestPasswordChange()` returns `Observable<void>`.
 
 ### Usage
 

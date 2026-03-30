@@ -24,4 +24,9 @@ export class AuthApi {
   updateMe(dto: UpdateProfileDto): Observable<User> {
     return this.#http.patch<User>(`${this.#base}/auth/me`, dto);
   }
+
+  /** POST /auth/me/change-password — sends a password reset email (database-connection users only). */
+  requestPasswordChange(): Observable<void> {
+    return this.#http.post<void>(`${this.#base}/auth/me/change-password`, {});
+  }
 }
