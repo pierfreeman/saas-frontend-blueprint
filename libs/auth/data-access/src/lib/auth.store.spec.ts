@@ -8,7 +8,7 @@ import type { User } from './auth.api.types';
 const mockUser: User = {
   id: 'u1',
   email: 'a@b.com',
-  auth0Id: 'auth0|1'
+  auth0Id: 'auth0|1',
 };
 
 function makeMockApi(overrides: Partial<InstanceType<typeof AuthApi>> = {}) {
@@ -188,7 +188,7 @@ describe('AuthStore', () => {
       store = TestBed.inject(AuthStore);
 
       const result = await store.updateProfile({
-        pictureUrl: 'https://example.com/pic.jpg'
+        pictureUrl: 'https://example.com/pic.jpg',
       });
 
       expect(result).toEqual(updated);
@@ -226,6 +226,39 @@ describe('AuthStore', () => {
       await expect(store.updateProfile({ firstName: 'X' })).rejects.toThrow(
         'Network error',
       );
+    });
+  });
+
+  // ── requestPasswordChange ─────────────────────────────────────────────────
+
+  describe('requestPasswordChange', () => {
+    it('calls api.requestPasswordChange', async () => {
+      const api = makeMockApi({
+        requestPasswordChange: vi.fn(() => of(undefined)),
+      });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthApi, useValue: api }],
+      });
+      store = TestBed.inject(AuthStore);
+
+      await store.requestPasswordChange();
+
+      expect(api.requestPasswordChange).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates API errors', async () => {
+      const error = new Error('forbidden');
+      const api = makeMockApi({
+        requestPasswordChange: vi.fn(() => throwError(() => error)),
+      });
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [{ provide: AuthApi, useValue: api }],
+      });
+      store = TestBed.inject(AuthStore);
+
+      await expect(store.requestPasswordChange()).rejects.toThrow('forbidden');
     });
   });
 });

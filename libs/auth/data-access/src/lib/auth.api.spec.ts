@@ -91,4 +91,22 @@ describe('AuthApi', () => {
       req.flush(mockUser);
     });
   });
+
+  describe('requestPasswordChange()', () => {
+    it('issues POST /auth/me/change-password', () => {
+      api.requestPasswordChange().subscribe();
+
+      const req = controller.expectOne(`${BASE}/auth/me/change-password`);
+      expect(req.request.method).toBe('POST');
+      req.flush(null);
+    });
+
+    it('sends an empty body', () => {
+      api.requestPasswordChange().subscribe();
+
+      const req = controller.expectOne(`${BASE}/auth/me/change-password`);
+      expect(req.request.body).toEqual({});
+      req.flush(null);
+    });
+  });
 });
