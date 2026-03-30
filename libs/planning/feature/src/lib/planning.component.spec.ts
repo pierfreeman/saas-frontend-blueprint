@@ -20,12 +20,19 @@ import {
 import { PlanningComponent } from './planning.component';
 import type { EventForm } from './planning.utils';
 
+import { Signal } from '@angular/core';
+
 type PlanningAny = {
   createDialogVisible: ReturnType<typeof signal<boolean>>;
   detailDialogVisible: ReturnType<typeof signal<boolean>>;
   exceptionDialogVisible: ReturnType<typeof signal<boolean>>;
   editMode: ReturnType<typeof signal<boolean>>;
-  selectedOccurrence: ReturnType<typeof signal<EventOccurrence | null>>;
+  /** Computed (read-only). Use selectOcc() helper in tests to simulate selection. */
+  selectedOccurrence: Signal<EventOccurrence | null>;
+  /** Backing key signal — set by selectOcc() helper */
+  _selectedKey: ReturnType<typeof signal<string | null>>;
+  /** Stub fallback signal — set by selectOcc() helper */
+  _selectedOccurrenceStub: ReturnType<typeof signal<EventOccurrence | null>>;
   editingEventId: ReturnType<typeof signal<string | null>>;
   editingVersion: ReturnType<typeof signal<number>>;
   checkingConflicts: ReturnType<typeof signal<boolean>>;
@@ -47,6 +54,17 @@ type PlanningAny = {
     recurrenceScope?: 'this' | 'thisAndFollowing';
   }): Promise<void>;
 } & PlanningComponent;
+
+/** Test helper: simulates selecting an occurrence (or clearing the selection). */
+function selectOcc(comp: PlanningAny, occ: EventOccurrence | null): void {
+  if (occ === null) {
+    comp._selectedKey.set(null);
+    comp._selectedOccurrenceStub.set(null);
+  } else {
+    comp._selectedKey.set(`${occ.eventId}__${occ.originalStartUtc}`);
+    comp._selectedOccurrenceStub.set(occ);
+  }
+}
 
 const makeOccurrence = (
   overrides: Partial<EventOccurrence> = {},
@@ -311,6 +329,8 @@ describe('PlanningComponent', () => {
   it('eventClick opens detail dialog and loads event detail', () => {
     const eventClick = comp.calendarOptions().eventClick;
     const occ = makeOccurrence();
+    // occurrence must be in store.occurrences() so the computed can resolve it
+    occurrences.set([occ]);
 
     eventClick?.({
       event: { extendedProps: { occurrence: occ } },
@@ -402,17 +422,40 @@ describe('PlanningComponent', () => {
   });
 
   it('sendRsvp returns early when no selected occurrence', async () => {
-    comp.selectedOccurrence.set(null);
+    selectOcc(comp, null);
     await comp.sendRsvp('YES');
     expect(storeMock.rsvp).not.toHaveBeenCalled();
   });
 
   it('sendRsvp sends RSVP when occurrence is selected', async () => {
-    comp.selectedOccurrence.set(makeOccurrence());
+    selectOcc(comp, makeOccurrence());
     await comp.sendRsvp('MAYBE');
     expect(storeMock.rsvp).toHaveBeenCalledWith('org-1', 'event-1', {
       status: 'MAYBE',
     });
+  });
+
+  it('sendRsvp includes originalStartUtc when the occurrence is recurring', async () => {
+    selectOcc(
+      comp,
+      makeOccurrence({
+        isRecurring: true,
+        rrule: 'FREQ=WEEKLY;BYDAY=MO',
+        originalStartUtc: '2026-01-12T10:00:00.000Z',
+      }),
+    );
+    await comp.sendRsvp('NO');
+    expect(storeMock.rsvp).toHaveBeenCalledWith('org-1', 'event-1', {
+      status: 'NO',
+      originalStartUtc: '2026-01-12T10:00:00.000Z',
+    });
+  });
+
+  it('sendRsvp omits originalStartUtc for a non-recurring event', async () => {
+    selectOcc(comp, makeOccurrence({ isRecurring: false, rrule: null }));
+    await comp.sendRsvp('YES');
+    const dto = storeMock.rsvp.mock.calls[0][2] as Record<string, unknown>;
+    expect(dto).not.toHaveProperty('originalStartUtc');
   });
 
   it('openExceptionDialog sets exception dialog visible', () => {
@@ -422,7 +465,7 @@ describe('PlanningComponent', () => {
 
   it('submitException closes dialog on success', async () => {
     comp.exceptionDialogVisible.set(true);
-    comp.selectedOccurrence.set(makeOccurrence());
+    selectOcc(comp, makeOccurrence());
     storeMock.createException.mockResolvedValueOnce({ id: 'ex-1' });
 
     await comp.submitException({
@@ -539,27 +582,23 @@ describe('PlanningComponent', () => {
   // ── canEditSelected() computed ──────────────────────────────────────────────
 
   it('canEditSelected() returns false when no occurrence is selected', () => {
-    comp.selectedOccurrence.set(null);
+    selectOcc(comp, null);
     expect(comp.canEditSelected()).toBe(false);
   });
 
   it('canEditSelected() returns true when user has PLANNING_MANAGE_ANY', () => {
     permissionsSet.add(PERMISSIONS.PLANNING_MANAGE_ANY);
-    comp.selectedOccurrence.set(
-      makeOccurrence({ createdByUserId: 'other-user' }),
-    );
+    selectOcc(comp, makeOccurrence({ createdByUserId: 'other-user' }));
     expect(comp.canEditSelected()).toBe(true);
   });
 
   it('canEditSelected() returns true when user is creator of the occurrence', () => {
-    comp.selectedOccurrence.set(makeOccurrence({ createdByUserId: 'user-1' }));
+    selectOcc(comp, makeOccurrence({ createdByUserId: 'user-1' }));
     expect(comp.canEditSelected()).toBe(true);
   });
 
   it('canEditSelected() returns false when user is not creator and lacks MANAGE_ANY', () => {
-    comp.selectedOccurrence.set(
-      makeOccurrence({ createdByUserId: 'other-user' }),
-    );
+    selectOcc(comp, makeOccurrence({ createdByUserId: 'other-user' }));
     expect(comp.canEditSelected()).toBe(false);
   });
 
@@ -596,7 +635,8 @@ describe('PlanningComponent', () => {
 
   it('submitException thisAndFollowing + isCancelled: true calls updateEvent with rruleUntilUtc', async () => {
     comp.exceptionDialogVisible.set(true);
-    comp.selectedOccurrence.set(
+    selectOcc(
+      comp,
       makeOccurrence({
         originalStartUtc: '2026-04-06T10:00:00.000Z',
         version: 3,
@@ -622,7 +662,7 @@ describe('PlanningComponent', () => {
 
   it('submitException thisAndFollowing + isCancelled: true + updateEvent fails keeps dialog open', async () => {
     comp.exceptionDialogVisible.set(true);
-    comp.selectedOccurrence.set(makeOccurrence());
+    selectOcc(comp, makeOccurrence());
     storeMock.updateEvent.mockResolvedValueOnce(null);
 
     await comp.submitException({
@@ -638,7 +678,7 @@ describe('PlanningComponent', () => {
 
   it('submitException thisAndFollowing + isCancelled: false calls splitSeries and closes dialog', async () => {
     comp.exceptionDialogVisible.set(true);
-    comp.selectedOccurrence.set(makeOccurrence());
+    selectOcc(comp, makeOccurrence());
     storeMock.splitSeries.mockResolvedValueOnce({ id: 'tail-1' });
 
     await comp.submitException({
@@ -659,7 +699,7 @@ describe('PlanningComponent', () => {
 
   it('submitException thisAndFollowing + isCancelled: false + splitSeries fails keeps dialog open', async () => {
     comp.exceptionDialogVisible.set(true);
-    comp.selectedOccurrence.set(makeOccurrence());
+    selectOcc(comp, makeOccurrence());
     storeMock.splitSeries.mockResolvedValueOnce(null);
 
     await comp.submitException({

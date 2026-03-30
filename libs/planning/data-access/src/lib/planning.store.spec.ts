@@ -275,10 +275,32 @@ describe('PlanningStore', () => {
 
   // ── rsvp() ─────────────────────────────────────────────────────────────────
   describe('rsvp()', () => {
-    it('returns the attendee and refreshes event detail', async () => {
+    it('returns the attendee and refreshes event detail and occurrences', async () => {
+      await store.loadOccurrences(ORG_ID, FROM, TO);
+      const api = TestBed.inject(PlanningApi) as ReturnType<typeof makeMockApi>;
+      const listSpy = vi.spyOn(api, 'listEvents');
+
       const result = await store.rsvp(ORG_ID, EVENT_ID, { status: 'YES' });
+
       expect(result).toEqual(mockAttendee);
       expect(store.selectedEvent()).toEqual(mockEventDetail);
+      // occurrences must be reloaded so per-occurrence RSVP overrides are reflected
+      expect(listSpy).toHaveBeenCalled();
+    });
+
+    it('passes originalStartUtc to the API for a per-occurrence RSVP', async () => {
+      const api = TestBed.inject(PlanningApi) as ReturnType<typeof makeMockApi>;
+      const rsvpSpy = vi.spyOn(api, 'rsvp');
+
+      await store.rsvp(ORG_ID, EVENT_ID, {
+        status: 'NO',
+        originalStartUtc: '2026-04-08T09:00:00.000Z',
+      });
+
+      expect(rsvpSpy).toHaveBeenCalledWith(ORG_ID, EVENT_ID, {
+        status: 'NO',
+        originalStartUtc: '2026-04-08T09:00:00.000Z',
+      });
     });
 
     it('returns null and stores error on failure', async () => {

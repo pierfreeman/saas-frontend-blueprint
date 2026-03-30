@@ -136,6 +136,7 @@ export class PlanningStore {
         this.#api.rsvp(orgId, eventId, dto),
       );
       await this.loadEventDetail(orgId, eventId);
+      await this.#reloadOccurrences();
       return attendee;
     } catch (err) {
       this.error.set(err as ApiError);

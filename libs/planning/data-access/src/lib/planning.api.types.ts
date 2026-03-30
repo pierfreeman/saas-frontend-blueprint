@@ -47,6 +47,7 @@ export interface UpdateEventDto {
 
 export interface RsvpDto {
   status: RSVPStatus;
+  originalStartUtc?: string;
 }
 
 export interface CreateEventExceptionDto {

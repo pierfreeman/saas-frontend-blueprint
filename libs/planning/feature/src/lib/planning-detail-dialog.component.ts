@@ -88,13 +88,18 @@ import type { MembershipSummary } from '@saas-frontend/memberships/data-access';
           </div>
 
           <!-- Attendees -->
-          @if (event.attendees.length > 0) {
+          @if ((occurrence?.attendees ?? event.attendees).length > 0) {
             <div class="flex flex-col gap-1">
               <p class="text-sm font-medium text-surface-700 m-0">
-                Attendees ({{ event.attendees.length }})
+                Attendees ({{
+                  (occurrence?.attendees ?? event.attendees).length
+                }})
               </p>
               <ul class="list-none p-0 m-0 flex flex-col gap-2">
-                @for (att of event.attendees; track att.id) {
+                @for (
+                  att of occurrence?.attendees ?? event.attendees;
+                  track att.id
+                ) {
                   <li class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2 min-w-0">
                       @if (memberMap.get(att.userId)?.user?.pictureUrl) {

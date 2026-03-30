@@ -33,6 +33,7 @@ import {
   type EventDetail,
   type EventOccurrence,
   type RSVPStatus,
+  type RsvpDto,
   type SplitSeriesDto,
   type UpdateEventDto,
 } from '@saas-frontend/planning/data-access';
@@ -197,7 +198,21 @@ export class PlanningComponent implements OnInit {
   protected detailDialogVisible = signal(false);
   protected exceptionDialogVisible = signal(false);
   protected editMode = signal(false);
-  protected selectedOccurrence = signal<EventOccurrence | null>(null);
+  // Key of the currently selected occurrence (eventId__originalStartUtc)
+  private readonly _selectedKey = signal<string | null>(null);
+  // Stub fallback for occurrences opened by ID that may not be in the list
+  private readonly _selectedOccurrenceStub = signal<EventOccurrence | null>(null);
+  // Always reflects the freshest occurrence from the store (auto-updates on reload)
+  protected readonly selectedOccurrence = computed<EventOccurrence | null>(
+    () => {
+      const key = this._selectedKey();
+      if (!key) return null;
+      const fromStore = this.store
+        .occurrences()
+        .find((o) => `${o.eventId}__${o.originalStartUtc}` === key);
+      return fromStore ?? this._selectedOccurrenceStub();
+    },
+  );
   protected editingEventId = signal<string | null>(null);
   protected editingVersion = signal<number>(0);
   protected checkingConflicts = signal(false);
@@ -286,7 +301,8 @@ export class PlanningComponent implements OnInit {
       version: detail.version,
       attendees: detail.attendees,
     };
-    this.selectedOccurrence.set(stub);
+    this._selectedKey.set(`${stub.eventId}__${stub.originalStartUtc}`);
+    this._selectedOccurrenceStub.set(stub);
     this.detailDialogVisible.set(true);
   }
 
@@ -303,7 +319,8 @@ export class PlanningComponent implements OnInit {
 
   #onEventClick(arg: EventClickArg): void {
     const occ = arg.event.extendedProps['occurrence'] as EventOccurrence;
-    this.selectedOccurrence.set(occ);
+    this._selectedKey.set(`${occ.eventId}__${occ.originalStartUtc}`);
+    this._selectedOccurrenceStub.set(null);
     this.detailDialogVisible.set(true);
     const orgId = this.#orgsStore.activeOrgId();
     if (orgId) {
@@ -477,7 +494,11 @@ export class PlanningComponent implements OnInit {
     const orgId = this.#orgsStore.activeOrgId();
     const occ = this.selectedOccurrence();
     if (!orgId || !occ) return;
-    await this.store.rsvp(orgId, occ.eventId, { status });
+    const dto: RsvpDto = {
+      status,
+      ...(occ.isRecurring ? { originalStartUtc: occ.originalStartUtc } : {}),
+    };
+    await this.store.rsvp(orgId, occ.eventId, dto);
   }
 
   // ── Exception dialog ───────────────────────────────────────────────────────
