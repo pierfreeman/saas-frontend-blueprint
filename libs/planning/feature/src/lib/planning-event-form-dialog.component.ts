@@ -329,7 +329,8 @@ export class PlanningEventFormDialogComponent implements OnChanges {
     const endIso = this.endDate?.toISOString() ?? '';
     const attendeesChanged =
       f.attendeeIds.length !== i.attendeeIds.length ||
-      [...f.attendeeIds].sort().join() !== [...i.attendeeIds].sort().join();
+      [...f.attendeeIds].sort((a, b) => a.localeCompare(b)).join() !==
+        [...i.attendeeIds].sort((a, b) => a.localeCompare(b)).join();
     return (
       f.title.trim() !== i.title.trim() ||
       f.description !== i.description ||
@@ -355,7 +356,7 @@ export class PlanningEventFormDialogComponent implements OnChanges {
   #parseIso(iso: string): Date | null {
     if (!iso) return null;
     const d = new Date(iso);
-    return isNaN(d.getTime()) ? null : d;
+    return Number.isNaN(d.getTime()) ? null : d;
   }
 
   #emitDraftChanged(): void {

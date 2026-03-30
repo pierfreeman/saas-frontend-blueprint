@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -7,19 +8,17 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
-import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, merge, of, switchMap } from 'rxjs';
-import { ToastModule } from 'primeng/toast';
-import { NavbarComponent } from './navbar.component';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import {
   NotificationRecord,
   NotificationsApi,
   NotificationsSocketService,
 } from '@saas-frontend/notifications/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
-import { Subscription } from 'rxjs';
+import { ToastModule } from 'primeng/toast';
+import { Subscription, filter, merge, of, switchMap } from 'rxjs';
+import { NavbarComponent } from './navbar.component';
 
 const PREVIEW_LIMIT = 10;
 
@@ -37,7 +36,7 @@ function typeIcon(type: string): string {
 }
 
 function entityRef(n: NotificationRecord): { type: string; id: string } | null {
-  const ref = (n.metadata as Record<string, unknown> | null)?.['entityRef'];
+  const ref = (n.metadata as Record<string, unknown>)?.['entityRef'];
   if (
     ref &&
     typeof ref === 'object' &&
@@ -316,7 +315,7 @@ export class ShellLayoutComponent implements OnDestroy {
     if (!ref) return;
     if (ref.type === 'event') {
       this.notificationsOpen.set(false);
-      void this.#router.navigate(['/planning'], {
+      this.#router.navigate(['/planning'], {
         queryParams: { eventId: ref.id },
       });
     }

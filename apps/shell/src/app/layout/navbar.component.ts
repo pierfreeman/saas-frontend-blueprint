@@ -31,7 +31,7 @@ import { OrgContextService } from '@saas-frontend/shared/util-org-context';
   template: `
     <!-- Desktop sidebar (hidden on mobile) -->
     <aside
-      class="hidden lg:flex flex-col w-[68px] h-full bg-surface-0 border-r border-surface-200 shrink-0 select-none"
+      class="hidden lg:flex flex-col w-17 h-full bg-surface-0 border-r border-surface-200 shrink-0 select-none"
     >
       <!-- Brand -->
       <a
@@ -244,7 +244,7 @@ export class NavbarComponent {
 
   /** Navigate and close the mobile drawer. */
   navigateTo(path: string): void {
-    void this.#router.navigateByUrl(path);
+    this.#router.navigateByUrl(path);
   }
 
   /** Logout from the mobile drawer. */
@@ -268,12 +268,12 @@ export class NavbarComponent {
     {
       label: 'Personal Settings',
       icon: 'pi pi-user',
-      command: () => this.#router.navigate(['/personal-settings']),
+      command: () => void this.#router.navigate(['/personal-settings']),
     },
     {
       label: 'Switch organization',
       icon: 'pi pi-building',
-      command: () => this.#router.navigate(['/org/select']),
+      command: () => void this.#router.navigate(['/org/select']),
     },
     { separator: true },
     {

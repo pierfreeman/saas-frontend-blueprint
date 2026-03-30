@@ -37,7 +37,7 @@ function typeIcon(type: string): string {
 
 /** Extract a typed entityRef from notification metadata if present. */
 function entityRef(n: NotificationRecord): { type: string; id: string } | null {
-  const ref = (n.metadata as Record<string, unknown> | null)?.['entityRef'];
+  const ref = (n.metadata as Record<string, unknown>)?.['entityRef'];
   if (
     ref &&
     typeof ref === 'object' &&
@@ -124,7 +124,7 @@ function entityRef(n: NotificationRecord): { type: string; id: string } | null {
           (click)="handleClick(n)"
         >
           <!-- Unread indicator dot -->
-          <div class="mt-2.5 w-2 flex-shrink-0">
+          <div class="mt-2.5 w-2 shrink-0">
             @if (!n.readAt) {
               <span class="block w-2 h-2 rounded-full bg-primary"></span>
             }
@@ -132,7 +132,7 @@ function entityRef(n: NotificationRecord): { type: string; id: string } | null {
 
           <!-- Type icon avatar -->
           <div
-            class="flex-shrink-0 w-9 h-9 rounded-full bg-surface-100 flex items-center justify-center"
+            class="shrink-0 w-9 h-9 rounded-full bg-surface-100 flex items-center justify-center"
           >
             <i class="pi {{ typeIcon(n.type) }} text-sm text-surface-500"></i>
           </div>
@@ -292,7 +292,7 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     const ref = entityRef(n);
     if (!ref) return;
     if (ref.type === 'event') {
-      void this.#router.navigate(['/planning'], {
+      this.#router.navigate(['/planning'], {
         queryParams: { eventId: ref.id },
       });
     }

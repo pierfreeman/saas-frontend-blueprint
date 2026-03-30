@@ -314,7 +314,7 @@ export class ActivityLogComponent implements OnInit {
     const orgId = this.#orgId();
     if (orgId) {
       this.#ent.loadEntitlements(orgId);
-      void this.#membershipsStore.loadMemberships(orgId);
+      this.#membershipsStore.loadMemberships(orgId);
     }
     this.#load(0);
   }

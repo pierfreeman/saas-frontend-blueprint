@@ -201,7 +201,9 @@ export class PlanningComponent implements OnInit {
   // Key of the currently selected occurrence (eventId__originalStartUtc)
   private readonly _selectedKey = signal<string | null>(null);
   // Stub fallback for occurrences opened by ID that may not be in the list
-  private readonly _selectedOccurrenceStub = signal<EventOccurrence | null>(null);
+  private readonly _selectedOccurrenceStub = signal<EventOccurrence | null>(
+    null,
+  );
   // Always reflects the freshest occurrence from the store (auto-updates on reload)
   protected readonly selectedOccurrence = computed<EventOccurrence | null>(
     () => {
@@ -264,9 +266,9 @@ export class PlanningComponent implements OnInit {
   ngOnInit(): void {
     const eventId = this.#route.snapshot.queryParamMap.get('eventId');
     if (eventId) {
-      void this.#openEventById(eventId);
+      this.#openEventById(eventId);
       // Remove query param from URL without adding a history entry
-      void this.#router.navigate([], {
+      this.#router.navigate([], {
         queryParams: {},
         replaceUrl: true,
         relativeTo: this.#route,
@@ -310,7 +312,7 @@ export class PlanningComponent implements OnInit {
   #onDatesSet(arg: DatesSetArg): void {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId) return;
-    void this.store.loadOccurrences(
+    this.store.loadOccurrences(
       orgId,
       arg.start.toISOString(),
       arg.end.toISOString(),
@@ -324,7 +326,7 @@ export class PlanningComponent implements OnInit {
     this.detailDialogVisible.set(true);
     const orgId = this.#orgsStore.activeOrgId();
     if (orgId) {
-      void this.store.loadEventDetail(orgId, occ.eventId);
+      this.store.loadEventDetail(orgId, occ.eventId);
     }
   }
 
@@ -402,59 +404,69 @@ export class PlanningComponent implements OnInit {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId || !form.title.trim()) return;
 
-    if (this.editMode()) {
-      const eventId = this.editingEventId();
-      if (!eventId) return;
-      const dto: UpdateEventDto = {
-        title: form.title.trim(),
-        start: toUtcIso(form.startUtc),
-        end: form.endUtc ? toUtcIso(form.endUtc) : undefined,
-        isAllDay: form.isAllDay,
-        description: form.description || undefined,
-        location: form.location || undefined,
-        rrule: form.rrule || undefined,
-        version: this.editingVersion(),
-        attendeeIds: form.attendeeIds,
-        notifyAttendees: form.notifyAttendees,
-        reminderMinutes: form.reminderMinutes,
-      };
-      const result = await this.store.updateEvent(orgId, eventId, dto);
-      if (!result) {
-        const err = this.store.error() as { status?: number } | null;
-        if (err?.status === 409) {
-          this.#toast.add({
-            severity: 'warn',
-            summary: 'Conflict',
-            detail: 'Event was modified by another user, please refresh.',
-          });
-        }
-        return;
-      }
-    } else {
-      const dto: CreateEventDto = {
-        title: form.title.trim(),
-        start: toUtcIso(form.startUtc),
-        end: form.endUtc ? toUtcIso(form.endUtc) : undefined,
-        isAllDay: form.isAllDay,
-        description: form.description || undefined,
-        location: form.location || undefined,
-        eventTimezone: form.eventTimezone,
-        rrule: form.rrule || undefined,
-        attendeeIds: form.attendeeIds.length > 0 ? form.attendeeIds : undefined,
-        reminderMinutes: form.reminderMinutes ?? undefined,
-      };
-      const created = await this.store.createEvent(orgId, dto);
-      if (!created) {
-        this.#toast.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to create event. Please try again.',
-        });
-        return;
-      }
-    }
+    const success = this.editMode()
+      ? await this.#submitEditForm(form, orgId)
+      : await this.#submitCreateForm(form, orgId);
 
-    this.createDialogVisible.set(false);
+    if (success) {
+      this.createDialogVisible.set(false);
+    }
+  }
+
+  async #submitEditForm(form: EventForm, orgId: string): Promise<boolean> {
+    const eventId = this.editingEventId();
+    if (!eventId) return false;
+    const dto: UpdateEventDto = {
+      title: form.title.trim(),
+      start: toUtcIso(form.startUtc),
+      end: form.endUtc ? toUtcIso(form.endUtc) : undefined,
+      isAllDay: form.isAllDay,
+      description: form.description || undefined,
+      location: form.location || undefined,
+      rrule: form.rrule || undefined,
+      version: this.editingVersion(),
+      attendeeIds: form.attendeeIds,
+      notifyAttendees: form.notifyAttendees,
+      reminderMinutes: form.reminderMinutes,
+    };
+    const result = await this.store.updateEvent(orgId, eventId, dto);
+    if (!result) {
+      const err = this.store.error() as { status?: number } | null;
+      if (err?.status === 409) {
+        this.#toast.add({
+          severity: 'warn',
+          summary: 'Conflict',
+          detail: 'Event was modified by another user, please refresh.',
+        });
+      }
+      return false;
+    }
+    return true;
+  }
+
+  async #submitCreateForm(form: EventForm, orgId: string): Promise<boolean> {
+    const dto: CreateEventDto = {
+      title: form.title.trim(),
+      start: toUtcIso(form.startUtc),
+      end: form.endUtc ? toUtcIso(form.endUtc) : undefined,
+      isAllDay: form.isAllDay,
+      description: form.description || undefined,
+      location: form.location || undefined,
+      eventTimezone: form.eventTimezone,
+      rrule: form.rrule || undefined,
+      attendeeIds: form.attendeeIds.length > 0 ? form.attendeeIds : undefined,
+      reminderMinutes: form.reminderMinutes ?? undefined,
+    };
+    const created = await this.store.createEvent(orgId, dto);
+    if (!created) {
+      this.#toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to create event. Please try again.',
+      });
+      return false;
+    }
+    return true;
   }
 
   // ── Detail dialog ──────────────────────────────────────────────────────────

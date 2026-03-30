@@ -63,7 +63,7 @@ function formatStorageBytes(bytes: string | null | undefined): string {
 function formatActivityAction(action: string): string {
   return action
     .toLowerCase()
-    .replace(/_/g, ' ')
+    .replaceAll('_', ' ')
     .replace(/^./, (c) => c.toUpperCase());
 }
 
