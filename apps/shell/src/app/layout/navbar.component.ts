@@ -49,17 +49,6 @@ import { OrgContextService } from '@saas-frontend/shared/util-org-context';
           <i class="pi pi-home"></i>
         </a>
 
-        <!-- Storage -->
-        <a
-          routerLink="/storage"
-          routerLinkActive="!text-primary"
-          pTooltip="Storage"
-          tooltipPosition="right"
-          class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
-        >
-          <i class="pi pi-database"></i>
-        </a>
-
         <!-- Planning -->
         <a
           routerLink="/planning"
@@ -69,6 +58,17 @@ import { OrgContextService } from '@saas-frontend/shared/util-org-context';
           class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
         >
           <i class="pi pi-calendar"></i>
+        </a>
+
+        <!-- Storage -->
+        <a
+          routerLink="/storage"
+          routerLinkActive="!text-primary"
+          pTooltip="Storage"
+          tooltipPosition="right"
+          class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
+        >
+          <i class="pi pi-folder"></i>
         </a>
       </nav>
 

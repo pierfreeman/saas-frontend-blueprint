@@ -249,114 +249,121 @@ function toActivityItem(log: ActivityLogRecord): ActivityItem {
         </div>
       }
 
-      <!-- Today's Agenda — all users -->
-      <p-card header="Upcoming events">
-        @if (loadingAgenda()) {
-          <div class="flex flex-col gap-3">
-            @for (i of [1, 2, 3]; track i) {
-              <p-skeleton height="3rem" />
-            }
-          </div>
-        } @else if (upcomingEvents().length === 0) {
-          <p class="text-surface-500 text-sm m-0">No upcoming events.</p>
-        } @else {
-          <div class="flex flex-col gap-2">
-            @for (
-              evt of upcomingEvents();
-              track evt.eventId + evt.originalStartUtc
-            ) {
-              <div
-                class="flex items-start gap-3 p-3 border border-surface-200 rounded-lg"
-              >
-                <!-- Date badge -->
-                <div
-                  class="flex flex-col items-center min-w-10 text-center shrink-0"
-                >
-                  <span
-                    class="text-xs text-surface-500 uppercase font-semibold leading-none"
-                    >{{ evt.startUtc | date: 'MMM' }}</span
-                  >
-                  <span class="text-2xl font-bold text-primary leading-tight">{{
-                    evt.startUtc | date: 'd'
-                  }}</span>
-                </div>
-
-                <!-- Details -->
-                <div class="flex flex-col flex-1 min-w-0">
-                  <span class="font-medium text-surface-900 truncate">{{
-                    evt.title
-                  }}</span>
-                  <span class="text-xs text-surface-500 mt-0.5">
-                    @if (evt.isAllDay) {
-                      All day
-                    } @else {
-                      {{ evt.startUtc | date: 'HH:mm' }} –
-                      {{ evt.endUtc | date: 'HH:mm' }}
-                    }
-                    @if (evt.location) {
-                      &nbsp;·&nbsp;{{ evt.location }}
-                    }
-                  </span>
-                </div>
-
-                <!-- RSVP badge -->
-                @if (evt.userRsvp) {
-                  <p-tag
-                    [value]="evt.rsvpLabel"
-                    [severity]="evt.rsvpSeverity"
-                    styleClass="text-xs shrink-0"
-                  />
-                }
-              </div>
-            }
-          </div>
-        }
-      </p-card>
-
-      <!-- Recent activity — admin/owner only -->
-      @if (isAdminOrOwner()) {
-        <p-card header="Recent activity">
-          @if (loadingActivity()) {
-            <div class="flex flex-col gap-2">
-              @for (i of [1, 2, 3, 4, 5]; track i) {
-                <p-skeleton height="1.75rem" />
+      <!-- Upcoming events + Recent activity — side by side on larger screens -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Today's Agenda — all users -->
+        <p-card header="Upcoming events" styleClass="h-full">
+          @if (loadingAgenda()) {
+            <div class="flex flex-col gap-3">
+              @for (i of [1, 2, 3]; track i) {
+                <p-skeleton height="3rem" />
               }
             </div>
-          } @else if (recentActivity().length === 0) {
-            <p class="text-surface-500 text-sm m-0">No activity yet.</p>
+          } @else if (upcomingEvents().length === 0) {
+            <p class="text-surface-500 text-sm m-0">No upcoming events.</p>
           } @else {
-            <div class="flex flex-col divide-y divide-surface-100">
-              @for (item of recentActivity(); track item.id) {
-                <div class="flex items-center justify-between py-2 gap-4">
-                  <div class="flex flex-col min-w-0">
+            <div class="flex flex-col gap-2">
+              @for (
+                evt of upcomingEvents();
+                track evt.eventId + evt.originalStartUtc
+              ) {
+                <a
+                  [routerLink]="['/planning']"
+                  [queryParams]="{ eventId: evt.eventId }"
+                  class="flex items-start gap-3 p-3 border border-surface-200 rounded-lg no-underline hover:bg-surface-50 transition-colors"
+                >
+                  <!-- Date badge -->
+                  <div
+                    class="flex flex-col items-center min-w-10 text-center shrink-0"
+                  >
                     <span
-                      class="text-sm font-medium text-surface-800 truncate"
-                      >{{ item.label }}</span
+                      class="text-xs text-surface-500 uppercase font-semibold leading-none"
+                      >{{ evt.startUtc | date: 'MMM' }}</span
                     >
-                    @if (item.entityType) {
-                      <span class="text-xs text-surface-400">{{
-                        item.entityType
-                      }}</span>
-                    }
+                    <span
+                      class="text-2xl font-bold text-primary leading-tight"
+                      >{{ evt.startUtc | date: 'd' }}</span
+                    >
                   </div>
-                  <div class="flex items-center gap-2 shrink-0">
-                    @if (item.actorRole) {
-                      <p-tag
-                        [value]="item.actorRole"
-                        severity="secondary"
-                        styleClass="text-xs"
-                      />
-                    }
-                    <span class="text-xs text-surface-400 whitespace-nowrap">{{
-                      item.relativeTime
+
+                  <!-- Details -->
+                  <div class="flex flex-col flex-1 min-w-0">
+                    <span class="font-medium text-surface-900 truncate">{{
+                      evt.title
                     }}</span>
+                    <span class="text-xs text-surface-500 mt-0.5">
+                      @if (evt.isAllDay) {
+                        All day
+                      } @else {
+                        {{ evt.startUtc | date: 'HH:mm' }} –
+                        {{ evt.endUtc | date: 'HH:mm' }}
+                      }
+                      @if (evt.location) {
+                        &nbsp;·&nbsp;{{ evt.location }}
+                      }
+                    </span>
                   </div>
-                </div>
+
+                  <!-- RSVP badge -->
+                  @if (evt.userRsvp) {
+                    <p-tag
+                      [value]="evt.rsvpLabel"
+                      [severity]="evt.rsvpSeverity"
+                      styleClass="text-xs shrink-0"
+                    />
+                  }
+                </a>
               }
             </div>
           }
         </p-card>
-      }
+
+        <!-- Recent activity — admin/owner only -->
+        @if (isAdminOrOwner()) {
+          <p-card header="Recent activity" styleClass="h-full">
+            @if (loadingActivity()) {
+              <div class="flex flex-col gap-2">
+                @for (i of [1, 2, 3, 4, 5]; track i) {
+                  <p-skeleton height="1.75rem" />
+                }
+              </div>
+            } @else if (recentActivity().length === 0) {
+              <p class="text-surface-500 text-sm m-0">No activity yet.</p>
+            } @else {
+              <div class="flex flex-col divide-y divide-surface-100">
+                @for (item of recentActivity(); track item.id) {
+                  <div class="flex items-center justify-between py-2 gap-4">
+                    <div class="flex flex-col min-w-0">
+                      <span
+                        class="text-sm font-medium text-surface-800 truncate"
+                        >{{ item.label }}</span
+                      >
+                      @if (item.entityType) {
+                        <span class="text-xs text-surface-400">{{
+                          item.entityType
+                        }}</span>
+                      }
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                      @if (item.actorRole) {
+                        <p-tag
+                          [value]="item.actorRole"
+                          severity="secondary"
+                          styleClass="text-xs"
+                        />
+                      }
+                      <span
+                        class="text-xs text-surface-400 whitespace-nowrap"
+                        >{{ item.relativeTime }}</span
+                      >
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </p-card>
+        }
+      </div>
     </div>
   `,
 })
@@ -476,7 +483,7 @@ export class DashboardComponent implements OnInit {
     // Activity log — restricted to OWNER and ADMIN.
     if (this.isAdminOrOwner()) {
       this.loadingActivity.set(true);
-      this.#activityLogApi.getActivityLog(orgId, { limit: 10 }).subscribe({
+      this.#activityLogApi.getActivityLog(orgId, { limit: 5 }).subscribe({
         next: ({ logs }) => {
           this.recentActivity.set(logs.map(toActivityItem));
           this.loadingActivity.set(false);

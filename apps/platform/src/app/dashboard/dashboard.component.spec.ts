@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
 import {
   ActivityLogApi,
   ActivityLogRecord,
@@ -610,6 +611,79 @@ describe('DashboardComponent', () => {
     });
   });
 
+  // ── Upcoming event links ─────────────────────────────────────────────────────
+
+  describe('upcoming event row links', () => {
+    it('renders each event row as an anchor element', async () => {
+      const occ = makeOccurrence({ eventId: 'evt-42' });
+      const { fixture } = setup({ occurrences: [occ] });
+      await new Promise((r) => setTimeout(r, 0));
+      fixture.detectChanges();
+
+      const anchors = fixture.debugElement
+        .queryAll(By.css('a'))
+        .filter((el) =>
+          el.nativeElement.getAttribute('href')?.includes('/planning'),
+        );
+      expect(anchors.length).toBe(1);
+    });
+
+    it('includes eventId as query param in href', async () => {
+      const occ = makeOccurrence({ eventId: 'evt-42' });
+      const { fixture } = setup({ occurrences: [occ] });
+      await new Promise((r) => setTimeout(r, 0));
+      fixture.detectChanges();
+
+      const anchor = fixture.debugElement
+        .queryAll(By.css('a'))
+        .find((el) =>
+          el.nativeElement.getAttribute('href')?.includes('/planning'),
+        );
+      expect(anchor).toBeTruthy();
+      expect(anchor!.nativeElement.getAttribute('href')).toContain(
+        'eventId=evt-42',
+      );
+    });
+
+    it('renders one anchor per visible event', async () => {
+      const occs = [
+        makeOccurrence({
+          eventId: 'evt-1',
+          startUtc: '2026-04-01T09:00:00Z',
+          originalStartUtc: '2026-04-01T09:00:00Z',
+        }),
+        makeOccurrence({
+          eventId: 'evt-2',
+          startUtc: '2026-04-02T09:00:00Z',
+          originalStartUtc: '2026-04-02T09:00:00Z',
+        }),
+      ];
+      const { fixture } = setup({ occurrences: occs });
+      await new Promise((r) => setTimeout(r, 0));
+      fixture.detectChanges();
+
+      const anchors = fixture.debugElement
+        .queryAll(By.css('a'))
+        .filter((el) =>
+          el.nativeElement.getAttribute('href')?.includes('/planning'),
+        );
+      expect(anchors.length).toBe(2);
+    });
+
+    it('does not render event anchors when there are no upcoming events', async () => {
+      const { fixture } = setup({ occurrences: [] });
+      await new Promise((r) => setTimeout(r, 0));
+      fixture.detectChanges();
+
+      const anchors = fixture.debugElement
+        .queryAll(By.css('a'))
+        .filter((el) =>
+          el.nativeElement.getAttribute('href')?.includes('/planning'),
+        );
+      expect(anchors.length).toBe(0);
+    });
+  });
+
   // ── RSVP severity mapping ────────────────────────────────────────────────────
 
   describe('RSVP severity mapping', () => {
@@ -651,10 +725,10 @@ describe('DashboardComponent', () => {
   // ── Recent activity ──────────────────────────────────────────────────────────
 
   describe('recent activity (admin/owner gate)', () => {
-    it('calls getActivityLog with orgId and limit:10 when OWNER', () => {
+    it('calls getActivityLog with orgId and limit:5 when OWNER', () => {
       const { mockActivityLogApi } = setup({ role: 'OWNER' });
       expect(mockActivityLogApi.getActivityLog).toHaveBeenCalledWith('org-1', {
-        limit: 10,
+        limit: 5,
       });
     });
 
