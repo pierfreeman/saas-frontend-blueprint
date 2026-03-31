@@ -31,9 +31,12 @@ export class NotificationsApi {
     });
   }
 
-  getUnreadCount(): Observable<UnreadCountResponse> {
+  getUnreadCount(orgId?: string): Observable<UnreadCountResponse> {
+    let params = new HttpParams();
+    if (orgId !== undefined) params = params.set('orgId', orgId);
     return this.#http.get<UnreadCountResponse>(
       `${this.#base}/notifications/unread-count`,
+      { params },
     );
   }
 

@@ -12,6 +12,7 @@ export const SOCKET_IO_FACTORY = new InjectionToken<typeof io>(
 
 export interface UnreadCountPayload {
   count: number;
+  orgId?: string;
 }
 
 /**

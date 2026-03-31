@@ -170,6 +170,21 @@ describe('NotificationsComponent', () => {
       // Only the empty list from the reload should be present.
       expect(component.notifications()).toHaveLength(0);
     });
+
+    it('does not prepend notifications from a different org', () => {
+      setup();
+      notification$.next(
+        makeNotification({ id: 'other-org', orgId: 'org-other' }),
+      );
+      expect(component.notifications()).toHaveLength(0);
+    });
+
+    it('prepends notifications from the same active org', () => {
+      setup();
+      notification$.next(makeNotification({ id: 'same-org', orgId: 'org-1' }));
+      expect(component.notifications()).toHaveLength(1);
+      expect(component.notifications()[0].id).toBe('same-org');
+    });
   });
 
   // ── Real-time: unreadCount$ ───────────────────────────────────────────────

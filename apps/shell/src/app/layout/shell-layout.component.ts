@@ -236,11 +236,11 @@ export class ShellLayoutComponent implements OnDestroy {
     toObservable(this.#orgsStore.activeOrgId)
       .pipe(
         filter(Boolean),
-        switchMap(() =>
+        switchMap((orgId) =>
           merge(
             of(null),
             this.#router.events.pipe(filter((e) => e instanceof NavigationEnd)),
-          ).pipe(switchMap(() => this.#notificationsApi.getUnreadCount())),
+          ).pipe(switchMap(() => this.#notificationsApi.getUnreadCount(orgId))),
         ),
         takeUntilDestroyed(),
       )
@@ -252,9 +252,13 @@ export class ShellLayoutComponent implements OnDestroy {
       });
 
     this.#subs.add(
-      this.#notificationsSocket.unreadCount$.subscribe(({ count }) =>
-        this.unreadCount.set(count ?? 0),
-      ),
+      this.#notificationsSocket.unreadCount$.subscribe(({ count, orgId }) => {
+        // Only update badge if the event is for the active org (or has no orgId for back-compat).
+        const activeOrg = this.#orgsStore.activeOrgId();
+        if (!orgId || orgId === activeOrg) {
+          this.unreadCount.set(count ?? 0);
+        }
+      }),
     );
 
     this.#subs.add(
