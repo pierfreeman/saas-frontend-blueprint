@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { appRoutes } from './app.routes';
 import { authGuard, orgGuard } from '@saas-frontend/shared/util-auth';
 import { Route, Routes } from '@angular/router';
@@ -15,7 +14,6 @@ describe('appRoutes', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(),
         {
           provide: RemoteConfigService,
           useValue: {
