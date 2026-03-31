@@ -26,9 +26,15 @@ if [[ -z "$BASE" ]]; then
   exit 1
 fi
 
-# Ensure the base commit exists locally (Vercel does a shallow clone by default).
+# Vercel does a shallow clone by default. Fetch enough history so that the
+# base commit (last successful deploy SHA) is available for nx affected.
 if ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
-  echo "[vercel-ignore] Base commit $BASE not available; proceeding with build."
+  echo "[vercel-ignore] Fetching history to reach base commit $BASE..."
+  git fetch --unshallow 2>/dev/null || git fetch origin --depth=50 2>/dev/null || true
+fi
+
+if ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+  echo "[vercel-ignore] Base commit $BASE still not available after fetch; proceeding with build."
   exit 1
 fi
 
