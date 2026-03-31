@@ -1,13 +1,29 @@
 import {
+  HTTP_INTERCEPTORS,
+  HttpInterceptorFn,
+  provideHttpClient,
+  withInterceptors,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
+import {
   ApplicationConfig,
   inject,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
+import { provideRouter } from '@angular/router';
+import { AuthHttpInterceptor, provideAuth0 } from '@auth0/auth0-angular';
 import { definePreset } from '@primeuix/themes';
+import Aura from '@primeuix/themes/aura';
+import { tenantInterceptor } from '@saas-frontend/organizations/data-access';
+import { errorInterceptor } from '@saas-frontend/shared/util-error';
+import { API_BASE_URL } from '@saas-frontend/shared/util-types';
+import { MessageService } from 'primeng/api';
+import { providePrimeNG } from 'primeng/config';
+import { environment } from 'src/environments/environment';
+import { AppInitService } from './app-init.service';
+import { appRoutes } from './app.routes';
 
 const AppTheme = definePreset(Aura, {
   semantic: {
@@ -44,23 +60,6 @@ const AppTheme = definePreset(Aura, {
     },
   },
 });
-import {
-  HTTP_INTERCEPTORS,
-  HttpInterceptorFn,
-  provideHttpClient,
-  withInterceptors,
-  withInterceptorsFromDi,
-} from '@angular/common/http';
-import { inject } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { AuthHttpInterceptor, provideAuth0 } from '@auth0/auth0-angular';
-import { appRoutes } from './app.routes';
-import { API_BASE_URL } from '@saas-frontend/shared/util-types';
-import { MessageService } from 'primeng/api';
-import { tenantInterceptor } from '@saas-frontend/organizations/data-access';
-import { errorInterceptor } from '@saas-frontend/shared/util-error';
-import { environment } from 'src/environments/environment';
-import { AppInitService } from './app-init.service';
 
 // Prevents ngrok's interstitial warning page from being returned instead of the
 // actual API response. The header is ignored by non-ngrok servers.
