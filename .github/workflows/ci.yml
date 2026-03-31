@@ -13,6 +13,7 @@ concurrency:
 permissions:
   actions: read
   contents: read
+  pull-requests: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -56,6 +57,21 @@ jobs:
 
       - name: Unit Tests
         run: npx nx run-many -t test --coverage --nx-bail
+
+      - name: Coverage summary
+        if: always()
+        run: node scripts/coverage-summary.mjs >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment coverage on PR
+        if: always() && github.event_name == 'pull_request'
+        run: node scripts/coverage-summary.mjs > coverage-comment.md
+
+      - name: Post coverage PR comment
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: coverage
+          path: coverage-comment.md
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
