@@ -23,7 +23,7 @@ describe('RemoteConfigService', () => {
 
   it('returns a fallback route with RemoteUnavailableComponent on loader failure', async () => {
     const loader = vi.fn().mockRejectedValue(new Error('chunk failed'));
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(vi.fn());
 
     const result = await service.loadRoutes('platform', loader);
 
@@ -35,7 +35,7 @@ describe('RemoteConfigService', () => {
   it('logs the error to console when loader fails', async () => {
     const err = new Error('network error');
     const loader = vi.fn().mockRejectedValue(err);
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const spy = vi.spyOn(console, 'error').mockImplementation(vi.fn());
 
     await service.loadRoutes('admin', loader);
 
