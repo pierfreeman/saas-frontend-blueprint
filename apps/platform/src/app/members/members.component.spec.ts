@@ -67,6 +67,7 @@ function setup(opts: {
 
   const mockEnt = {
     maxSeats: signal(maxSeats),
+    loadEntitlements: vi.fn(() => Promise.resolve()),
   } as unknown as EntitlementsStore;
 
   const mockPermissions = {
@@ -90,7 +91,14 @@ function setup(opts: {
   const component = fixture.componentInstance;
   fixture.detectChanges();
 
-  return { fixture, component, mockStore, memberships, loadingListSig };
+  return {
+    fixture,
+    component,
+    mockStore,
+    mockEnt,
+    memberships,
+    loadingListSig,
+  };
 }
 
 // ── Suite ─────────────────────────────────────────────────────────────────────
@@ -148,7 +156,12 @@ describe('MembersComponent', () => {
       expect(mockStore.loadMemberships).toHaveBeenCalledWith('org-1');
     });
 
-    it('does not call loadMemberships without an org id', () => {
+    it('calls loadEntitlements with the active org id on init', () => {
+      const { mockEnt } = setup({});
+      expect(mockEnt.loadEntitlements).toHaveBeenCalledWith('org-1');
+    });
+
+    it('does not call loadMemberships or loadEntitlements without an org id', () => {
       const mockStore = {
         memberships: signal<MembershipSummary[]>([]),
         loadingList: signal(false),
@@ -160,6 +173,11 @@ describe('MembersComponent', () => {
         removeMember: vi.fn(() => Promise.resolve()),
       } as unknown as MembershipsStore;
 
+      const mockEnt = {
+        maxSeats: signal(10),
+        loadEntitlements: vi.fn(() => Promise.resolve()),
+      } as unknown as EntitlementsStore;
+
       TestBed.configureTestingModule({
         imports: [MembersComponent],
         providers: [
@@ -169,10 +187,7 @@ describe('MembersComponent', () => {
             provide: OrganizationsStore,
             useValue: { activeOrgId: signal<string | null>(null) },
           },
-          {
-            provide: EntitlementsStore,
-            useValue: { maxSeats: signal(10) },
-          },
+          { provide: EntitlementsStore, useValue: mockEnt },
           {
             provide: PermissionsService,
             useValue: { currentUserPermissions: signal(new Set<string>()) },
@@ -185,6 +200,7 @@ describe('MembersComponent', () => {
       const fixture = TestBed.createComponent(MembersComponent);
       fixture.detectChanges();
       expect(mockStore.loadMemberships).not.toHaveBeenCalled();
+      expect(mockEnt.loadEntitlements).not.toHaveBeenCalled();
     });
   });
 
@@ -235,7 +251,10 @@ describe('MembersComponent', () => {
           },
           {
             provide: EntitlementsStore,
-            useValue: { maxSeats: signal(10) },
+            useValue: {
+              maxSeats: signal(10),
+              loadEntitlements: vi.fn(() => Promise.resolve()),
+            },
           },
           {
             provide: PermissionsService,
