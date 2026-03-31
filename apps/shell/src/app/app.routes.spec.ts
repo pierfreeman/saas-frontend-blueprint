@@ -1,11 +1,29 @@
+import { TestBed } from '@angular/core/testing';
 import { appRoutes } from './app.routes';
 import { authGuard, orgGuard } from '@saas-frontend/shared/util-auth';
-import { Route } from '@angular/router';
+import { Route, Routes } from '@angular/router';
+import { RemoteConfigService } from './remote-config.service';
 
 describe('appRoutes', () => {
   const authRoute = appRoutes.find((r) => r.path === 'auth');
   const layoutRoute = appRoutes.find((r) => r.path === '' && r.children);
   const children = (layoutRoute?.children ?? []) as Route[];
+
+  // Provide a pass-through RemoteConfigService so loadChildren tests exercise
+  // the real import('auth/Routes') / MF loaders without error-handling noise.
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: RemoteConfigService,
+          useValue: {
+            loadRoutes: (_name: string, loader: () => Promise<Routes>) =>
+              loader(),
+          },
+        },
+      ],
+    });
+  });
 
   it('the auth path has no guard (publicly accessible)', () => {
     expect(authRoute).toBeDefined();
@@ -33,25 +51,30 @@ describe('appRoutes', () => {
   });
 
   // ── Lazy loader functions ────────────────────────────────────────────────
-  // Call the MF remote loadChildren to exercise their arrow-function bodies.
-  // loadComponent loaders import real Angular components (with transitive
-  // service dependencies) — they are marked with /* v8 ignore */ in the source
-  // to avoid pulling in unrelated coverage gaps.
+  // Call the MF remote loadChildren inside an injection context so that
+  // inject(RemoteConfigService) resolves. The mock service passes through
+  // directly to import('remote/Routes') — no error-handling detour.
 
   it('auth loadChildren resolves AUTH_ROUTES', async () => {
-    const result = await (authRoute!.loadChildren as () => Promise<unknown>)();
+    const result = await TestBed.runInInjectionContext(() =>
+      (authRoute!.loadChildren as () => Promise<unknown>)(),
+    );
     expect(Array.isArray(result)).toBe(true);
   });
 
   it('admin loadChildren resolves ADMIN_ROUTES', async () => {
     const admin = children.find((r) => r.path === 'admin');
-    const result = await (admin!.loadChildren as () => Promise<unknown>)();
+    const result = await TestBed.runInInjectionContext(() =>
+      (admin!.loadChildren as () => Promise<unknown>)(),
+    );
     expect(Array.isArray(result)).toBe(true);
   });
 
   it('platform loadChildren resolves PLATFORM_ROUTES', async () => {
     const platform = children.find((r) => r.path === '' && !r.children);
-    const result = await (platform!.loadChildren as () => Promise<unknown>)();
+    const result = await TestBed.runInInjectionContext(() =>
+      (platform!.loadChildren as () => Promise<unknown>)(),
+    );
     expect(Array.isArray(result)).toBe(true);
   });
 });

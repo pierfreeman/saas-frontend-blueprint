@@ -67,6 +67,8 @@ The shell is the **only host** in the monorepo. It owns:
 
 **There is exactly one shell.** Do not replicate its global providers in remotes — remotes get them transitively via singleton sharing.
 
+`RemoteConfigService` is registered via `provideAppInitializer` and runs before the router activates. It fetches `/remotes.json` (written at Vercel build time by `scripts/generate-env.sh`) and calls the MF 2.x `init()` runtime. Every remote `loadChildren` in `app.routes.ts` is wrapped by `RemoteConfigService.loadRoutes()` — if a remote bundle fails to load, the shell renders `RemoteUnavailableComponent` instead of crashing. In development this service is a no-op; webpack's dev-server resolves remotes via the `devRemotes` config.
+
 ```
 apps/shell/src/
   app/
@@ -75,11 +77,14 @@ apps/shell/src/
     app.guard.ts           ← authGuard (Auth0 isAuthenticated$)
     org.guard.ts           ← orgGuard (OrganizationsStore.hasActiveOrg())
     error.interceptor.ts   ← maps HTTP errors to toast messages
+    remote-config.service.ts  ← MF runtime config + per-remote error handling
     layout/
       shell-layout.component.ts
       navbar.component.ts
     org-select/
       org-select.component.ts
+    remote-unavailable/
+      remote-unavailable.component.ts  ← fallback UI when a remote fails to load
   environments/
     environment.ts
   remotes.d.ts             ← TypeScript module declarations for remote entry points

@@ -143,6 +143,8 @@ export const environment = {
 };
 ```
 
+> **Production**: `environment.prod.ts` is generated at Vercel build time by `scripts/generate-env.sh` from Vercel environment variables — never edit it manually.
+
 **`apps/platform/src/environments/environment.ts`** — platform-specific config
 
 ```ts
@@ -350,6 +352,57 @@ npx nx g @nx/js:lib libs/<domain>/data-access
 # 4. Export from src/index.ts
 # 5. Provide the service in the consuming route group providers[]
 ```
+
+---
+
+## Deployment (Vercel)
+
+Each MFE is deployed as an **independent Vercel project** pointing at the same repository root (`.`). A single `vercel.json` at the root applies to all four projects.
+
+### Projects
+
+| Vercel project | `VERCEL_APP` env var | Output dir           | Port (dev) |
+| -------------- | -------------------- | -------------------- | ---------- |
+| `shell`        | `shell`              | `dist/apps/shell`    | 4200       |
+| `auth`         | `auth`               | `dist/apps/auth`     | 4201       |
+| `platform`     | `platform`           | `dist/apps/platform` | 4202       |
+| `admin`        | `admin`              | `dist/apps/admin`    | 4203       |
+
+**Build command** (all projects): `bash scripts/vercel-build.sh`  
+**Output directory** (all projects): `dist/apps/$VERCEL_APP`  
+**Install command**: `npm install`
+
+### Environment variables (per-project)
+
+Every project needs at minimum `VERCEL_APP` set to its name. The shell additionally requires:
+
+| Variable              | Description                                            |
+| --------------------- | ------------------------------------------------------ |
+| `VERCEL_APP`          | App name (`shell`, `auth`, `platform`, `admin`)        |
+| `API_URL`             | Backend API base URL                                   |
+| `AUTH0_DOMAIN`        | Auth0 tenant domain                                    |
+| `AUTH0_CLIENT_ID`     | Auth0 SPA client ID                                    |
+| `AUTH0_AUDIENCE`      | Auth0 API identifier                                   |
+| `AUTH0_REDIRECT_URI`  | Deployed shell URL + `/auth/callback`                  |
+| `REMOTE_AUTH_URL`     | `https://<auth-project>.vercel.app/remoteEntry.js`     |
+| `REMOTE_PLATFORM_URL` | `https://<platform-project>.vercel.app/remoteEntry.js` |
+| `REMOTE_ADMIN_URL`    | `https://<admin-project>.vercel.app/remoteEntry.js`    |
+
+`scripts/generate-env.sh` reads these variables and writes `environment.prod.ts` (and `public/remotes.json` for the shell) at build time.
+
+### Dynamic remote loading
+
+The shell loads remote entry URLs at **runtime** (not at build time) via `RemoteConfigService`:
+
+1. `provideAppInitializer` calls `RemoteConfigService.loadConfig()` before the router activates.
+2. `loadConfig()` fetches `/remotes.json` (served as a static asset) and registers each remote with the `@module-federation/runtime` 2.x runtime.
+3. `app.routes.ts` wraps every `loadChildren` in `RemoteConfigService.loadRoutes()` — if a remote fails to load, the shell renders `RemoteUnavailableComponent` instead of crashing.
+
+This means the shell can point at different remote URLs **without being rebuilt**.
+
+### Selective builds (Nx affected)
+
+`scripts/vercel-ignore.sh` skips the build when the Vercel project's app is not in the Nx affected graph for the current commit. This avoids unnecessary rebuilds in CI/CD when only unrelated code changed.
 
 ---
 
