@@ -133,7 +133,6 @@ jobs:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
     needs: [unit, sonarqube]
-    if: github.event_name == 'push'
     timeout-minutes: 30
 
     strategy:
@@ -184,14 +183,34 @@ jobs:
         env:
           VERCEL_PROJECT_ID: ${{ secrets[matrix.app.project_id_secret] }}
 
+      # Production: push to main
       - name: Deploy to production
-        if: steps.affected.outputs.skip == 'false' && github.ref == 'refs/heads/main'
+        if: steps.affected.outputs.skip == 'false' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: vercel deploy --prod --token=$VERCEL_TOKEN
         env:
           VERCEL_PROJECT_ID: ${{ secrets[matrix.app.project_id_secret] }}
 
-      - name: Deploy to staging (preview)
-        if: steps.affected.outputs.skip == 'false' && github.ref != 'refs/heads/main'
+      # Staging: push to develop
+      - name: Deploy to staging
+        if: steps.affected.outputs.skip == 'false' && github.event_name == 'push' && github.ref == 'refs/heads/develop'
         run: vercel deploy --token=$VERCEL_TOKEN
         env:
           VERCEL_PROJECT_ID: ${{ secrets[matrix.app.project_id_secret] }}
+
+      # Preview: pull requests targeting main or develop
+      - name: Deploy preview
+        if: steps.affected.outputs.skip == 'false' && github.event_name == 'pull_request'
+        id: preview
+        run: |
+          url=$(vercel deploy --token=$VERCEL_TOKEN)
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+        env:
+          VERCEL_PROJECT_ID: ${{ secrets[matrix.app.project_id_secret] }}
+
+      - name: Comment preview URL on PR
+        if: steps.preview.outputs.url
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview-${{ matrix.app.name }}
+          message: |
+            🚀 **${{ matrix.app.name }}** preview deployed: ${{ steps.preview.outputs.url }}
