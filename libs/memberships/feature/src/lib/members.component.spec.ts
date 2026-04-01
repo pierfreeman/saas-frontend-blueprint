@@ -6,7 +6,6 @@ import {
   MembershipsStore,
   MembershipSummary,
 } from '@saas-frontend/memberships/data-access';
-import { MembersComponent } from '@saas-frontend/memberships/feature';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import {
   PERMISSIONS,
@@ -14,6 +13,7 @@ import {
 } from '@saas-frontend/shared/util-rbac';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { describe, expect, it, vi } from 'vitest';
+import { MembersComponent } from './members.component';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
