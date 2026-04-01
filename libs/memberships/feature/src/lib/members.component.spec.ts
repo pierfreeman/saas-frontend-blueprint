@@ -5,6 +5,7 @@ import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import {
   MembershipsStore,
   MembershipSummary,
+  MembershipRole,
 } from '@saas-frontend/memberships/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import {
@@ -402,6 +403,199 @@ describe('MembersComponent', () => {
       const { component } = setup({});
       const m = makeMember({ user: { email: 'frank@x.com' } });
       expect(component.avatarLabel(m)).toBe('F');
+    });
+  });
+
+  describe('changeRole', () => {
+    function setupWithErrorStore(updateRoleError: string | null = null) {
+      const errorSig = signal<{ message: string } | null>(null);
+      const mockStore = {
+        memberships: signal([] as MembershipSummary[]),
+        loadingList: signal(false),
+        loadingMutation: signal(false),
+        error: errorSig,
+        loadMemberships: vi.fn(() => Promise.resolve()),
+        inviteMember: vi.fn(() => Promise.resolve(null)),
+        updateMemberRole: vi.fn(async () => {
+          if (updateRoleError) errorSig.set({ message: updateRoleError });
+        }),
+        removeMember: vi.fn(() => Promise.resolve()),
+      } as unknown as MembershipsStore;
+
+      TestBed.configureTestingModule({
+        imports: [MembersComponent],
+        providers: [
+          provideRouter([]),
+          { provide: MembershipsStore, useValue: mockStore },
+          {
+            provide: OrganizationsStore,
+            useValue: { activeOrgId: signal('org-1') },
+          },
+          {
+            provide: EntitlementsStore,
+            useValue: {
+              maxSeats: signal(10),
+              loadEntitlements: vi.fn(() => Promise.resolve()),
+            },
+          },
+          {
+            provide: PermissionsService,
+            useValue: { currentUserPermissions: signal(new Set<string>()) },
+          },
+          ConfirmationService,
+          MessageService,
+        ],
+      });
+      const fixture = TestBed.createComponent(MembersComponent);
+      const component = fixture.componentInstance;
+      fixture.detectChanges();
+      const toast = fixture.debugElement.injector.get(MessageService);
+      const toastSpy = vi.spyOn(toast, 'add');
+      return { component, mockStore, toastSpy };
+    }
+
+    it('calls updateMemberRole and shows success toast', async () => {
+      const { component, mockStore, toastSpy } = setupWithErrorStore();
+      await component.changeRole(makeMember(), 'ADMIN' as MembershipRole);
+      expect(mockStore.updateMemberRole).toHaveBeenCalledWith(
+        'org-1',
+        'm1',
+        'ADMIN',
+      );
+      expect(toastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'success',
+          summary: 'Role updated',
+        }),
+      );
+    });
+
+    it('shows error toast when store has error after updateMemberRole', async () => {
+      const { component, toastSpy } = setupWithErrorStore('Role update failed');
+      await component.changeRole(makeMember(), 'ADMIN' as MembershipRole);
+      expect(toastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          detail: 'Role update failed',
+        }),
+      );
+    });
+
+    it('returns early when member has no id', async () => {
+      const { component, mockStore } = setupWithErrorStore();
+      await component.changeRole(
+        { ...makeMember(), id: undefined as any },
+        'ADMIN' as MembershipRole,
+      );
+      expect(mockStore.updateMemberRole).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('confirmRemove and #doRemove', () => {
+    function setupWithMockConfirm(removeError: string | null = null) {
+      const errorSig = signal<{ message: string } | null>(null);
+      const mockStore = {
+        memberships: signal([] as MembershipSummary[]),
+        loadingList: signal(false),
+        loadingMutation: signal(false),
+        error: errorSig,
+        loadMemberships: vi.fn(() => Promise.resolve()),
+        inviteMember: vi.fn(() => Promise.resolve(null)),
+        updateMemberRole: vi.fn(() => Promise.resolve()),
+        removeMember: vi.fn(async () => {
+          if (removeError) errorSig.set({ message: removeError });
+        }),
+      } as unknown as MembershipsStore;
+
+      TestBed.configureTestingModule({
+        imports: [MembersComponent],
+        providers: [
+          provideRouter([]),
+          { provide: MembershipsStore, useValue: mockStore },
+          {
+            provide: OrganizationsStore,
+            useValue: { activeOrgId: signal('org-1') },
+          },
+          {
+            provide: EntitlementsStore,
+            useValue: {
+              maxSeats: signal(10),
+              loadEntitlements: vi.fn(() => Promise.resolve()),
+            },
+          },
+          {
+            provide: PermissionsService,
+            useValue: { currentUserPermissions: signal(new Set<string>()) },
+          },
+          ConfirmationService,
+          MessageService,
+        ],
+      });
+      const fixture = TestBed.createComponent(MembersComponent);
+      const component = fixture.componentInstance;
+      fixture.detectChanges();
+      const confirmSvc = fixture.debugElement.injector.get(ConfirmationService);
+      const toastSvc = fixture.debugElement.injector.get(MessageService);
+      const confirmSpy = vi.spyOn(confirmSvc, 'confirm');
+      const toastSpy = vi.spyOn(toastSvc, 'add');
+      return { component, mockStore, confirmSpy, toastSpy };
+    }
+
+    it('calls ConfirmationService.confirm with user email in message', () => {
+      const { component, confirmSpy } = setupWithMockConfirm();
+      component.confirmRemove(
+        makeMember({ user: { email: 'remove@example.com' } }),
+      );
+      expect(confirmSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('remove@example.com'),
+        }),
+      );
+    });
+
+    it('calls ConfirmationService.confirm with userId when user.email is absent', () => {
+      const { component, confirmSpy } = setupWithMockConfirm();
+      component.confirmRemove(makeMember({ userId: 'user-uuid-999' }));
+      expect(confirmSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining('user-uuid-999'),
+        }),
+      );
+    });
+
+    it('calls removeMember and shows success toast when accept is triggered', async () => {
+      const { component, mockStore, confirmSpy, toastSpy } =
+        setupWithMockConfirm();
+      component.confirmRemove(makeMember());
+      const { accept } = confirmSpy.mock.calls[0][0] as any;
+      await accept();
+      expect(mockStore.removeMember).toHaveBeenCalledWith('org-1', 'm1');
+      expect(toastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'success', summary: 'Removed' }),
+      );
+    });
+
+    it('shows error toast when store has error after removeMember', async () => {
+      const { component, confirmSpy, toastSpy } = setupWithMockConfirm(
+        'Cannot remove member',
+      );
+      component.confirmRemove(makeMember());
+      const { accept } = confirmSpy.mock.calls[0][0] as any;
+      await accept();
+      expect(toastSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          detail: 'Cannot remove member',
+        }),
+      );
+    });
+
+    it('does not call removeMember when member has no id', async () => {
+      const { component, mockStore, confirmSpy } = setupWithMockConfirm();
+      component.confirmRemove({ ...makeMember(), id: undefined as any });
+      const { accept } = confirmSpy.mock.calls[0][0] as any;
+      await accept();
+      expect(mockStore.removeMember).not.toHaveBeenCalled();
     });
   });
 });

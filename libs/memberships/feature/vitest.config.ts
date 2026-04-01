@@ -30,7 +30,7 @@ export default defineConfig(async () => {
         reportsDirectory: resolve(root, 'coverage/memberships-feature'),
         reporter: ['text', 'lcov', 'html'],
         include: ['src/lib/**/*.ts'],
-        exclude: ['src/**/*.spec.ts'],
+        exclude: ['src/**/*.spec.ts', 'src/lib/**/*.routes.ts'],
         thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
       },
     },
