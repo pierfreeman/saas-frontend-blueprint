@@ -16,12 +16,14 @@ function setup(
     canManage?: boolean;
     email?: string;
     pictureUrl?: string | null;
+    isSystemAdmin?: boolean;
   } = {},
 ) {
   const {
     canManage = false,
     email = 'alice@example.com',
     pictureUrl = null,
+    isSystemAdmin = false,
   } = opts;
 
   const mockAuth = {
@@ -29,7 +31,7 @@ function setup(
   } as unknown as AuthService;
 
   const mockAuthStore = {
-    currentUser: signal({ email, pictureUrl }),
+    currentUser: signal({ email, pictureUrl, isSystemAdmin }),
     clearUser: vi.fn(),
   } as unknown as AuthStore;
 
@@ -157,6 +159,36 @@ describe('NavbarComponent', () => {
         pictureUrl: 'https://example.com/pic.jpg',
       });
       expect(component.avatarPicture()).toBe('https://example.com/pic.jpg');
+    });
+  });
+
+  // ── isSystemAdmin ────────────────────────────────────────────────────────────
+
+  describe('isSystemAdmin()', () => {
+    it('returns false when isSystemAdmin is false', () => {
+      const { component } = setup({ isSystemAdmin: false });
+      expect(component.isSystemAdmin()).toBe(false);
+    });
+
+    it('returns true when isSystemAdmin is true', () => {
+      const { component } = setup({ isSystemAdmin: true });
+      expect(component.isSystemAdmin()).toBe(true);
+    });
+
+    it('does not render admin link in desktop sidebar when false', () => {
+      const { fixture } = setup({ isSystemAdmin: false });
+      const links = fixture.debugElement.queryAll(
+        By.css('a[routerLink="/admin"]'),
+      );
+      expect(links).toHaveLength(0);
+    });
+
+    it('renders admin link in desktop sidebar when true', () => {
+      const { fixture } = setup({ isSystemAdmin: true });
+      const links = fixture.debugElement.queryAll(
+        By.css('a[routerLink="/admin"]'),
+      );
+      expect(links.length).toBeGreaterThan(0);
     });
   });
 

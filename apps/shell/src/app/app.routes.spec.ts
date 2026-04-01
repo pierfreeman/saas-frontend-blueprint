@@ -1,6 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { appRoutes } from './app.routes';
-import { authGuard, orgGuard } from '@saas-frontend/shared/util-auth';
+import {
+  authGuard,
+  isSystemAdminGuard,
+  orgGuard,
+} from '@saas-frontend/shared/util-auth';
 import { Route, Routes } from '@angular/router';
 import { RemoteConfigService } from './remote-config.service';
 
@@ -40,9 +44,9 @@ describe('appRoutes', () => {
     expect(platform?.canActivate).toContain(orgGuard);
   });
 
-  it('the admin child route is protected by orgGuard', () => {
+  it('the admin child route is protected by isSystemAdminGuard', () => {
     const admin = children.find((r) => r.path === 'admin');
-    expect(admin?.canActivate).toContain(orgGuard);
+    expect(admin?.canActivate).toContain(isSystemAdminGuard);
   });
 
   it('the wildcard route redirects to root', () => {

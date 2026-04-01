@@ -4,7 +4,12 @@ import { vi } from 'vitest';
 import { AuthStore, AuthApi } from '@saas-frontend/auth/data-access';
 import type { User } from '@saas-frontend/auth/data-access';
 
-const mockUser: User = { id: 'u1', email: 'a@b.com', auth0Id: 'auth0|1' };
+const mockUser: User = {
+  id: 'u1',
+  email: 'a@b.com',
+  auth0Id: 'auth0|1',
+  isSystemAdmin: false,
+};
 
 function mockApi(overrides: Partial<InstanceType<typeof AuthApi>> = {}) {
   return {
