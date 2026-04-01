@@ -1,35 +1,40 @@
 # admin
 
-**Admin MFE** (`port 4203`) — super-admin dashboard area. Currently a placeholder — this is where internal operations tooling lives (user lookup, org inspection, system metrics).
+**Admin MFE** (`port 4203`) — super-admin backoffice portal. Provides internal operations tooling: org inspection, member management, billing oversight, and cross-tenant activity log. Accessible only to users with `isSystemAdmin === true`.
 
 Loaded by the shell at `/admin`. Exposes a single `./Routes` entry point.
 
 ---
 
-## Exposed entry point
+## Access control
 
-```ts
-// module-federation.config.ts
-exposes: { './Routes': 'src/app/remote-entry/entry.ts' }
-```
+The shell applies **`isSystemAdminGuard`** to the `/admin` path — it reads `AuthStore.currentUser().isSystemAdmin` and redirects to `/` if the flag is `false`. The guard is defined in `@saas-frontend/shared/util-auth`.
 
-The shell router loads it as:
+To grant admin access to a user, run the backend promotion script:
 
-```ts
-{
-  path: 'admin',
-  canActivate: [orgGuard],
-  loadChildren: () => import('admin/Routes').then(m => m.ADMIN_ROUTES),
-}
+```sh
+cd saas-backend-blueprint
+node scripts/promote-admin.mjs <email> true
 ```
 
 ---
 
-## Current routes
+## Routes
 
-| Route              | Component                 | Status      |
-| ------------------ | ------------------------- | ----------- |
-| `/admin/dashboard` | `AdminDashboardComponent` | Placeholder |
+| Route                         | Component                     | Description                                  |
+| ----------------------------- | ----------------------------- | -------------------------------------------- |
+| `/admin`                      | — (redirect)                  | Redirects to `/admin/organizations`          |
+| `/admin/organizations`        | `AdminOrganizationsComponent` | Paginated org list, search, status filter    |
+| `/admin/organizations/:orgId` | `AdminOrgDetailComponent`     | Org detail + 3-tab panel                     |
+| `/admin/activity-log`         | `AdminAllActivityComponent`   | Cross-tenant activity log, date range filter |
+
+### Org detail tabs (`AdminOrgDetailComponent`)
+
+| Tab      | Sub-component               | Description                                                                 |
+| -------- | --------------------------- | --------------------------------------------------------------------------- |
+| Members  | `AdminMembersTabComponent`  | Paginated members, invite, role change, remove                              |
+| Billing  | `AdminBillingTabComponent`  | Subscription overview, Stripe portal link, entitlements, cache invalidation |
+| Activity | `AdminActivityTabComponent` | Org-scoped activity log with date filter                                    |
 
 ---
 
@@ -38,21 +43,51 @@ The shell router loads it as:
 ```
 src/app/
   remote-entry/
-    entry.ts          — re-exports ADMIN_ROUTES
-    entry.routes.ts   — declares ADMIN_ROUTES
+    entry.ts             — re-exports ADMIN_ROUTES
+    entry.routes.ts      — route group: providers[] + lazy child routes
   admin-dashboard/
-    admin-dashboard.component.ts  — placeholder component
+    admin-dashboard.component.ts    — landing card (logged-in user info)
+  organizations/
+    admin-organizations.component.ts    — org list page
+    admin-organizations.component.spec.ts
+    admin-org-detail.component.ts       — org detail + tab switcher
+    admin-org-detail.component.spec.ts
+    admin-members-tab.component.ts      — members tab (sub-component)
+    admin-members-tab.component.spec.ts
+    admin-billing-tab.component.ts      — billing tab (sub-component)
+    admin-billing-tab.component.spec.ts
+    admin-activity-tab.component.ts     — per-org activity tab (sub-component)
+    admin-activity-tab.component.spec.ts
+  activity-log/
+    admin-all-activity.component.ts     — cross-tenant activity log page
+    admin-all-activity.component.spec.ts
 ```
+
+---
+
+## Data access
+
+All API calls go through `AdminApi` from `@saas-frontend/admin/data-access`. The service is provided in the route group `providers[]` alongside `API_BASE_URL`.
+
+```ts
+// entry.routes.ts (excerpt)
+providers: [
+  AdminApi,
+  { provide: API_BASE_URL, useValue: environment.apiUrl },
+],
+```
+
+See [`libs/admin/data-access/README.md`](../../libs/admin/data-access/README.md) for the full method inventory.
 
 ---
 
 ## Running
 
 ```sh
-# Via shell
+# Via shell (recommended)
 npx nx serve shell --devRemotes=admin
 
-# Standalone
+# Standalone (no shell layout)
 npx nx serve admin
 ```
 
@@ -63,12 +98,6 @@ npx nx serve admin
 To add a new admin page:
 
 1. Create `src/app/<feature>/<feature>.component.ts`
-2. Add a lazy route in `entry.routes.ts`
-3. Provide any `*Api` services in the route group `providers` array (same `API_BASE_URL` re-provision pattern as `platform`)
-4. Add a nav link in `apps/shell/src/app/layout/navbar.component.ts` (guarded by admin role if needed)
-
----
-
-## Access control
-
-Currently the only guard applied is `orgGuard` (active org required). Add an admin role check guard here before exposing real functionality to end users.
+2. Add a lazy `loadComponent` route in `entry.routes.ts` under the `children[]` of the provider group
+3. Any new `*Api` service must be added to that same `providers[]` array
+4. Tests go co-located as `<feature>.component.spec.ts`

@@ -42,6 +42,7 @@ Designed to pair with [saas-backend-blueprint](../saas-backend-blueprint).
 - 🧩 **Module Federation** — each MFE is independently built and deployable; the shell composes them at runtime
 - 🔒 **Route guards** — `authGuard` (Auth0 session) + `orgGuard` (active org required before accessing platform routes)
 - 📅 **Planning / Calendar** — FullCalendar with month/week/day views, recurring events (RRULE builder), drag-and-drop rescheduling, RSVP, live conflict checking, per-occurrence exceptions, This-and-Following series splitting, IANA timezone selector, event reminder presets
+- 🛠️ **Admin backoffice portal** — super-admin area (protected by `isSystemAdmin` flag) with org list, org detail, member management, billing overview with Stripe portal access, per-org and cross-tenant activity log, entitlement cache invalidation
 
 ---
 
@@ -52,9 +53,11 @@ apps/
   shell/          — Host app (port 4200): routing, layout, guards, global providers
   auth/           — Auth MFE (port 4201): login page, Auth0 callback handler
   platform/       — Platform MFE (port 4202): dashboard, members, settings, billing
-  admin/          — Admin MFE (port 4203): super-admin dashboard (placeholder)
+  admin/          — Admin MFE (port 4203): super-admin backoffice portal (org inspection, members, billing, activity log)
 
 libs/
+  admin/
+    data-access/  — AdminApi (org list, org detail, members, billing, activity log, entitlements)
   auth/
     data-access/  — AuthStore (signals), AuthApi, type aliases
   organizations/
@@ -291,20 +294,21 @@ All page components follow this pattern:
 
 ## Libraries
 
-| Import path                                | README                                        | Description                                                                           |
-| ------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `@saas-frontend/auth/data-access`          | [→](libs/auth/data-access/README.md)          | `AuthStore`, `AuthApi` — user identity and session                                    |
-| `@saas-frontend/organizations/data-access` | [→](libs/organizations/data-access/README.md) | `OrganizationsStore`, `OrganizationsApi`, `tenantInterceptor`                         |
-| `@saas-frontend/memberships/data-access`   | [→](libs/memberships/data-access/README.md)   | `MembershipsApi` — CRUD for org members                                               |
-| `@saas-frontend/billing/data-access`       | [→](libs/billing/data-access/README.md)       | `BillingApi` — subscription, checkout, portal, cancel                                 |
-| `@saas-frontend/activity-log/data-access`  | [→](libs/activity-log/data-access/README.md)  | `ActivityLogApi` — paginated org activity log                                         |
-| `@saas-frontend/entitlements/data-access`  | [→](libs/entitlements/data-access/README.md)  | `EntitlementsApi` — plan-based feature flags                                          |
-| `@saas-frontend/notifications/data-access` | [→](libs/notifications/data-access/README.md) | `NotificationsApi` — in-app notifications                                             |
-| `@saas-frontend/planning/data-access`      | [→](libs/planning/data-access/README.md)      | `PlanningApi`, `PlanningStore` — calendar events CRUD, RSVP, series split             |
-| `@saas-frontend/planning/feature`          | [→](libs/planning/feature/README.md)          | Full calendar UI — FullCalendar, RRULE builder, This-and-Following split, reminder UX |
-| `@saas-frontend/storage/data-access`       | [→](libs/storage/data-access/README.md)       | `StorageApi` — presigned upload/download URLs                                         |
-| `@saas-frontend/tasks/data-access`         | [→](libs/tasks/data-access/README.md)         | `TasksApi` — background job status tracking                                           |
-| `@saas-frontend/shared/util-types`         | [→](libs/shared/util-types/README.md)         | `API_BASE_URL` token, OpenAPI-aligned TypeScript types                                |
+| Import path                                | README                                        | Description                                                                             |
+| ------------------------------------------ | --------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `@saas-frontend/admin/data-access`         | [→](libs/admin/data-access/README.md)         | `AdminApi` — org list/detail, members, billing, activity log, entitlements (admin only) |
+| `@saas-frontend/auth/data-access`          | [→](libs/auth/data-access/README.md)          | `AuthStore`, `AuthApi` — user identity and session                                      |
+| `@saas-frontend/organizations/data-access` | [→](libs/organizations/data-access/README.md) | `OrganizationsStore`, `OrganizationsApi`, `tenantInterceptor`                           |
+| `@saas-frontend/memberships/data-access`   | [→](libs/memberships/data-access/README.md)   | `MembershipsApi` — CRUD for org members                                                 |
+| `@saas-frontend/billing/data-access`       | [→](libs/billing/data-access/README.md)       | `BillingApi` — subscription, checkout, portal, cancel                                   |
+| `@saas-frontend/activity-log/data-access`  | [→](libs/activity-log/data-access/README.md)  | `ActivityLogApi` — paginated org activity log                                           |
+| `@saas-frontend/entitlements/data-access`  | [→](libs/entitlements/data-access/README.md)  | `EntitlementsApi` — plan-based feature flags                                            |
+| `@saas-frontend/notifications/data-access` | [→](libs/notifications/data-access/README.md) | `NotificationsApi` — in-app notifications                                               |
+| `@saas-frontend/planning/data-access`      | [→](libs/planning/data-access/README.md)      | `PlanningApi`, `PlanningStore` — calendar events CRUD, RSVP, series split               |
+| `@saas-frontend/planning/feature`          | [→](libs/planning/feature/README.md)          | Full calendar UI — FullCalendar, RRULE builder, This-and-Following split, reminder UX   |
+| `@saas-frontend/storage/data-access`       | [→](libs/storage/data-access/README.md)       | `StorageApi` — presigned upload/download URLs                                           |
+| `@saas-frontend/tasks/data-access`         | [→](libs/tasks/data-access/README.md)         | `TasksApi` — background job status tracking                                             |
+| `@saas-frontend/shared/util-types`         | [→](libs/shared/util-types/README.md)         | `API_BASE_URL` token, OpenAPI-aligned TypeScript types                                  |
 
 ---
 

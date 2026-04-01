@@ -90,6 +90,30 @@
     "lint": {
       "executor": "@nx/eslint:lint"
     },
+    "build-for-test": {
+      "executor": "@nx/angular:application",
+      "options": {
+        "outputPath": "dist/apps/admin-test",
+        "tsConfig": "apps/admin/tsconfig.app.json"
+      }
+    },
+    "test": {
+      "executor": "@nx/angular:unit-test",
+      "options": {
+        "buildTarget": "admin:build-for-test",
+        "tsConfig": "apps/admin/tsconfig.spec.json",
+        "runnerConfig": "apps/admin/vitest.config.ts",
+        "watch": false,
+        "coverageInclude": ["apps/admin/src/**/*.ts"],
+        "coverageExclude": [
+          "apps/admin/src/**/*.spec.ts",
+          "apps/admin/src/test-setup.*",
+          "apps/admin/src/main.ts",
+          "apps/admin/src/environments/**"
+        ],
+        "coverageReporters": ["text", "lcov", "html"]
+      }
+    },
     "serve-static": {
       "continuous": true,
       "executor": "@nx/web:file-server",

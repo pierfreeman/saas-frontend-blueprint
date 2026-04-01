@@ -29,9 +29,10 @@ saas-frontend-blueprint/
 │   ├── shell/      ← Host MFE (port 4200): routing, layout, guards, global providers
 │   ├── auth/       ← Auth MFE (port 4201): login, Auth0 callback
 │   ├── platform/   ← Platform MFE (port 4202): dashboard, members, settings, billing
-│   └── admin/      ← Admin MFE (port 4203): super-admin area (placeholder)
+│   └── admin/      ← Admin MFE (port 4203): super-admin backoffice portal
 └── libs/
     ├── shared/util-types/          ← API_BASE_URL token + OpenAPI types (no logic)
+    ├── admin/data-access/          ← AdminApi (org, members, billing, activity log, entitlements)
     ├── auth/data-access/           ← AuthStore, AuthApi
     ├── organizations/data-access/  ← OrganizationsStore, OrganizationsApi, tenantInterceptor
     ├── memberships/data-access/    ← MembershipsApi
@@ -119,6 +120,8 @@ apps/{remote}/src/
 ```
 
 **Currently using Pattern B:** `auth`, `platform`, `admin`.
+
+The `admin` MFE exposes routes under `/admin` and is protected by `isSystemAdminGuard` in the shell (not `orgGuard`). Only users with `isSystemAdmin: true` in `AuthStore` can access these routes.
 
 ---
 
