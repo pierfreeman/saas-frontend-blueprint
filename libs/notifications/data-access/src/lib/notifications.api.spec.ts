@@ -83,13 +83,26 @@ describe('NotificationsApi', () => {
   });
 
   describe('getUnreadCount()', () => {
-    it('sends GET to /notifications/unread-count', () => {
+    it('sends GET to /notifications/unread-count without orgId', () => {
       api.getUnreadCount().subscribe();
 
       const req = controller.expectOne(`${BASE}/notifications/unread-count`);
       expect(req.request.method).toBe('GET');
+      expect(req.request.params.has('orgId')).toBe(false);
 
       req.flush({ count: 3 });
+    });
+
+    it('sends GET to /notifications/unread-count with orgId param', () => {
+      api.getUnreadCount('org-42').subscribe();
+
+      const req = controller.expectOne(
+        (r) => r.url === `${BASE}/notifications/unread-count`,
+      );
+      expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('orgId')).toBe('org-42');
+
+      req.flush({ count: 7 });
     });
   });
 

@@ -334,6 +334,10 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   /** Prepend a server-pushed notification to the list, respecting the active filter. */
   #onRealtimeNotification(n: NotificationRecord): void {
+    // Only show notifications for the active org.
+    const activeOrg = this.#orgsStore.activeOrgId();
+    if (activeOrg && n.orgId !== activeOrg) return;
+
     // If showing unread-only, skip notifications that somehow arrive already read.
     if (this.unreadOnly() && n.readAt) return;
 

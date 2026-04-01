@@ -301,6 +301,7 @@ export class MembersComponent implements OnInit {
 
   ngOnInit(): void {
     this.#loadMembers();
+    this.#loadEntitlements();
   }
 
   avatarLabel(m: MembershipSummary): string {
@@ -424,5 +425,11 @@ export class MembersComponent implements OnInit {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId) return;
     this.#store.loadMemberships(orgId);
+  }
+
+  #loadEntitlements(): void {
+    const orgId = this.#orgsStore.activeOrgId();
+    if (!orgId) return;
+    this.#ent.loadEntitlements(orgId);
   }
 }

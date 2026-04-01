@@ -155,6 +155,22 @@ describe('NotificationsSocketService', () => {
       expect(counts).toHaveLength(1);
       expect(counts[0]).toEqual({ count: 5 });
     });
+
+    it('emits count with orgId when included in the payload', () => {
+      setup();
+      service.connect('org-1');
+
+      const counts: unknown[] = [];
+      service.unreadCount$.subscribe((c) => counts.push(c));
+
+      getSocketHandler('notification:unread-count')?.({
+        count: 3,
+        orgId: 'org-1',
+      });
+
+      expect(counts).toHaveLength(1);
+      expect(counts[0]).toEqual({ count: 3, orgId: 'org-1' });
+    });
   });
 
   // ── disconnect() ───────────────────────────────────────────────────────────

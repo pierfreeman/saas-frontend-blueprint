@@ -56,9 +56,7 @@ describe('NotificationsComponent', () => {
   };
 
   function createComp(): NotificationsComponent {
-    return TestBed.runInInjectionContext(
-      () => new NotificationsComponent(),
-    );
+    return TestBed.runInInjectionContext(() => new NotificationsComponent());
   }
 
   beforeEach(async () => {
@@ -83,7 +81,9 @@ describe('NotificationsComponent', () => {
 
   describe('typeIcon()', () => {
     let comp: NotificationsComponent;
-    beforeEach(() => { comp = createComp(); });
+    beforeEach(() => {
+      comp = createComp();
+    });
 
     it('returns pi-calendar for event types', () => {
       expect(comp.typeIcon('event.created')).toBe('pi-calendar');
@@ -118,7 +118,9 @@ describe('NotificationsComponent', () => {
 
   describe('isClickable()', () => {
     let comp: NotificationsComponent;
-    beforeEach(() => { comp = createComp(); });
+    beforeEach(() => {
+      comp = createComp();
+    });
 
     it('returns true when notification is unread', () => {
       expect(comp.isClickable(makeNotification({ readAt: null }))).toBe(true);
@@ -133,7 +135,10 @@ describe('NotificationsComponent', () => {
     });
 
     it('returns false when notification is read and has no entityRef', () => {
-      const n = makeNotification({ readAt: new Date().toISOString(), metadata: null });
+      const n = makeNotification({
+        readAt: new Date().toISOString(),
+        metadata: null,
+      });
       expect(comp.isClickable(n)).toBe(false);
     });
   });
@@ -149,7 +154,12 @@ describe('NotificationsComponent', () => {
       comp.ngOnInit();
 
       expect(apiMock.getNotifications).toHaveBeenCalledWith(
-        expect.objectContaining({ orgId: 'org-1', unreadOnly: false, limit: 20, offset: 0 }),
+        expect.objectContaining({
+          orgId: 'org-1',
+          unreadOnly: false,
+          limit: 20,
+          offset: 0,
+        }),
       );
       expect(socketMock.connect).toHaveBeenCalledWith('org-1');
       expect(comp.notifications()).toEqual(notifs);
@@ -182,10 +192,39 @@ describe('NotificationsComponent', () => {
       comp.ngOnInit();
       comp.toggleUnreadOnly(); // enables unreadOnly
 
-      const incoming = makeNotification({ id: 'already-read', readAt: new Date().toISOString() });
+      const incoming = makeNotification({
+        id: 'already-read',
+        readAt: new Date().toISOString(),
+      });
       notificationSubject.next(incoming);
 
       expect(comp.notifications()).toHaveLength(0);
+    });
+
+    it('does not prepend realtime notifications from a different org', () => {
+      apiMock.getNotifications.mockReturnValue(of([]));
+      const comp = createComp();
+      comp.ngOnInit();
+
+      const incoming = makeNotification({
+        id: 'other-org',
+        orgId: 'org-other',
+      });
+      notificationSubject.next(incoming);
+
+      expect(comp.notifications()).toHaveLength(0);
+    });
+
+    it('prepends realtime notifications from the same org', () => {
+      apiMock.getNotifications.mockReturnValue(of([]));
+      const comp = createComp();
+      comp.ngOnInit();
+
+      const incoming = makeNotification({ id: 'same-org', orgId: 'org-1' });
+      notificationSubject.next(incoming);
+
+      expect(comp.notifications()).toHaveLength(1);
+      expect(comp.notifications()[0].id).toBe('same-org');
     });
 
     it('skips socket connect when no active org', () => {
@@ -244,14 +283,19 @@ describe('NotificationsComponent', () => {
 
   describe('markAllAsRead()', () => {
     it('calls api with all unread ids and marks them read', () => {
-      const notifs = [makeNotification({ id: 'n1' }), makeNotification({ id: 'n2' })];
+      const notifs = [
+        makeNotification({ id: 'n1' }),
+        makeNotification({ id: 'n2' }),
+      ];
       apiMock.getNotifications.mockReturnValue(of(notifs));
 
       const comp = createComp();
       comp.ngOnInit();
       comp.markAllAsRead();
 
-      expect(apiMock.markManyAsRead).toHaveBeenCalledWith({ ids: ['n1', 'n2'] });
+      expect(apiMock.markManyAsRead).toHaveBeenCalledWith({
+        ids: ['n1', 'n2'],
+      });
       expect(comp.notifications().every((n) => n.readAt !== null)).toBe(true);
       expect(comp.markingAll()).toBe(false);
     });
@@ -270,7 +314,9 @@ describe('NotificationsComponent', () => {
     it('resets markingAll on api error', () => {
       const notif = makeNotification();
       apiMock.getNotifications.mockReturnValue(of([notif]));
-      apiMock.markManyAsRead.mockReturnValue(throwError(() => new Error('fail')));
+      apiMock.markManyAsRead.mockReturnValue(
+        throwError(() => new Error('fail')),
+      );
 
       const comp = createComp();
       comp.ngOnInit();
@@ -316,14 +362,16 @@ describe('NotificationsComponent', () => {
       comp.ngOnInit();
       comp.handleClick(notif);
 
-      expect(routerMock.navigate).toHaveBeenCalledWith(
-        ['/planning'],
-        { queryParams: { eventId: 'evt-42' } },
-      );
+      expect(routerMock.navigate).toHaveBeenCalledWith(['/planning'], {
+        queryParams: { eventId: 'evt-42' },
+      });
     });
 
     it('does not navigate when entityRef is absent', () => {
-      const notif = makeNotification({ readAt: new Date().toISOString(), metadata: null });
+      const notif = makeNotification({
+        readAt: new Date().toISOString(),
+        metadata: null,
+      });
       const comp = createComp();
       comp.handleClick(notif);
       expect(routerMock.navigate).not.toHaveBeenCalled();

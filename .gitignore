@@ -42,15 +42,17 @@ Thumbs.db
 .nx/workspace-data
 .cursor/rules/nx-rules.mdc
 
-.agents/*
-.claude/*
 .codex/*
 .cursor/*
 .gemini/*
+.opencode/*
 
-.claude/worktrees
-.claude/settings.local.json
 .nx/polygraph
 .angular
 
 .mf
+
+.env
+
+.scannerwork
+.sonarlint
