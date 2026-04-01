@@ -1,6 +1,6 @@
 # saas-frontend-blueprint
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pierfreeman_saas-frontend-blueprint&metric=alert_status&token=0501e485a8e14b73a4e194e5c8902f121989087c)](https://sonarcloud.io/summary/new_code?id=pierfreeman_saas-frontend-blueprint)(https://github.com/pierfreeman/saas-frontend-blueprint/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pierfreeman_saas-frontend-blueprint&metric=alert_status&token=0501e485a8e14b73a4e194e5c8902f121989087c)](https://sonarcloud.io/summary/new_code?id=pierfreeman_saas-frontend-blueprint) [![CI](https://github.com/pierfreeman/saas-frontend-blueprint/actions/workflows/ci.yml/badge.svg)](https://github.com/pierfreeman/saas-frontend-blueprint/actions/workflows/ci.yml)
 
 Production-ready multi-tenant SaaS frontend built as an [Nx](https://nx.dev) monorepo using **Angular 21 Module Federation**.
 
