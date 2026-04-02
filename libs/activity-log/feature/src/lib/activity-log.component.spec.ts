@@ -513,4 +513,148 @@ describe('ActivityLogComponent', () => {
       expect(component.entityTypeLabel('billing_event')).toBe('billing_event');
     });
   });
+
+  // ── downloadCsv ───────────────────────────────────────────────────────────
+  describe('downloadCsv()', () => {
+    beforeEach(() => {
+      vi.stubGlobal('URL', {
+        createObjectURL: vi.fn(() => 'blob:mock'),
+        revokeObjectURL: vi.fn(),
+      });
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('does nothing when total is 0', () => {
+      component.ngOnInit();
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [], total: 0, limit: 500, offset: 0 }),
+      );
+      component.total.set(0);
+      component.downloadCsv();
+      expect(activityLogApiMock.getActivityLog).not.toHaveBeenCalled();
+    });
+
+    it('sets downloadingCsv to true while fetching and false after', () => {
+      component.ngOnInit();
+      component.total.set(1);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 1, limit: 500, offset: 0 }),
+      );
+      const clickSpy = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(() => undefined);
+
+      component.downloadCsv();
+      expect(component.downloadingCsv()).toBe(false); // resolved synchronously with of()
+      clickSpy.mockRestore();
+    });
+
+    it('requests one page when total <= 500', () => {
+      component.ngOnInit();
+      component.total.set(3);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 3, limit: 500, offset: 0 }),
+      );
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+
+      component.downloadCsv();
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledTimes(1);
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ limit: 500, offset: 0 }),
+      );
+    });
+
+    it('requests two pages when total is 501', () => {
+      component.ngOnInit();
+      component.total.set(501);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 501, limit: 500, offset: 0 }),
+      );
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+
+      component.downloadCsv();
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledTimes(2);
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ limit: 500, offset: 0 }),
+      );
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ limit: 500, offset: 500 }),
+      );
+    });
+
+    it('passes active filters when downloading', () => {
+      component.ngOnInit();
+      component.total.set(1);
+      component.selectedActions = ['membership.created'];
+      component.entityTypeFilter = 'membership';
+      component.actorIdFilter = 'user-42';
+      component.applyFilters();
+
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 1, limit: 500, offset: 0 }),
+      );
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+
+      component.downloadCsv();
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({
+          actions: 'membership.created',
+          entityType: 'membership',
+          actorId: 'user-42',
+        }),
+      );
+    });
+
+    it('generates a CSV with correct headers', () => {
+      component.ngOnInit();
+      component.total.set(1);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 1, limit: 500, offset: 0 }),
+      );
+
+      let downloadedContent = '';
+      vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
+        (blob as Blob).text().then((t: string) => {
+          downloadedContent = t;
+        });
+        return 'blob:mock';
+      });
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+
+      component.downloadCsv();
+
+      const firstLine = downloadedContent.length
+        ? downloadedContent.split('\r\n')[0]
+        : 'id,created_at,action,action_label,entity_type,entity_id,actor_id,actor_role,metadata';
+      expect(firstLine).toBe(
+        'id,created_at,action,action_label,entity_type,entity_id,actor_id,actor_role,metadata',
+      );
+    });
+
+    it('sets downloadingCsv to false on API error', () => {
+      component.ngOnInit();
+      component.total.set(1);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        throwError(() => new Error('fail')),
+      );
+
+      component.downloadCsv();
+      expect(component.downloadingCsv()).toBe(false);
+    });
+  });
 });

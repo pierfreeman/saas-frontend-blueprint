@@ -9,17 +9,16 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import {
   ActivityLogApi,
   ActivityLogRecord,
   ACTIVITY_LOG_ACTIONS,
-  ACTIVITY_LOG_ACTION_MAP,
   ENTITY_TYPE_OPTIONS,
   ENTITY_TYPE_MAP,
   getActionLabel,
   getActionSeverity,
   getActionIcon,
-  getEntityTypeLabel,
 } from '@saas-frontend/activity-log/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
@@ -114,11 +113,22 @@ const GROUPED_ACTION_OPTIONS: ActionGroup[] = [
       <div class="flex flex-col gap-4">
         <div class="flex items-center justify-between">
           <h1 class="text-2xl font-bold text-surface-900 m-0">Activity Log</h1>
-          <span class="text-sm text-surface-500">
-            @if (!loading()) {
-              {{ total() }} events
-            }
-          </span>
+          <div class="flex items-center gap-3">
+            <span class="text-sm text-surface-500">
+              @if (!loading()) {
+                {{ total() }} events
+              }
+            </span>
+            <p-button
+              label="Export CSV"
+              icon="pi pi-download"
+              size="small"
+              severity="secondary"
+              [loading]="downloadingCsv()"
+              [disabled]="total() === 0 || loading()"
+              (onClick)="downloadCsv()"
+            />
+          </div>
         </div>
 
         <!-- Filters -->
@@ -403,6 +413,7 @@ export class ActivityLogComponent implements OnInit {
   readonly logs = signal<ActivityLogRecord[]>([]);
   readonly total = signal(0);
   readonly loading = signal(true);
+  readonly downloadingCsv = signal(false);
 
   readonly pageSize = PAGE_SIZE;
   readonly skeletonRows = new Array(8);
@@ -546,6 +557,91 @@ export class ActivityLogComponent implements OnInit {
     if (fullName) return fullName;
     if (member?.user?.email) return member.user.email;
     return actorId;
+  }
+
+  downloadCsv(): void {
+    const orgId = this.#orgId();
+    if (!orgId || this.total() === 0) return;
+
+    this.downloadingCsv.set(true);
+
+    const BATCH = 500;
+    const total = this.total();
+    const pages = Math.ceil(total / BATCH);
+    const filters = this.#activeFilters();
+
+    const buildParams = (offset: number) => ({
+      limit: BATCH,
+      offset,
+      ...(filters.actions.length > 0
+        ? { actions: filters.actions.join(',') }
+        : {}),
+      ...(filters.entityType ? { entityType: filters.entityType } : {}),
+      ...(filters.actorId ? { actorId: filters.actorId } : {}),
+      ...(filters.fromDate ? { fromDate: filters.fromDate } : {}),
+      ...(filters.toDate ? { toDate: filters.toDate } : {}),
+    });
+
+    const requests = Array.from({ length: pages }, (_, i) =>
+      this.#api.getActivityLog(orgId, buildParams(i * BATCH)),
+    );
+
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        const allLogs = results.flatMap((r) => r.logs);
+        const csv = this.#buildCsv(allLogs);
+        const date = new Date().toISOString().slice(0, 10);
+        this.#triggerDownload(csv, `activity-log-${date}.csv`);
+        this.downloadingCsv.set(false);
+      },
+      error: () => {
+        this.downloadingCsv.set(false);
+      },
+    });
+  }
+
+  #buildCsv(logs: ActivityLogRecord[]): string {
+    const esc = (v: unknown): string => {
+      const s = v == null ? '' : String(v);
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const header = [
+      'id',
+      'created_at',
+      'action',
+      'action_label',
+      'entity_type',
+      'entity_id',
+      'actor_id',
+      'actor_role',
+      'metadata',
+    ].join(',');
+    const rows = logs.map((log) =>
+      [
+        log.id,
+        log.createdAt,
+        log.action,
+        getActionLabel(log.action),
+        log.entityType ?? '',
+        log.entityId ?? '',
+        log.actorId ?? '',
+        log.actorRole ?? '',
+        JSON.stringify(log.metadata ?? {}),
+      ]
+        .map(esc)
+        .join(','),
+    );
+    return [header, ...rows].join('\r\n');
+  }
+
+  #triggerDownload(content: string, filename: string): void {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
 
   #toApiDate(value: Date | null): string {
