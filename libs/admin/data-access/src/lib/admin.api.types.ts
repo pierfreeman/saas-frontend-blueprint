@@ -161,6 +161,7 @@ export interface EntitlementOverride {
   reason: string;
   expiresAt: string | null;
   createdBy: string;
+  createdByName: string;
   createdAt: string;
   updatedAt: string;
 }

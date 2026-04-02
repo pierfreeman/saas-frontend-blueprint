@@ -32,7 +32,8 @@ saas-frontend-blueprint/
 │   └── admin/      ← Admin MFE (port 4203): super-admin backoffice portal
 └── libs/
     ├── shared/util-types/          ← API_BASE_URL token + OpenAPI types (no logic)
-    ├── admin/data-access/          ← AdminApi (org, members, billing, activity log, entitlements)
+    ├── shared/util-rbac/           ← PermissionsService, *hasPermission, *hasPlan, *hasEntitlement directives
+    ├── admin/data-access/          ← AdminApi (org, members, billing, activity log, entitlement override CRUD)
     ├── auth/data-access/           ← AuthStore, AuthApi
     ├── organizations/data-access/  ← OrganizationsStore, OrganizationsApi, tenantInterceptor
     ├── memberships/data-access/    ← MembershipsApi
@@ -122,6 +123,8 @@ apps/{remote}/src/
 **Currently using Pattern B:** `auth`, `platform`, `admin`.
 
 The `admin` MFE exposes routes under `/admin` and is protected by `isSystemAdminGuard` in the shell (not `orgGuard`). Only users with `isSystemAdmin: true` in `AuthStore` can access these routes.
+
+The admin entitlements tab uses `AdminApi.listOverrides()`, `setOverride()`, and `deleteOverride()`. Override records include `createdByName` (resolved server-side from the admin’s user record) displayed in the “Set by” column.
 
 ---
 
@@ -789,3 +792,4 @@ Use this when opening a PR for a new page, library, or app:
 - [ ] Spec file co-located alongside every new source file
 - [ ] `openapi.types.ts` was regenerated (not hand-edited) if the API schema changed
 - [ ] Nav link added to `navbar.component.ts` if the page is user-visible
+- [ ] Feature-gated UI uses `*hasEntitlement`, `*hasPermission`, or `*hasPlan` from `@saas-frontend/shared/util-rbac`

@@ -39,16 +39,24 @@ async function syncCurrentUser(): Promise<boolean> {
   const authStore = inject(AuthStore);
   const membershipsStore = inject(MembershipsStore);
   const orgsStore = inject(OrganizationsStore);
+  const entitlementsStore = inject(EntitlementsStore);
   const orgContext = inject(OrgContextService); // root instance — not in route providers
 
   const userId = authStore.currentUser()?.id ?? null;
   membershipsStore.setCurrentUserId(userId);
 
-  // Load memberships for the active org if not already loaded.
+  // Load memberships and entitlements for the active org if not already loaded.
+  // This covers the page-refresh / direct-navigation case where org is persisted
+  // from localStorage but stores have not yet been primed by switchOrg().
   const orgId = orgsStore.activeOrgId();
-  if (orgId && membershipsStore.memberships().length === 0) {
-    await membershipsStore.loadMemberships(orgId);
-  }
+  await Promise.all([
+    orgId && membershipsStore.memberships().length === 0
+      ? membershipsStore.loadMemberships(orgId)
+      : Promise.resolve(),
+    orgId && !entitlementsStore.entitlements()
+      ? entitlementsStore.loadEntitlements(orgId)
+      : Promise.resolve(),
+  ]);
 
   // Propagate role to root OrgContextService so the shell navbar can react.
   orgContext.setNavRole(membershipsStore.currentUserRole());

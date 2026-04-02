@@ -174,6 +174,7 @@ const KEY_ITEMS: OverrideKeyItem[] = OVERRIDE_KEYS.map((k) => ({
                 <th>Key</th>
                 <th>Value</th>
                 <th>Reason</th>
+                <th>Set by</th>
                 <th>Expires</th>
                 <th></th>
               </tr>
@@ -196,6 +197,12 @@ const KEY_ITEMS: OverrideKeyItem[] = OVERRIDE_KEYS.map((k) => ({
                 </td>
                 <td class="text-sm text-surface-600 max-w-xs truncate">
                   {{ override.reason }}
+                </td>
+                <td
+                  class="text-sm text-surface-600 max-w-32 truncate"
+                  [title]="override.createdByName"
+                >
+                  {{ override.createdByName || '—' }}
                 </td>
                 <td class="text-xs text-surface-400">
                   {{
