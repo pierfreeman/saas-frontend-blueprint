@@ -1,5 +1,9 @@
 export interface ActivityLogParams {
   action?: string;
+  /** Comma-separated list of specific action strings (OR logic, takes precedence over action). */
+  actions?: string;
+  /** Filter by entity type (e.g. Organization, Membership). */
+  entityType?: string;
   fromDate?: string;
   toDate?: string;
   limit?: number;

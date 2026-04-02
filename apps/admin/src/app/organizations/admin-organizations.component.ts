@@ -152,12 +152,12 @@ const PAGE_SIZE = 20;
                 <!-- Tags -->
                 <div class="flex items-center gap-2">
                   <p-tag
-                    [value]="org.status"
+                    [value]="'Org: ' + org.status"
                     [severity]="orgStatusSeverity(org.status)"
                     [rounded]="true"
                   />
                   <p-tag
-                    [value]="org.billingStatus"
+                    [value]="'Billing: ' + org.billingStatus"
                     [severity]="billingStatusSeverity(org.billingStatus)"
                     [rounded]="true"
                   />

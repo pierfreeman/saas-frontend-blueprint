@@ -1,4 +1,4 @@
-import { DatePipe, SlicePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,7 +19,8 @@ import { MembershipsStore } from '@saas-frontend/memberships/data-access';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DatePickerModule } from 'primeng/datepicker';
-import { InputTextModule } from 'primeng/inputtext';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -27,25 +28,311 @@ import { TooltipModule } from 'primeng/tooltip';
 
 const PAGE_SIZE = 20;
 
-/** Map action prefixes to PrimeNG tag severity + icon. */
-function actionMeta(action: string): {
+interface ActionOption {
+  label: string;
+  value: string;
   severity: 'success' | 'info' | 'warn' | 'danger' | 'secondary';
   icon: string;
-} {
-  if (action.startsWith('org.deleted') || action.includes('delete'))
-    return { severity: 'danger', icon: 'pi-trash' };
-  if (action.includes('cancel') || action.includes('downgrade'))
-    return { severity: 'warn', icon: 'pi-exclamation-triangle' };
-  if (action.startsWith('org.') || action.startsWith('membership.'))
-    return { severity: 'info', icon: 'pi-building' };
-  if (
-    action.includes('billing') ||
-    action.includes('subscription') ||
-    action.includes('checkout')
-  )
-    return { severity: 'success', icon: 'pi-credit-card' };
-  return { severity: 'secondary', icon: 'pi-circle' };
 }
+
+interface ActionGroup {
+  label: string;
+  items: ActionOption[];
+}
+
+const ALL_ACTIONS: ActionOption[] = [
+  // Organization
+  {
+    label: 'Organization created',
+    value: 'organization.created',
+    severity: 'info',
+    icon: 'pi-building',
+  },
+  {
+    label: 'Organization updated',
+    value: 'organization.updated',
+    severity: 'secondary',
+    icon: 'pi-building',
+  },
+  {
+    label: 'Organization deleted',
+    value: 'organization.deleted',
+    severity: 'danger',
+    icon: 'pi-trash',
+  },
+  {
+    label: 'Deletion requested',
+    value: 'organization.deletion.requested',
+    severity: 'danger',
+    icon: 'pi-exclamation-triangle',
+  },
+  {
+    label: 'Export requested',
+    value: 'organization.export.requested',
+    severity: 'info',
+    icon: 'pi-download',
+  },
+  // Members
+  {
+    label: 'Member added',
+    value: 'membership.created',
+    severity: 'info',
+    icon: 'pi-user-plus',
+  },
+  {
+    label: 'Role changed',
+    value: 'membership.role_changed',
+    severity: 'secondary',
+    icon: 'pi-pencil',
+  },
+  {
+    label: 'Member removed',
+    value: 'membership.deleted',
+    severity: 'danger',
+    icon: 'pi-user-minus',
+  },
+  // Users
+  {
+    label: 'Invite sent',
+    value: 'user.created.pending',
+    severity: 'info',
+    icon: 'pi-send',
+  },
+  {
+    label: 'User provisioned',
+    value: 'user.provisioned',
+    severity: 'success',
+    icon: 'pi-check-circle',
+  },
+  {
+    label: 'User deleted',
+    value: 'user.deleted',
+    severity: 'danger',
+    icon: 'pi-trash',
+  },
+  // Billing
+  {
+    label: 'Checkout started',
+    value: 'billing.checkout.created',
+    severity: 'warn',
+    icon: 'pi-shopping-cart',
+  },
+  {
+    label: 'Checkout completed',
+    value: 'billing.checkout.completed',
+    severity: 'success',
+    icon: 'pi-check',
+  },
+  {
+    label: 'Billing portal opened',
+    value: 'billing.portal.accessed',
+    severity: 'secondary',
+    icon: 'pi-external-link',
+  },
+  {
+    label: 'Subscription created',
+    value: 'subscription.created',
+    severity: 'success',
+    icon: 'pi-credit-card',
+  },
+  {
+    label: 'Subscription updated',
+    value: 'subscription.updated',
+    severity: 'secondary',
+    icon: 'pi-refresh',
+  },
+  {
+    label: 'Plan upgraded',
+    value: 'subscription.upgraded',
+    severity: 'success',
+    icon: 'pi-arrow-up',
+  },
+  {
+    label: 'Subscription cancelled',
+    value: 'subscription.cancelled',
+    severity: 'danger',
+    icon: 'pi-times-circle',
+  },
+  {
+    label: 'Subscription canceled',
+    value: 'subscription.canceled',
+    severity: 'danger',
+    icon: 'pi-times-circle',
+  },
+  {
+    label: 'Subscription reactivated',
+    value: 'subscription.reactivated',
+    severity: 'success',
+    icon: 'pi-replay',
+  },
+  {
+    label: 'Payment succeeded',
+    value: 'invoice.payment_succeeded',
+    severity: 'success',
+    icon: 'pi-check-circle',
+  },
+  {
+    label: 'Payment failed',
+    value: 'invoice.payment_failed',
+    severity: 'danger',
+    icon: 'pi-times-circle',
+  },
+  // Planning
+  {
+    label: 'Event created',
+    value: 'planning.event.created',
+    severity: 'info',
+    icon: 'pi-calendar-plus',
+  },
+  {
+    label: 'Event updated',
+    value: 'planning.event.updated',
+    severity: 'secondary',
+    icon: 'pi-calendar',
+  },
+  {
+    label: 'Event deleted',
+    value: 'planning.event.deleted',
+    severity: 'danger',
+    icon: 'pi-calendar-times',
+  },
+  {
+    label: 'RSVP updated',
+    value: 'planning.event.rsvp',
+    severity: 'info',
+    icon: 'pi-calendar-clock',
+  },
+  {
+    label: 'Series split',
+    value: 'planning.event.series.split',
+    severity: 'secondary',
+    icon: 'pi-share-alt',
+  },
+  // Files
+  {
+    label: 'File uploaded',
+    value: 'file.upload.confirmed',
+    severity: 'success',
+    icon: 'pi-upload',
+  },
+  {
+    label: 'File downloaded',
+    value: 'file.download.requested',
+    severity: 'secondary',
+    icon: 'pi-download',
+  },
+  {
+    label: 'File deleted',
+    value: 'file.deleted',
+    severity: 'danger',
+    icon: 'pi-trash',
+  },
+  // Jobs
+  {
+    label: 'Job created',
+    value: 'job.created',
+    severity: 'info',
+    icon: 'pi-send',
+  },
+  {
+    label: 'Job processing',
+    value: 'job.processing',
+    severity: 'warn',
+    icon: 'pi-sync',
+  },
+  {
+    label: 'Job completed',
+    value: 'job.completed',
+    severity: 'success',
+    icon: 'pi-check-circle',
+  },
+  {
+    label: 'Job failed',
+    value: 'job.failed',
+    severity: 'danger',
+    icon: 'pi-times-circle',
+  },
+  // Email
+  {
+    label: 'Email sent',
+    value: 'email.sent',
+    severity: 'success',
+    icon: 'pi-envelope',
+  },
+  {
+    label: 'Email failed',
+    value: 'email.failed',
+    severity: 'danger',
+    icon: 'pi-envelope',
+  },
+  // Notifications
+  {
+    label: 'Notification sent',
+    value: 'notification.created',
+    severity: 'info',
+    icon: 'pi-bell',
+  },
+];
+
+const ACTION_MAP = new Map<string, ActionOption>(
+  ALL_ACTIONS.map((a) => [a.value, a]),
+);
+
+const GROUPED_ACTION_OPTIONS: ActionGroup[] = [
+  {
+    label: 'Organization',
+    items: ALL_ACTIONS.filter((a) => a.value.startsWith('organization.')),
+  },
+  {
+    label: 'Members',
+    items: ALL_ACTIONS.filter((a) => a.value.startsWith('membership.')),
+  },
+  {
+    label: 'Users',
+    items: ALL_ACTIONS.filter((a) => a.value.startsWith('user.')),
+  },
+  {
+    label: 'Billing',
+    items: ALL_ACTIONS.filter(
+      (a) =>
+        a.value.startsWith('billing.') ||
+        a.value.startsWith('subscription.') ||
+        a.value.startsWith('invoice.'),
+    ),
+  },
+  {
+    label: 'Planning',
+    items: ALL_ACTIONS.filter((a) => a.value.startsWith('planning.')),
+  },
+  {
+    label: 'Files',
+    items: ALL_ACTIONS.filter((a) => a.value.startsWith('file.')),
+  },
+  {
+    label: 'Jobs',
+    items: ALL_ACTIONS.filter((a) => a.value.startsWith('job.')),
+  },
+  {
+    label: 'Email',
+    items: ALL_ACTIONS.filter((a) => a.value.startsWith('email.')),
+  },
+  {
+    label: 'Notifications',
+    items: ALL_ACTIONS.filter((a) => a.value.startsWith('notification.')),
+  },
+];
+
+const ENTITY_TYPE_OPTIONS = [
+  { label: 'Organization', value: 'Organization' },
+  { label: 'Membership', value: 'Membership' },
+  { label: 'User', value: 'User' },
+  { label: 'Subscription', value: 'Subscription' },
+  { label: 'Invoice', value: 'Invoice' },
+  { label: 'Planning Event', value: 'PlanningEvent' },
+  { label: 'Job', value: 'Job' },
+  { label: 'File', value: 'File' },
+  { label: 'Notification', value: 'Notification' },
+];
 
 @Component({
   selector: 'app-activity-log',
@@ -53,14 +340,14 @@ function actionMeta(action: string): {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DatePipe,
-    SlicePipe,
     FormsModule,
     RouterLink,
     CardModule,
     DatePickerModule,
+    MultiSelectModule,
+    SelectModule,
     TableModule,
     TagModule,
-    InputTextModule,
     ButtonModule,
     SkeletonModule,
     TooltipModule,
@@ -81,15 +368,29 @@ function actionMeta(action: string): {
         <p-card>
           <div class="flex flex-wrap gap-3 items-end">
             <div class="flex flex-col gap-1">
-              <label class="text-xs text-surface-500 font-medium"
-                >Action filter</label
-              >
-              <input
-                pInputText
-                size="small"
-                [(ngModel)]="actionFilter"
-                placeholder="e.g. membership.role"
-                class="w-56"
+              <label class="text-xs text-surface-500 font-medium">Action</label>
+              <p-multiselect
+                [options]="groupedActionOptions"
+                [(ngModel)]="selectedActions"
+                [group]="true"
+                optionLabel="label"
+                optionValue="value"
+                optionGroupLabel="label"
+                optionGroupChildren="items"
+                placeholder="All actions"
+                appendTo="body"
+                styleClass="w-72"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs text-surface-500 font-medium">Entity</label>
+              <p-select
+                [options]="entityTypeOptions"
+                [(ngModel)]="entityTypeFilter"
+                placeholder="All entities"
+                [showClear]="true"
+                appendTo="body"
+                styleClass="w-44"
               />
             </div>
             <div class="flex flex-col gap-1">
@@ -158,93 +459,135 @@ function actionMeta(action: string): {
               [loading]="loading()"
               (onLazyLoad)="onLazyLoad($event)"
               dataKey="id"
+              [expandedRowKeys]="expandedRows()"
               styleClass="p-datatable-sm"
             >
               <ng-template pTemplate="header">
                 <tr>
+                  <th style="width: 3rem"></th>
                   <th style="width: 9rem">When</th>
-                  <th style="width: 12rem">Action</th>
-                  <th style="width: 6rem">Role</th>
+                  <th style="width: 16rem">Action</th>
+                  <th style="width: 10rem">Actor</th>
                   <th>Entity</th>
-                  <th>Metadata</th>
                 </tr>
               </ng-template>
 
-              <ng-template pTemplate="body" let-row>
+              <ng-template pTemplate="body" let-row let-expanded="expanded">
                 <tr>
+                  <!-- Row expander -->
+                  <td>
+                    <button
+                      type="button"
+                      (click)="toggleExpandedRow(row.id)"
+                      class="p-link rounded-full w-7 h-7 inline-flex items-center justify-center text-surface-500 hover:text-surface-700 hover:bg-surface-100"
+                    >
+                      <i
+                        [class]="
+                          'pi ' +
+                          (expandedRows()[row.id]
+                            ? 'pi-chevron-down'
+                            : 'pi-chevron-right')
+                        "
+                      ></i>
+                    </button>
+                  </td>
+
                   <!-- Timestamp -->
                   <td class="text-sm text-surface-500 whitespace-nowrap">
                     {{ row.createdAt | date: 'dd MMM yy, HH:mm' }}
                   </td>
 
-                  <!-- Action badge -->
+                  <!-- Action badge (human-readable label) -->
                   <td>
                     <p-tag
-                      [value]="row.action"
+                      [value]="actionLabel(row.action)"
                       [severity]="actionSeverity(row.action)"
                       [icon]="'pi ' + actionIcon(row.action)"
-                      styleClass="text-xs font-mono"
+                      styleClass="text-xs"
                     />
                   </td>
 
-                  <!-- Role -->
+                  <!-- Actor -->
                   <td class="text-sm">
-                    @if (row.actorRole) {
-                      <span class="text-surface-600">{{ row.actorRole }}</span>
-                      @if (row.actorId) {
-                        <div
-                          class="text-surface-500 text-xs"
-                          [pTooltip]="row.actorId"
-                          tooltipPosition="top"
-                        >
-                          {{ actorDisplay(row) }}
+                    @if (row.actorRole || row.actorId) {
+                      <div class="font-medium text-surface-700">
+                        {{ actorDisplay(row) }}
+                      </div>
+                      @if (row.actorRole) {
+                        <div class="text-xs text-surface-400">
+                          {{ row.actorRole }}
                         </div>
                       }
-                    } @else if (row.actorId) {
-                      <span
-                        class="text-surface-500"
-                        [pTooltip]="row.actorId"
-                        tooltipPosition="top"
-                      >
-                        {{ actorDisplay(row) }}
-                      </span>
                     } @else {
-                      <span class="text-surface-300 italic">system</span>
+                      <span class="text-surface-300 italic text-xs"
+                        >system</span
+                      >
                     }
                   </td>
 
-                  <!-- Entity -->
+                  <!-- Entity type only -->
                   <td class="text-sm">
                     @if (row.entityType) {
                       <span class="text-surface-700">{{ row.entityType }}</span>
-                      @if (row.entityId) {
-                        <span
-                          class="text-surface-400 font-mono text-xs ml-1"
-                          [pTooltip]="row.entityId"
-                          tooltipPosition="top"
-                        >
-                          #{{ row.entityId | slice: 0 : 8 }}…
-                        </span>
-                      }
                     } @else {
                       <span class="text-surface-300">—</span>
                     }
                   </td>
+                </tr>
+              </ng-template>
 
-                  <!-- Metadata -->
-                  <td
-                    class="text-xs text-surface-500 font-mono max-w-xs truncate"
-                  >
-                    @if (hasMetadata(row)) {
-                      <span
-                        [pTooltip]="metadataString(row)"
-                        tooltipPosition="top"
-                      >
-                        {{ metadataString(row) }}
-                      </span>
-                    } @else {
-                      <span class="text-surface-300">—</span>
-                    }
+              <!-- Row expansion: technical details -->
+              <ng-template pTemplate="rowexpansion" #expandedrow let-row>
+                <tr>
+                  <td colspan="5" class="bg-surface-50 px-6 py-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      <div class="flex flex-col gap-1">
+                        <span
+                          class="text-xs font-semibold text-surface-400 uppercase tracking-wide"
+                          >Event ID</span
+                        >
+                        <code
+                          class="font-mono text-xs text-surface-700 break-all select-all"
+                          >{{ row.id }}</code
+                        >
+                      </div>
+                      @if (row.actorId) {
+                        <div class="flex flex-col gap-1">
+                          <span
+                            class="text-xs font-semibold text-surface-400 uppercase tracking-wide"
+                            >Actor ID</span
+                          >
+                          <code
+                            class="font-mono text-xs text-surface-700 break-all select-all"
+                            >{{ row.actorId }}</code
+                          >
+                        </div>
+                      }
+                      @if (row.entityId) {
+                        <div class="flex flex-col gap-1">
+                          <span
+                            class="text-xs font-semibold text-surface-400 uppercase tracking-wide"
+                            >Entity ID</span
+                          >
+                          <code
+                            class="font-mono text-xs text-surface-700 break-all select-all"
+                            >{{ row.entityId }}</code
+                          >
+                        </div>
+                      }
+                      @if (hasMetadata(row)) {
+                        <div class="flex flex-col gap-1 sm:col-span-2">
+                          <span
+                            class="text-xs font-semibold text-surface-400 uppercase tracking-wide"
+                            >Metadata</span
+                          >
+                          <pre
+                            class="font-mono text-xs text-surface-700 bg-surface-100 rounded p-3 overflow-auto max-h-40 m-0 whitespace-pre-wrap"
+                            >{{ metadataString(row) }}</pre
+                          >
+                        </div>
+                      }
+                    </div>
                   </td>
                 </tr>
               </ng-template>
@@ -292,18 +635,35 @@ export class ActivityLogComponent implements OnInit {
   readonly pageSize = PAGE_SIZE;
   readonly skeletonRows = new Array(8);
 
+  readonly expandedRows = signal<Record<string, boolean>>({});
+
+  toggleExpandedRow(id: string): void {
+    this.expandedRows.update((curr) => {
+      const next = { ...curr };
+      if (next[id]) delete next[id];
+      else next[id] = true;
+      return next;
+    });
+  }
+
+  readonly groupedActionOptions = GROUPED_ACTION_OPTIONS;
+  readonly entityTypeOptions = ENTITY_TYPE_OPTIONS;
+
   // filter state (v-model)
-  actionFilter = '';
+  selectedActions: string[] = [];
+  entityTypeFilter: string | null = null;
   fromDate: Date | null = null;
   toDate: Date | null = null;
 
   // active applied filters
   readonly #activeFilters = signal<{
-    action: string;
+    actions: string[];
+    entityType: string;
     fromDate: string;
     toDate: string;
   }>({
-    action: '',
+    actions: [],
+    entityType: '',
     fromDate: '',
     toDate: '',
   });
@@ -325,7 +685,8 @@ export class ActivityLogComponent implements OnInit {
 
   applyFilters(): void {
     this.#activeFilters.set({
-      action: this.actionFilter.trim(),
+      actions: [...this.selectedActions],
+      entityType: this.entityTypeFilter ?? '',
       fromDate: this.#toApiDate(this.fromDate),
       toDate: this.#toApiDate(this.toDate),
     });
@@ -333,21 +694,31 @@ export class ActivityLogComponent implements OnInit {
   }
 
   resetFilters(): void {
-    this.actionFilter = '';
+    this.selectedActions = [];
+    this.entityTypeFilter = null;
     this.fromDate = null;
     this.toDate = null;
-    this.#activeFilters.set({ action: '', fromDate: '', toDate: '' });
+    this.#activeFilters.set({
+      actions: [],
+      entityType: '',
+      fromDate: '',
+      toDate: '',
+    });
     this.#load(0);
+  }
+
+  actionLabel(action: string): string {
+    return ACTION_MAP.get(action)?.label ?? action;
   }
 
   actionSeverity(
     action: string,
   ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
-    return actionMeta(action).severity;
+    return ACTION_MAP.get(action)?.severity ?? 'secondary';
   }
 
   actionIcon(action: string): string {
-    return actionMeta(action).icon;
+    return ACTION_MAP.get(action)?.icon ?? 'pi-circle';
   }
 
   hasMetadata(row: ActivityLogRecord): boolean {
@@ -356,7 +727,7 @@ export class ActivityLogComponent implements OnInit {
 
   metadataString(row: ActivityLogRecord): string {
     try {
-      return JSON.stringify(row.metadata);
+      return JSON.stringify(row.metadata, null, 2);
     } catch {
       return '';
     }
@@ -373,8 +744,8 @@ export class ActivityLogComponent implements OnInit {
     const last = member?.user?.lastName?.trim() ?? '';
     const fullName = [first, last].filter(Boolean).join(' ').trim();
 
-    if (fullName) return `${fullName}`;
-    if (member?.user?.email) return `${member.user.email}`;
+    if (fullName) return fullName;
+    if (member?.user?.email) return member.user.email;
     return actorId;
   }
 
@@ -396,7 +767,10 @@ export class ActivityLogComponent implements OnInit {
       .getActivityLog(orgId, {
         limit: PAGE_SIZE,
         offset,
-        ...(filters.action ? { action: filters.action } : {}),
+        ...(filters.actions.length > 0
+          ? { actions: filters.actions.join(',') }
+          : {}),
+        ...(filters.entityType ? { entityType: filters.entityType } : {}),
         ...(filters.fromDate ? { fromDate: filters.fromDate } : {}),
         ...(filters.toDate ? { toDate: filters.toDate } : {}),
       })
