@@ -11,8 +11,11 @@ import { beforeEach, afterEach } from 'vitest';
 // jsdom does not implement ResizeObserver; stub it for PrimeNG components that use it.
 if (typeof globalThis.ResizeObserver === 'undefined') {
   globalThis.ResizeObserver = class ResizeObserver {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     observe() {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     unobserve() {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     disconnect() {}
   };
 }

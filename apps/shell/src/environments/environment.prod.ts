@@ -3,6 +3,7 @@
 export const environment = {
   production: true,
   apiUrl: 'https://api.yourdomain.com',
+  adminApiUrl: 'https://admin-api.yourdomain.com',
   auth0Domain: 'your-tenant.eu.auth0.com',
   auth0ClientId: 'YOUR_PROD_CLIENT_ID',
   auth0Audience: 'https://api.yourdomain.com',

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { API_BASE_URL } from '@saas-frontend/shared/util-types';
+import { ADMIN_API_BASE_URL } from '@saas-frontend/shared/util-types';
 import type {
   AdminOrganizationDetail,
   AdminOrganizationListItem,
@@ -20,7 +20,7 @@ import type {
 @Injectable({ providedIn: 'root' })
 export class AdminApi {
   readonly #http = inject(HttpClient);
-  readonly #base = inject(API_BASE_URL);
+  readonly #base = inject(ADMIN_API_BASE_URL);
 
   // ── Organizations ───────────────────────────────────────────────────────────
 

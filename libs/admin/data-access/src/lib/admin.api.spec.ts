@@ -6,7 +6,7 @@ import {
 import { provideHttpClient } from '@angular/common/http';
 import { vi } from 'vitest';
 import { AdminApi } from './admin.api';
-import { API_BASE_URL } from '@saas-frontend/shared/util-types';
+import { ADMIN_API_BASE_URL } from '@saas-frontend/shared/util-types';
 
 describe('AdminApi', () => {
   let api: AdminApi;
@@ -17,7 +17,7 @@ describe('AdminApi', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: API_BASE_URL, useValue: 'http://test' },
+        { provide: ADMIN_API_BASE_URL, useValue: 'http://test' },
         AdminApi,
       ],
     });

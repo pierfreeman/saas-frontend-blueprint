@@ -200,9 +200,10 @@ const PAGE_SIZE = 20;
     >
       <div class="flex flex-col gap-4 pt-2">
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium">Email</label>
+          <label for="invite-email" class="text-sm font-medium">Email</label>
           <input
             pInputText
+            id="invite-email"
             type="email"
             placeholder="user@example.com"
             [(ngModel)]="inviteEmail"
@@ -210,8 +211,9 @@ const PAGE_SIZE = 20;
           />
         </div>
         <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium">Role</label>
+          <label for="invite-role" class="text-sm font-medium">Role</label>
           <p-select
+            inputId="invite-role"
             [options]="roleOptions"
             [(ngModel)]="inviteRole"
             optionLabel="label"
@@ -245,8 +247,9 @@ const PAGE_SIZE = 20;
       [style]="{ width: '22rem' }"
     >
       <div class="flex flex-col gap-1 pt-2">
-        <label class="text-sm font-medium">New role</label>
+        <label for="change-role" class="text-sm font-medium">New role</label>
         <p-select
+          inputId="change-role"
           [options]="roleOptions"
           [(ngModel)]="selectedRole"
           optionLabel="label"
