@@ -331,6 +331,45 @@ describe('MembersComponent', () => {
       const { component } = setup({});
       expect(component.roleSeverity('UNKNOWN')).toBe('secondary');
     });
+
+    it('statusSeverity maps INVITED to warn and SUSPENDED to danger', () => {
+      const { component } = setup({});
+      expect(component.statusSeverity('INVITED')).toBe('warn');
+      expect(component.statusSeverity('SUSPENDED')).toBe('danger');
+    });
+
+    it('statusSeverity defaults to secondary for unknown status', () => {
+      const { component } = setup({});
+      expect(component.statusSeverity('UNKNOWN')).toBe('secondary');
+      expect(component.statusSeverity(undefined)).toBe('secondary');
+    });
+
+    it('renders a status badge for INVITED members', () => {
+      const { fixture } = setup({
+        members: [
+          makeMember({
+            id: 'm-inv',
+            status: 'INVITED',
+            user: { email: 'inv@example.com' },
+          }),
+        ],
+      });
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.textContent).toContain('Invited');
+    });
+
+    it('does not render a status badge for ACTIVE members', () => {
+      const { fixture } = setup({
+        members: [
+          makeMember({ status: 'ACTIVE', user: { email: 'a@example.com' } }),
+        ],
+      });
+      fixture.detectChanges();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.textContent).not.toContain('Invited');
+      expect(el.textContent).not.toContain('Suspended');
+    });
   });
 
   describe('displayName', () => {

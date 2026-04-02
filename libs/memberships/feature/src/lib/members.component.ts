@@ -6,6 +6,7 @@ import {
   computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
@@ -31,13 +32,18 @@ import {
   PERMISSIONS,
 } from '@saas-frontend/shared/util-rbac';
 
-type TagSeverity = 'success' | 'info' | 'secondary' | 'warn';
+type TagSeverity = 'success' | 'info' | 'secondary' | 'warn' | 'danger';
 
 const ROLE_SEVERITY: Record<string, TagSeverity> = {
   OWNER: 'warn',
   ADMIN: 'info',
   MEMBER: 'success',
   READ_ONLY: 'secondary',
+};
+
+const STATUS_SEVERITY: Record<string, TagSeverity> = {
+  INVITED: 'warn',
+  SUSPENDED: 'danger',
 };
 
 const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
@@ -52,6 +58,7 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    TitleCasePipe,
     FormsModule,
     RouterLink,
     CardModule,
@@ -158,9 +165,19 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
                     {{ displayName(m) }}
                   </p>
                   <p class="text-xs text-surface-400 m-0 truncate">
-                    {{ displayEmail(m) || (m.status ?? 'ACTIVE') }}
+                    {{ displayEmail(m) }}
                   </p>
                 </div>
+
+                @if (m.status && m.status !== 'ACTIVE') {
+                  <p-tag
+                    [value]="m.status | titlecase"
+                    [severity]="statusSeverity(m.status)"
+                    [icon]="
+                      m.status === 'INVITED' ? 'pi pi-envelope' : 'pi pi-ban'
+                    "
+                  />
+                }
 
                 @if (canEditRole(m)) {
                   <p-select
@@ -333,6 +350,10 @@ export class MembersComponent implements OnInit {
 
   roleSeverity(role?: string): TagSeverity {
     return ROLE_SEVERITY[role ?? ''] ?? 'secondary';
+  }
+
+  statusSeverity(status?: string): TagSeverity {
+    return STATUS_SEVERITY[status ?? ''] ?? 'secondary';
   }
 
   canEditRole(m: MembershipSummary): boolean {
