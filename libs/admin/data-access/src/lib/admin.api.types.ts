@@ -138,3 +138,36 @@ export interface ListActivityQuery {
   fromDate?: string;
   toDate?: string;
 }
+
+// ── Entitlement overrides ─────────────────────────────────────────────────────
+
+export const OVERRIDE_KEYS = [
+  'advancedAnalytics',
+  'customReports',
+  'apiAccess',
+  'ssoEnabled',
+  'prioritySupport',
+  'maxSeats',
+  'storageLimitBytes',
+] as const;
+
+export type OverrideKey = (typeof OVERRIDE_KEYS)[number];
+
+export interface EntitlementOverride {
+  id: string;
+  orgId: string;
+  key: OverrideKey;
+  value: boolean | number;
+  reason: string;
+  expiresAt: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SetFeatureFlagOverridePayload {
+  key: OverrideKey;
+  value: boolean | number;
+  reason: string;
+  expiresAt?: string;
+}

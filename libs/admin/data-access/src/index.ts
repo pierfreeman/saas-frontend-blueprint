@@ -1,4 +1,5 @@
 export { AdminApi } from './lib/admin.api';
+export { OVERRIDE_KEYS } from './lib/admin.api.types';
 export type {
   AdminOrganizationListItem,
   AdminOrganizationDetail,
@@ -18,4 +19,7 @@ export type {
   ListOrganizationsQuery,
   ListMembersQuery,
   ListActivityQuery,
+  OverrideKey,
+  EntitlementOverride,
+  SetFeatureFlagOverridePayload,
 } from './lib/admin.api.types';

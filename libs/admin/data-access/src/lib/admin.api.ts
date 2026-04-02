@@ -11,6 +11,8 @@ import type {
   AdminBillingPortalResponse,
   PaginatedAdminActivityResult,
   OrganizationEntitlements,
+  EntitlementOverride,
+  SetFeatureFlagOverridePayload,
   MembershipRole,
   ListOrganizationsQuery,
   ListMembersQuery,
@@ -155,6 +157,28 @@ export class AdminApi {
     return this.#http.post<void>(
       `${this.#base}/admin/organizations/${orgId}/entitlements/invalidate`,
       {},
+    );
+  }
+
+  listFeatureFlagOverrides(orgId: string): Observable<EntitlementOverride[]> {
+    return this.#http.get<EntitlementOverride[]>(
+      `${this.#base}/admin/organizations/${orgId}/entitlements/overrides`,
+    );
+  }
+
+  setFeatureFlagOverride(
+    orgId: string,
+    payload: SetFeatureFlagOverridePayload,
+  ): Observable<EntitlementOverride> {
+    return this.#http.patch<EntitlementOverride>(
+      `${this.#base}/admin/organizations/${orgId}/feature-flags`,
+      payload,
+    );
+  }
+
+  deleteFeatureFlagOverride(orgId: string, key: string): Observable<void> {
+    return this.#http.delete<void>(
+      `${this.#base}/admin/organizations/${orgId}/feature-flags/${key}`,
     );
   }
 }

@@ -53,6 +53,8 @@ const mockApi = {
   listMembers: vi.fn(() => of({ items: [], total: 0, limit: 20, offset: 0 })),
   getBillingOverview: vi.fn(() => of({})),
   getOrgActivity: vi.fn(() => of({ logs: [], total: 0, limit: 20, offset: 0 })),
+  getEntitlements: vi.fn(() => of(mockOrg.entitlements)),
+  listFeatureFlagOverrides: vi.fn(() => of([])),
 };
 
 describe('AdminOrgDetailComponent', () => {
