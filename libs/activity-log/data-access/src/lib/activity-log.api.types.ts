@@ -4,6 +4,8 @@ export interface ActivityLogParams {
   actions?: string;
   /** Filter by entity type (e.g. Organization, Membership). */
   entityType?: string;
+  /** Filter by actor user UUID. */
+  actorId?: string;
   fromDate?: string;
   toDate?: string;
   limit?: number;

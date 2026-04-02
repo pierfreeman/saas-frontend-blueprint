@@ -124,12 +124,30 @@ describe('ActivityLogApi', () => {
       expect(req.request.params.get('fromDate')).toBe(
         '2026-03-01T00:00:00.000Z',
       );
-      expect(req.request.params.get('toDate')).toBe(
-        '2026-03-31T23:59:59.999Z',
-      );
+      expect(req.request.params.get('toDate')).toBe('2026-03-31T23:59:59.999Z');
       expect(req.request.params.get('limit')).toBe('50');
       expect(req.request.params.get('offset')).toBe('0');
       req.flush([]);
+    });
+
+    it('issues GET with actorId filter', () => {
+      api.getActivityLog(ORG_ID, { actorId: 'user-abc' }).subscribe();
+
+      const req = controller.expectOne(
+        (r) => r.url === `${BASE}/organizations/${ORG_ID}/activity-log`,
+      );
+      expect(req.request.params.get('actorId')).toBe('user-abc');
+      req.flush({ logs: [], total: 0 });
+    });
+
+    it('does not include actorId param when not provided', () => {
+      api.getActivityLog(ORG_ID).subscribe();
+
+      const req = controller.expectOne(
+        `${BASE}/organizations/${ORG_ID}/activity-log`,
+      );
+      expect(req.request.params.has('actorId')).toBe(false);
+      req.flush({ logs: [], total: 0 });
     });
 
     it('uses the injected API_BASE_URL token', () => {

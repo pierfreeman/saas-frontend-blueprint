@@ -21,6 +21,7 @@ export class ActivityLogApi {
     if (query?.actions) params = params.set('actions', query.actions);
     else if (query?.action) params = params.set('action', query.action);
     if (query?.entityType) params = params.set('entityType', query.entityType);
+    if (query?.actorId) params = params.set('actorId', query.actorId);
     if (query?.fromDate) params = params.set('fromDate', query.fromDate);
     if (query?.toDate) params = params.set('toDate', query.toDate);
     if (query?.limit !== undefined) params = params.set('limit', query.limit);

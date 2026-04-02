@@ -208,6 +208,12 @@ const ALL_ACTIONS: ActionOption[] = [
     severity: 'secondary',
     icon: 'pi-share-alt',
   },
+  {
+    label: 'Exception created',
+    value: 'planning.event.exception.created',
+    severity: 'info',
+    icon: 'pi-calendar-plus',
+  },
   // Files
   {
     label: 'File uploaded',
@@ -323,16 +329,19 @@ const GROUPED_ACTION_OPTIONS: ActionGroup[] = [
 ];
 
 const ENTITY_TYPE_OPTIONS = [
-  { label: 'Organization', value: 'Organization' },
-  { label: 'Membership', value: 'Membership' },
-  { label: 'User', value: 'User' },
-  { label: 'Subscription', value: 'Subscription' },
-  { label: 'Invoice', value: 'Invoice' },
-  { label: 'Planning Event', value: 'PlanningEvent' },
-  { label: 'Job', value: 'Job' },
+  { label: 'Organization', value: 'organization' },
+  { label: 'Membership', value: 'membership' },
+  { label: 'User', value: 'user' },
+  { label: 'Planning Event', value: 'event' },
+  { label: 'Job', value: 'job' },
   { label: 'File', value: 'File' },
-  { label: 'Notification', value: 'Notification' },
+  { label: 'Notification', value: 'notification' },
+  { label: 'Email', value: 'email' },
 ];
+
+const ENTITY_TYPE_MAP = new Map<string, string>(
+  ENTITY_TYPE_OPTIONS.map((e) => [e.value, e.label]),
+);
 
 @Component({
   selector: 'app-activity-log',
@@ -391,6 +400,19 @@ const ENTITY_TYPE_OPTIONS = [
                 [showClear]="true"
                 appendTo="body"
                 styleClass="w-44"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <label class="text-xs text-surface-500 font-medium">Actor</label>
+              <p-select
+                [options]="actorOptions()"
+                [(ngModel)]="actorIdFilter"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="All actors"
+                [showClear]="true"
+                appendTo="body"
+                styleClass="w-52"
               />
             </div>
             <div class="flex flex-col gap-1">
@@ -528,7 +550,9 @@ const ENTITY_TYPE_OPTIONS = [
                   <!-- Entity type only -->
                   <td class="text-sm">
                     @if (row.entityType) {
-                      <span class="text-surface-700">{{ row.entityType }}</span>
+                      <span class="text-surface-700">{{
+                        entityTypeLabel(row.entityType)
+                      }}</span>
                     } @else {
                       <span class="text-surface-300">—</span>
                     }
@@ -652,6 +676,7 @@ export class ActivityLogComponent implements OnInit {
   // filter state (v-model)
   selectedActions: string[] = [];
   entityTypeFilter: string | null = null;
+  actorIdFilter: string | null = null;
   fromDate: Date | null = null;
   toDate: Date | null = null;
 
@@ -659,16 +684,32 @@ export class ActivityLogComponent implements OnInit {
   readonly #activeFilters = signal<{
     actions: string[];
     entityType: string;
+    actorId: string;
     fromDate: string;
     toDate: string;
   }>({
     actions: [],
     entityType: '',
+    actorId: '',
     fromDate: '',
     toDate: '',
   });
 
   readonly #orgId = computed(() => this.#orgsStore.activeOrgId());
+
+  readonly actorOptions = computed(() => {
+    const members = this.#membershipsStore.memberships();
+    return members
+      .filter((m): m is typeof m & { userId: string } => !!m.userId)
+      .map((m) => {
+        const first = m.user?.firstName?.trim() ?? '';
+        const last = m.user?.lastName?.trim() ?? '';
+        const fullName = [first, last].filter(Boolean).join(' ').trim();
+        const label = fullName || m.user?.email || m.userId;
+        return { label, value: m.userId };
+      })
+      .sort((a, b) => a.label.localeCompare(b.label));
+  });
 
   ngOnInit(): void {
     const orgId = this.#orgId();
@@ -679,7 +720,10 @@ export class ActivityLogComponent implements OnInit {
     this.#load(0);
   }
 
+  #suppressLazyLoad = false;
+
   onLazyLoad(event: TableLazyLoadEvent): void {
+    if (this.#suppressLazyLoad) return;
     this.#load(event.first ?? 0);
   }
 
@@ -687,6 +731,7 @@ export class ActivityLogComponent implements OnInit {
     this.#activeFilters.set({
       actions: [...this.selectedActions],
       entityType: this.entityTypeFilter ?? '',
+      actorId: this.actorIdFilter ?? '',
       fromDate: this.#toApiDate(this.fromDate),
       toDate: this.#toApiDate(this.toDate),
     });
@@ -696,11 +741,13 @@ export class ActivityLogComponent implements OnInit {
   resetFilters(): void {
     this.selectedActions = [];
     this.entityTypeFilter = null;
+    this.actorIdFilter = null;
     this.fromDate = null;
     this.toDate = null;
     this.#activeFilters.set({
       actions: [],
       entityType: '',
+      actorId: '',
       fromDate: '',
       toDate: '',
     });
@@ -719,6 +766,10 @@ export class ActivityLogComponent implements OnInit {
 
   actionIcon(action: string): string {
     return ACTION_MAP.get(action)?.icon ?? 'pi-circle';
+  }
+
+  entityTypeLabel(value: string): string {
+    return ENTITY_TYPE_MAP.get(value) ?? value;
   }
 
   hasMetadata(row: ActivityLogRecord): boolean {
@@ -760,6 +811,7 @@ export class ActivityLogComponent implements OnInit {
   #load(offset: number): void {
     const orgId = this.#orgId();
     if (!orgId) return;
+    this.#suppressLazyLoad = true;
     this.loading.set(true);
 
     const filters = this.#activeFilters();
@@ -771,6 +823,7 @@ export class ActivityLogComponent implements OnInit {
           ? { actions: filters.actions.join(',') }
           : {}),
         ...(filters.entityType ? { entityType: filters.entityType } : {}),
+        ...(filters.actorId ? { actorId: filters.actorId } : {}),
         ...(filters.fromDate ? { fromDate: filters.fromDate } : {}),
         ...(filters.toDate ? { toDate: filters.toDate } : {}),
       })
@@ -779,9 +832,15 @@ export class ActivityLogComponent implements OnInit {
           this.logs.set(result.logs);
           this.total.set(result.total);
           this.loading.set(false);
+          setTimeout(() => {
+            this.#suppressLazyLoad = false;
+          }, 0);
         },
         error: () => {
           this.loading.set(false);
+          setTimeout(() => {
+            this.#suppressLazyLoad = false;
+          }, 0);
         },
       });
   }
