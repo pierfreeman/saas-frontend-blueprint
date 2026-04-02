@@ -12,6 +12,14 @@ import { RouterLink } from '@angular/router';
 import {
   ActivityLogApi,
   ActivityLogRecord,
+  ACTIVITY_LOG_ACTIONS,
+  ACTIVITY_LOG_ACTION_MAP,
+  ENTITY_TYPE_OPTIONS,
+  ENTITY_TYPE_MAP,
+  getActionLabel,
+  getActionSeverity,
+  getActionIcon,
+  getEntityTypeLabel,
 } from '@saas-frontend/activity-log/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
@@ -28,278 +36,31 @@ import { TooltipModule } from 'primeng/tooltip';
 
 const PAGE_SIZE = 20;
 
-interface ActionOption {
-  label: string;
-  value: string;
-  severity: 'success' | 'info' | 'warn' | 'danger' | 'secondary';
-  icon: string;
-}
-
 interface ActionGroup {
   label: string;
-  items: ActionOption[];
+  items: { label: string; value: string }[];
 }
-
-const ALL_ACTIONS: ActionOption[] = [
-  // Organization
-  {
-    label: 'Organization created',
-    value: 'organization.created',
-    severity: 'info',
-    icon: 'pi-building',
-  },
-  {
-    label: 'Organization updated',
-    value: 'organization.updated',
-    severity: 'secondary',
-    icon: 'pi-building',
-  },
-  {
-    label: 'Organization deleted',
-    value: 'organization.deleted',
-    severity: 'danger',
-    icon: 'pi-trash',
-  },
-  {
-    label: 'Deletion requested',
-    value: 'organization.deletion.requested',
-    severity: 'danger',
-    icon: 'pi-exclamation-triangle',
-  },
-  {
-    label: 'Export requested',
-    value: 'organization.export.requested',
-    severity: 'info',
-    icon: 'pi-download',
-  },
-  // Members
-  {
-    label: 'Member added',
-    value: 'membership.created',
-    severity: 'info',
-    icon: 'pi-user-plus',
-  },
-  {
-    label: 'Role changed',
-    value: 'membership.role_changed',
-    severity: 'secondary',
-    icon: 'pi-pencil',
-  },
-  {
-    label: 'Member removed',
-    value: 'membership.deleted',
-    severity: 'danger',
-    icon: 'pi-user-minus',
-  },
-  // Users
-  {
-    label: 'Invite sent',
-    value: 'user.created.pending',
-    severity: 'info',
-    icon: 'pi-send',
-  },
-  {
-    label: 'User provisioned',
-    value: 'user.provisioned',
-    severity: 'success',
-    icon: 'pi-check-circle',
-  },
-  {
-    label: 'User deleted',
-    value: 'user.deleted',
-    severity: 'danger',
-    icon: 'pi-trash',
-  },
-  // Billing
-  {
-    label: 'Checkout started',
-    value: 'billing.checkout.created',
-    severity: 'warn',
-    icon: 'pi-shopping-cart',
-  },
-  {
-    label: 'Checkout completed',
-    value: 'billing.checkout.completed',
-    severity: 'success',
-    icon: 'pi-check',
-  },
-  {
-    label: 'Billing portal opened',
-    value: 'billing.portal.accessed',
-    severity: 'secondary',
-    icon: 'pi-external-link',
-  },
-  {
-    label: 'Subscription created',
-    value: 'subscription.created',
-    severity: 'success',
-    icon: 'pi-credit-card',
-  },
-  {
-    label: 'Subscription updated',
-    value: 'subscription.updated',
-    severity: 'secondary',
-    icon: 'pi-refresh',
-  },
-  {
-    label: 'Plan upgraded',
-    value: 'subscription.upgraded',
-    severity: 'success',
-    icon: 'pi-arrow-up',
-  },
-  {
-    label: 'Subscription cancelled',
-    value: 'subscription.cancelled',
-    severity: 'danger',
-    icon: 'pi-times-circle',
-  },
-  {
-    label: 'Subscription canceled',
-    value: 'subscription.canceled',
-    severity: 'danger',
-    icon: 'pi-times-circle',
-  },
-  {
-    label: 'Subscription reactivated',
-    value: 'subscription.reactivated',
-    severity: 'success',
-    icon: 'pi-replay',
-  },
-  {
-    label: 'Payment succeeded',
-    value: 'invoice.payment_succeeded',
-    severity: 'success',
-    icon: 'pi-check-circle',
-  },
-  {
-    label: 'Payment failed',
-    value: 'invoice.payment_failed',
-    severity: 'danger',
-    icon: 'pi-times-circle',
-  },
-  // Planning
-  {
-    label: 'Event created',
-    value: 'planning.event.created',
-    severity: 'info',
-    icon: 'pi-calendar-plus',
-  },
-  {
-    label: 'Event updated',
-    value: 'planning.event.updated',
-    severity: 'secondary',
-    icon: 'pi-calendar',
-  },
-  {
-    label: 'Event deleted',
-    value: 'planning.event.deleted',
-    severity: 'danger',
-    icon: 'pi-calendar-times',
-  },
-  {
-    label: 'RSVP updated',
-    value: 'planning.event.rsvp',
-    severity: 'info',
-    icon: 'pi-calendar-clock',
-  },
-  {
-    label: 'Series split',
-    value: 'planning.event.series.split',
-    severity: 'secondary',
-    icon: 'pi-share-alt',
-  },
-  {
-    label: 'Exception created',
-    value: 'planning.event.exception.created',
-    severity: 'info',
-    icon: 'pi-calendar-plus',
-  },
-  // Files
-  {
-    label: 'File uploaded',
-    value: 'file.upload.confirmed',
-    severity: 'success',
-    icon: 'pi-upload',
-  },
-  {
-    label: 'File downloaded',
-    value: 'file.download.requested',
-    severity: 'secondary',
-    icon: 'pi-download',
-  },
-  {
-    label: 'File deleted',
-    value: 'file.deleted',
-    severity: 'danger',
-    icon: 'pi-trash',
-  },
-  // Jobs
-  {
-    label: 'Job created',
-    value: 'job.created',
-    severity: 'info',
-    icon: 'pi-send',
-  },
-  {
-    label: 'Job processing',
-    value: 'job.processing',
-    severity: 'warn',
-    icon: 'pi-sync',
-  },
-  {
-    label: 'Job completed',
-    value: 'job.completed',
-    severity: 'success',
-    icon: 'pi-check-circle',
-  },
-  {
-    label: 'Job failed',
-    value: 'job.failed',
-    severity: 'danger',
-    icon: 'pi-times-circle',
-  },
-  // Email
-  {
-    label: 'Email sent',
-    value: 'email.sent',
-    severity: 'success',
-    icon: 'pi-envelope',
-  },
-  {
-    label: 'Email failed',
-    value: 'email.failed',
-    severity: 'danger',
-    icon: 'pi-envelope',
-  },
-  // Notifications
-  {
-    label: 'Notification sent',
-    value: 'notification.created',
-    severity: 'info',
-    icon: 'pi-bell',
-  },
-];
-
-const ACTION_MAP = new Map<string, ActionOption>(
-  ALL_ACTIONS.map((a) => [a.value, a]),
-);
 
 const GROUPED_ACTION_OPTIONS: ActionGroup[] = [
   {
     label: 'Organization',
-    items: ALL_ACTIONS.filter((a) => a.value.startsWith('organization.')),
+    items: ACTIVITY_LOG_ACTIONS.filter((a) =>
+      a.value.startsWith('organization.'),
+    ),
   },
   {
     label: 'Members',
-    items: ALL_ACTIONS.filter((a) => a.value.startsWith('membership.')),
+    items: ACTIVITY_LOG_ACTIONS.filter((a) =>
+      a.value.startsWith('membership.'),
+    ),
   },
   {
     label: 'Users',
-    items: ALL_ACTIONS.filter((a) => a.value.startsWith('user.')),
+    items: ACTIVITY_LOG_ACTIONS.filter((a) => a.value.startsWith('user.')),
   },
   {
     label: 'Billing',
-    items: ALL_ACTIONS.filter(
+    items: ACTIVITY_LOG_ACTIONS.filter(
       (a) =>
         a.value.startsWith('billing.') ||
         a.value.startsWith('subscription.') ||
@@ -308,40 +69,27 @@ const GROUPED_ACTION_OPTIONS: ActionGroup[] = [
   },
   {
     label: 'Planning',
-    items: ALL_ACTIONS.filter((a) => a.value.startsWith('planning.')),
+    items: ACTIVITY_LOG_ACTIONS.filter((a) => a.value.startsWith('planning.')),
   },
   {
     label: 'Files',
-    items: ALL_ACTIONS.filter((a) => a.value.startsWith('file.')),
+    items: ACTIVITY_LOG_ACTIONS.filter((a) => a.value.startsWith('file.')),
   },
   {
     label: 'Jobs',
-    items: ALL_ACTIONS.filter((a) => a.value.startsWith('job.')),
+    items: ACTIVITY_LOG_ACTIONS.filter((a) => a.value.startsWith('job.')),
   },
   {
     label: 'Email',
-    items: ALL_ACTIONS.filter((a) => a.value.startsWith('email.')),
+    items: ACTIVITY_LOG_ACTIONS.filter((a) => a.value.startsWith('email.')),
   },
   {
     label: 'Notifications',
-    items: ALL_ACTIONS.filter((a) => a.value.startsWith('notification.')),
+    items: ACTIVITY_LOG_ACTIONS.filter((a) =>
+      a.value.startsWith('notification.'),
+    ),
   },
 ];
-
-const ENTITY_TYPE_OPTIONS = [
-  { label: 'Organization', value: 'organization' },
-  { label: 'Membership', value: 'membership' },
-  { label: 'User', value: 'user' },
-  { label: 'Planning Event', value: 'event' },
-  { label: 'Job', value: 'job' },
-  { label: 'File', value: 'File' },
-  { label: 'Notification', value: 'notification' },
-  { label: 'Email', value: 'email' },
-];
-
-const ENTITY_TYPE_MAP = new Map<string, string>(
-  ENTITY_TYPE_OPTIONS.map((e) => [e.value, e.label]),
-);
 
 @Component({
   selector: 'app-activity-log',
@@ -755,17 +503,17 @@ export class ActivityLogComponent implements OnInit {
   }
 
   actionLabel(action: string): string {
-    return ACTION_MAP.get(action)?.label ?? action;
+    return getActionLabel(action);
   }
 
   actionSeverity(
     action: string,
   ): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
-    return ACTION_MAP.get(action)?.severity ?? 'secondary';
+    return getActionSeverity(action);
   }
 
   actionIcon(action: string): string {
-    return ACTION_MAP.get(action)?.icon ?? 'pi-circle';
+    return getActionIcon(action);
   }
 
   entityTypeLabel(value: string): string {

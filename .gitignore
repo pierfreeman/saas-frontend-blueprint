@@ -56,3 +56,5 @@ Thumbs.db
 
 .scannerwork
 .sonarlint
+.claude/worktrees
+.claude/settings.local.json
