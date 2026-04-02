@@ -598,4 +598,143 @@ describe('MembersComponent', () => {
       expect(mockStore.removeMember).not.toHaveBeenCalled();
     });
   });
+
+  // ── downloadCsv ──────────────────────────────────────────────────────────
+  describe('downloadCsv()', () => {
+    beforeEach(() => {
+      vi.stubGlobal('URL', {
+        createObjectURL: vi.fn(() => 'blob:mock'),
+        revokeObjectURL: vi.fn(),
+      });
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('does nothing when member list is empty', () => {
+      const { component } = setup({ members: [] });
+      component.downloadCsv();
+      expect(URL.createObjectURL).not.toHaveBeenCalled();
+    });
+
+    it('triggers a download when members are present', () => {
+      const { component } = setup({ members: [makeMember()] });
+      component.downloadCsv();
+      expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
+      expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1);
+    });
+
+    it('revokes the object URL after triggering download', () => {
+      const { component } = setup({ members: [makeMember()] });
+      component.downloadCsv();
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock');
+    });
+
+    it('generates CSV with the correct header row', async () => {
+      const { component } = setup({ members: [makeMember()] });
+      let capturedBlob: Blob | null = null;
+      vi.mocked(
+        URL.createObjectURL as ReturnType<typeof vi.fn>,
+      ).mockImplementation((b: Blob) => {
+        capturedBlob = b;
+        return 'blob:mock';
+      });
+      component.downloadCsv();
+      const text = await capturedBlob!.text();
+      expect(text.split('\r\n')[0]).toBe(
+        'id,user_id,email,first_name,last_name,role,status',
+      );
+    });
+
+    it('includes member data in CSV rows', async () => {
+      const m = makeMember({
+        id: 'mbr-1',
+        userId: 'uid-1',
+        role: 'ADMIN',
+        status: 'ACTIVE',
+        user: {
+          email: 'alice@example.com',
+          firstName: 'Alice',
+          lastName: 'Smith',
+        },
+      });
+      const { component } = setup({ members: [m] });
+      let capturedBlob: Blob | null = null;
+      vi.mocked(
+        URL.createObjectURL as ReturnType<typeof vi.fn>,
+      ).mockImplementation((b: Blob) => {
+        capturedBlob = b;
+        return 'blob:mock';
+      });
+      component.downloadCsv();
+      const text = await capturedBlob!.text();
+      const dataRow = text.split('\r\n')[1];
+      expect(dataRow).toContain('mbr-1');
+      expect(dataRow).toContain('uid-1');
+      expect(dataRow).toContain('alice@example.com');
+      expect(dataRow).toContain('Alice');
+      expect(dataRow).toContain('Smith');
+      expect(dataRow).toContain('ADMIN');
+      expect(dataRow).toContain('ACTIVE');
+    });
+
+    it('escapes double-quotes inside field values', async () => {
+      const m = makeMember({
+        user: { firstName: 'Al"ice', email: 'alice@example.com' },
+      });
+      const { component } = setup({ members: [m] });
+      let capturedBlob: Blob | null = null;
+      vi.mocked(
+        URL.createObjectURL as ReturnType<typeof vi.fn>,
+      ).mockImplementation((b: Blob) => {
+        capturedBlob = b;
+        return 'blob:mock';
+      });
+      component.downloadCsv();
+      const text = await capturedBlob!.text();
+      expect(text).toContain('"Al""ice"');
+    });
+
+    it('handles missing user fields gracefully', async () => {
+      const m = makeMember({ user: undefined });
+      const { component } = setup({ members: [m] });
+      let capturedBlob: Blob | null = null;
+      vi.mocked(
+        URL.createObjectURL as ReturnType<typeof vi.fn>,
+      ).mockImplementation((b: Blob) => {
+        capturedBlob = b;
+        return 'blob:mock';
+      });
+      component.downloadCsv();
+      const text = await capturedBlob!.text();
+      const dataRow = text.split('\r\n')[1];
+      // email, first_name, last_name should be empty quoted strings
+      expect(dataRow).toContain('""');
+    });
+
+    it('filename includes orgId and today date', () => {
+      const { component } = setup({ members: [makeMember()] });
+      const filenames: string[] = [];
+      const origCreate = document.createElement.bind(document);
+      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+        const el = origCreate(tag);
+        if (tag === 'a') {
+          vi.spyOn(el, 'click').mockImplementation(() => {
+            filenames.push((el as HTMLAnchorElement).download);
+          });
+        }
+        return el;
+      });
+      component.downloadCsv();
+      const today = new Date().toISOString().slice(0, 10);
+      expect(filenames[0]).toMatch(
+        new RegExp(`^members-org-1-${today}\\.csv$`),
+      );
+    });
+  });
 });

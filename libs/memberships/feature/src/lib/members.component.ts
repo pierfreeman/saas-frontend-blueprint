@@ -78,25 +78,35 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
             People with access to this organization.
           </p>
         </div>
-        @if (canInviteByPermission()) {
-          <div class="flex flex-col items-end gap-1">
-            <p-button
-              label="Invite member"
-              icon="pi pi-user-plus"
-              [disabled]="atSeatLimit()"
-              (onClick)="openInviteDialog()"
-            />
-            @if (atSeatLimit()) {
-              <p class="text-xs text-orange-600 m-0">
-                Seat limit reached ({{ members().length }}/{{ maxSeats() }}).
-                <a routerLink="/billing" class="underline text-orange-600"
-                  >Upgrade</a
-                >
-                to add more.
-              </p>
-            }
-          </div>
-        }
+        <div class="flex items-center gap-2">
+          <p-button
+            label="Export CSV"
+            icon="pi pi-download"
+            size="small"
+            severity="secondary"
+            [disabled]="members().length === 0 || loading()"
+            (onClick)="downloadCsv()"
+          />
+          @if (canInviteByPermission()) {
+            <div class="flex flex-col items-end gap-1">
+              <p-button
+                label="Invite member"
+                icon="pi pi-user-plus"
+                [disabled]="atSeatLimit()"
+                (onClick)="openInviteDialog()"
+              />
+              @if (atSeatLimit()) {
+                <p class="text-xs text-orange-600 m-0">
+                  Seat limit reached ({{ members().length }}/{{ maxSeats() }}).
+                  <a routerLink="/billing" class="underline text-orange-600"
+                    >Upgrade</a
+                  >
+                  to add more.
+                </p>
+              }
+            </div>
+          }
+        </div>
       </div>
 
       <p-card>
@@ -431,5 +441,53 @@ export class MembersComponent implements OnInit {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId) return;
     this.#ent.loadEntitlements(orgId);
+  }
+
+  downloadCsv(): void {
+    if (this.members().length === 0) return;
+    const csv = this.#buildCsv(this.members());
+    const orgId = this.#orgsStore.activeOrgId() ?? 'org';
+    const date = new Date().toISOString().slice(0, 10);
+    this.#triggerDownload(csv, `members-${orgId}-${date}.csv`);
+  }
+
+  #buildCsv(rows: MembershipSummary[]): string {
+    const esc = (v: unknown): string => {
+      const s = v == null ? '' : String(v);
+      return `"${s.replace(/"/g, '""')}"`;
+    };
+    const header = [
+      'id',
+      'user_id',
+      'email',
+      'first_name',
+      'last_name',
+      'role',
+      'status',
+    ].join(',');
+    const lines = rows.map((m) =>
+      [
+        m.id ?? '',
+        m.userId ?? '',
+        m.user?.email ?? '',
+        m.user?.firstName ?? '',
+        m.user?.lastName ?? '',
+        m.role ?? '',
+        m.status ?? '',
+      ]
+        .map(esc)
+        .join(','),
+    );
+    return [header, ...lines].join('\r\n');
+  }
+
+  #triggerDownload(content: string, filename: string): void {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
 }
