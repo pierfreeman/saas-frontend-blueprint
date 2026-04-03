@@ -20,6 +20,19 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           authStore.clearUser();
           orgsStore.clearActiveOrg();
           router.navigateByUrl('/auth');
+        } else if (
+          err.status === 403 &&
+          err.error?.message === 'Organization is suspended'
+        ) {
+          orgsStore.clearActiveOrg();
+          router.navigateByUrl('/org/select');
+          messageService.add({
+            severity: 'warn',
+            summary: 'Organization suspended',
+            detail:
+              'This organization has been suspended. Please contact support or switch to another organization.',
+            life: 8000,
+          });
         } else {
           const summary = httpErrorSummary(err.status);
           const detail =

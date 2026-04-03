@@ -8,7 +8,7 @@ import config from './module-federation.config';
  */
 const mfConfig = withModuleFederation(config, { dts: false });
 
-export default async (cfg: any) => {
+export default async (cfg: Record<string, unknown>) => {
   const result = await (await mfConfig)(cfg);
   result.watchOptions = {
     ignored: [

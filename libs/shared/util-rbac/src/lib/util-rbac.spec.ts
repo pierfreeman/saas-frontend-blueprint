@@ -9,8 +9,12 @@ import { PermissionsService } from './permissions.service';
 import { hasPermission } from './has-permission';
 import { HasPermissionDirective } from './has-permission.directive';
 import { HasPlanDirective } from './has-plan.directive';
+import { HasEntitlementDirective } from './has-entitlement.directive';
 import { MembershipsStore } from '@saas-frontend/memberships/data-access';
-import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
+import {
+  EntitlementsStore,
+  type OrganizationEntitlements,
+} from '@saas-frontend/entitlements/data-access';
 
 // ── resolvePermissions() ───────────────────────────────────────────────────
 
@@ -282,5 +286,115 @@ describe('HasPlanDirective', () => {
     fixture.detectChanges();
 
     expect(fixture.debugElement.query(By.css('div'))).toBeNull();
+  });
+});
+
+// ── HasEntitlementDirective ────────────────────────────────────────────────
+
+@Component({
+  template: `<span *hasEntitlement="'ssoEnabled'">SSO Settings</span>`,
+  imports: [HasEntitlementDirective],
+})
+class TestHasEntitlementComponent {}
+
+function makeEntitlements(
+  overrides: Partial<OrganizationEntitlements> = {},
+): OrganizationEntitlements {
+  return {
+    plan: 'FREE',
+    advancedAnalytics: false,
+    customReports: false,
+    apiAccess: false,
+    ssoEnabled: false,
+    prioritySupport: false,
+    maxSeats: 3,
+    storageLimitBytes: 100 * 1024 * 1024,
+    ...overrides,
+  };
+}
+
+describe('HasEntitlementDirective', () => {
+  let fixture: ComponentFixture<TestHasEntitlementComponent>;
+  let entitlementsSignal: ReturnType<
+    typeof signal<OrganizationEntitlements | null>
+  >;
+
+  beforeEach(() => {
+    entitlementsSignal = signal<OrganizationEntitlements | null>(null);
+    TestBed.configureTestingModule({
+      imports: [TestHasEntitlementComponent],
+      providers: [
+        {
+          provide: EntitlementsStore,
+          useValue: { entitlements: entitlementsSignal },
+        },
+      ],
+    });
+    fixture = TestBed.createComponent(TestHasEntitlementComponent);
+    fixture.detectChanges();
+  });
+
+  it('hides the element when entitlements are null (not loaded)', () => {
+    expect(fixture.debugElement.query(By.css('span'))).toBeNull();
+  });
+
+  it('hides the element when the boolean flag is false', () => {
+    entitlementsSignal.set(makeEntitlements({ ssoEnabled: false }));
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.detectChanges();
+    expect(fixture.debugElement.query(By.css('span'))).toBeNull();
+  });
+
+  it('shows the element when the boolean flag is true', () => {
+    entitlementsSignal.set(makeEntitlements({ ssoEnabled: true }));
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.detectChanges();
+    expect(fixture.debugElement.query(By.css('span'))).not.toBeNull();
+  });
+
+  it('hides the element again when the flag changes from true to false', () => {
+    entitlementsSignal.set(makeEntitlements({ ssoEnabled: true }));
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.detectChanges();
+
+    entitlementsSignal.set(makeEntitlements({ ssoEnabled: false }));
+    fixture.detectChanges();
+    TestBed.flushEffects();
+    fixture.detectChanges();
+
+    expect(fixture.debugElement.query(By.css('span'))).toBeNull();
+  });
+
+  it('shows the element for maxSeats when value is > 0', () => {
+    @Component({
+      template: `<div *hasEntitlement="'maxSeats'">seats block</div>`,
+      imports: [HasEntitlementDirective],
+    })
+    class MaxSeatsComponent {}
+
+    const seatsFixture = TestBed.createComponent(MaxSeatsComponent);
+    entitlementsSignal.set(makeEntitlements({ maxSeats: 10 }));
+    seatsFixture.detectChanges();
+    TestBed.flushEffects();
+    seatsFixture.detectChanges();
+    expect(seatsFixture.debugElement.query(By.css('div'))).not.toBeNull();
+  });
+
+  it('hides the element for maxSeats when value is 0', () => {
+    @Component({
+      template: `<div *hasEntitlement="'maxSeats'">seats block</div>`,
+      imports: [HasEntitlementDirective],
+    })
+    class MaxSeatsZeroComponent {}
+
+    const seatsFixture = TestBed.createComponent(MaxSeatsZeroComponent);
+    entitlementsSignal.set(makeEntitlements({ maxSeats: 0 }));
+    seatsFixture.detectChanges();
+    TestBed.flushEffects();
+    seatsFixture.detectChanges();
+    expect(seatsFixture.debugElement.query(By.css('div'))).toBeNull();
   });
 });

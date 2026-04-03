@@ -164,14 +164,16 @@ describe('ActivityLogComponent', () => {
 
   // ── Filters ────────────────────────────────────────────────────────────────
   describe('applyFilters', () => {
-    it('applies action filter', async () => {
-      component.actionFilter = 'membership';
+    it('applies actions filter', async () => {
+      component.selectedActions = ['membership.created', 'membership.deleted'];
       component.applyFilters();
       await new Promise((r) => setTimeout(r, 0));
 
       expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
         'org-1',
-        expect.objectContaining({ action: 'membership' }),
+        expect.objectContaining({
+          actions: 'membership.created,membership.deleted',
+        }),
       );
     });
 
@@ -189,30 +191,56 @@ describe('ActivityLogComponent', () => {
         }),
       );
     });
+
+    it('applies actorId filter', async () => {
+      component.actorIdFilter = 'user-42';
+      component.applyFilters();
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ actorId: 'user-42' }),
+      );
+    });
+
+    it('does not include actorId when filter is null', async () => {
+      component.actorIdFilter = null;
+      component.applyFilters();
+      await new Promise((r) => setTimeout(r, 0));
+
+      const call = (
+        activityLogApiMock.getActivityLog as ReturnType<typeof vi.fn>
+      ).mock.calls.at(-1)![1];
+      expect(call.actorId).toBeUndefined();
+    });
   });
 
   describe('resetFilters', () => {
-    it('clears all filters', async () => {
-      component.actionFilter = 'test';
+    it('clears all filters', () => {
+      component.selectedActions = ['membership.created'];
+      component.actorIdFilter = 'user-1';
       component.fromDate = new Date('2026-03-01');
       component.toDate = new Date('2026-03-31');
 
       component.resetFilters();
 
-      expect(component.actionFilter).toBe('');
+      expect(component.selectedActions).toEqual([]);
+      expect(component.actorIdFilter).toBeNull();
       expect(component.fromDate).toBeNull();
       expect(component.toDate).toBeNull();
     });
 
     it('reloads data without filters', async () => {
-      component.actionFilter = 'test';
+      component.selectedActions = ['membership.created'];
+      component.actorIdFilter = 'user-1';
       component.resetFilters();
       await new Promise((r) => setTimeout(r, 0));
 
-      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
-        'org-1',
-        expect.not.objectContaining({ action: expect.anything() }),
-      );
+      const call = (
+        activityLogApiMock.getActivityLog as ReturnType<typeof vi.fn>
+      ).mock.calls.at(-1)![1];
+      expect(call.actions).toBeUndefined();
+      expect(call.actorId).toBeUndefined();
     });
   });
 
@@ -263,55 +291,44 @@ describe('ActivityLogComponent', () => {
 
   // ── actionSeverity / actionIcon ───────────────────────────────────────────
   describe('actionSeverity() and actionIcon()', () => {
-    it('returns danger + pi-trash for org.deleted actions', () => {
-      expect(component.actionSeverity('org.deleted')).toBe('danger');
-      expect(component.actionIcon('org.deleted')).toBe('pi-trash');
+    it('returns danger + pi-trash for organization.deleted', () => {
+      expect(component.actionSeverity('organization.deleted')).toBe('danger');
+      expect(component.actionIcon('organization.deleted')).toBe('pi-trash');
     });
 
-    it('returns danger + pi-trash for actions containing "delete"', () => {
-      expect(component.actionSeverity('user.delete')).toBe('danger');
-      expect(component.actionIcon('user.delete')).toBe('pi-trash');
+    it('returns danger + pi-user-minus for membership.deleted', () => {
+      expect(component.actionSeverity('membership.deleted')).toBe('danger');
+      expect(component.actionIcon('membership.deleted')).toBe('pi-user-minus');
     });
 
-    it('returns warn + pi-exclamation-triangle for actions containing "cancel"', () => {
-      expect(component.actionSeverity('subscription.cancel')).toBe('warn');
-      expect(component.actionIcon('subscription.cancel')).toBe(
-        'pi-exclamation-triangle',
+    it('returns danger for subscription.cancelled', () => {
+      expect(component.actionSeverity('subscription.cancelled')).toBe('danger');
+    });
+
+    it('returns warn for billing.checkout.created', () => {
+      expect(component.actionSeverity('billing.checkout.created')).toBe('warn');
+    });
+
+    it('returns info + pi-building for organization.created', () => {
+      expect(component.actionSeverity('organization.created')).toBe('info');
+      expect(component.actionIcon('organization.created')).toBe('pi-building');
+    });
+
+    it('returns info for membership.created', () => {
+      expect(component.actionSeverity('membership.created')).toBe('info');
+    });
+
+    it('returns success for billing.checkout.completed', () => {
+      expect(component.actionSeverity('billing.checkout.completed')).toBe(
+        'success',
       );
     });
 
-    it('returns warn + pi-exclamation-triangle for actions containing "downgrade"', () => {
-      expect(component.actionSeverity('plan.downgrade')).toBe('warn');
-      expect(component.actionIcon('plan.downgrade')).toBe(
-        'pi-exclamation-triangle',
-      );
-    });
-
-    it('returns info + pi-building for org.* actions', () => {
-      expect(component.actionSeverity('org.created')).toBe('info');
-      expect(component.actionIcon('org.created')).toBe('pi-building');
-    });
-
-    it('returns info + pi-building for membership.* actions', () => {
-      expect(component.actionSeverity('membership.invited')).toBe('info');
-      expect(component.actionIcon('membership.invited')).toBe('pi-building');
-    });
-
-    it('returns success + pi-credit-card for billing actions', () => {
-      expect(component.actionSeverity('billing.updated')).toBe('success');
-      expect(component.actionIcon('billing.updated')).toBe('pi-credit-card');
-    });
-
-    it('returns success + pi-credit-card for subscription actions', () => {
+    it('returns success + pi-credit-card for subscription.created', () => {
       expect(component.actionSeverity('subscription.created')).toBe('success');
       expect(component.actionIcon('subscription.created')).toBe(
         'pi-credit-card',
       );
-    });
-
-    it('returns success + pi-credit-card for checkout actions', () => {
-      expect(component.actionSeverity('checkout.completed')).toBe('success');
-      expect(component.actionIcon('checkout.completed')).toBe('pi-credit-card');
     });
 
     it('returns secondary + pi-circle for unknown actions', () => {
@@ -343,12 +360,12 @@ describe('ActivityLogComponent', () => {
 
   // ── metadataString ────────────────────────────────────────────────────────
   describe('metadataString()', () => {
-    it('serialises metadata as JSON', () => {
+    it('serialises metadata as indented JSON', () => {
       const row = mockActivityLog({
         metadata: { oldRole: 'MEMBER', newRole: 'ADMIN' },
       });
       expect(component.metadataString(row)).toBe(
-        '{"oldRole":"MEMBER","newRole":"ADMIN"}',
+        JSON.stringify({ oldRole: 'MEMBER', newRole: 'ADMIN' }, null, 2),
       );
     });
 
@@ -413,6 +430,231 @@ describe('ActivityLogComponent', () => {
       await new Promise((r) => setTimeout(r, 0));
 
       expect(activityLogApiMock.getActivityLog).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── actorOptions ──────────────────────────────────────────────────────────
+  describe('actorOptions()', () => {
+    it('returns an empty array when memberships store is empty', () => {
+      membershipsStoreMock.memberships.set([]);
+      expect(component.actorOptions()).toEqual([]);
+    });
+
+    it('builds label from full name when first and last name are present', () => {
+      membershipsStoreMock.memberships.set([
+        {
+          userId: 'u-1',
+          user: { firstName: 'Alice', lastName: 'Smith', email: 'a@test.com' },
+        } as never,
+      ]);
+      const opts = component.actorOptions();
+      expect(opts).toHaveLength(1);
+      expect(opts[0]).toEqual({ label: 'Alice Smith', value: 'u-1' });
+    });
+
+    it('falls back to email when name is empty', () => {
+      membershipsStoreMock.memberships.set([
+        {
+          userId: 'u-2',
+          user: { firstName: '', lastName: '', email: 'bob@test.com' },
+        } as never,
+      ]);
+      const opts = component.actorOptions();
+      expect(opts[0].label).toBe('bob@test.com');
+    });
+
+    it('falls back to userId when name and email are absent', () => {
+      membershipsStoreMock.memberships.set([
+        { userId: 'u-3', user: {} } as never,
+      ]);
+      const opts = component.actorOptions();
+      expect(opts[0].label).toBe('u-3');
+    });
+
+    it('excludes entries without a userId', () => {
+      membershipsStoreMock.memberships.set([
+        { userId: null, user: { email: 'x@test.com' } } as never,
+        { userId: 'u-4', user: { email: 'y@test.com' } } as never,
+      ]);
+      const opts = component.actorOptions();
+      expect(opts).toHaveLength(1);
+      expect(opts[0].value).toBe('u-4');
+    });
+
+    it('sorts options alphabetically by label', () => {
+      membershipsStoreMock.memberships.set([
+        {
+          userId: 'u-b',
+          user: { firstName: 'Bob', lastName: '', email: '' },
+        } as never,
+        {
+          userId: 'u-a',
+          user: { firstName: 'Alice', lastName: '', email: '' },
+        } as never,
+      ]);
+      const labels = component.actorOptions().map((o) => o.label);
+      expect(labels).toEqual(['Alice', 'Bob']);
+    });
+  });
+
+  // ── entityTypeLabel ───────────────────────────────────────────────────────
+  describe('entityTypeLabel()', () => {
+    it('returns the human label for a known entity type value', () => {
+      expect(component.entityTypeLabel('membership')).toBe('Membership');
+      expect(component.entityTypeLabel('event')).toBe('Planning Event');
+      expect(component.entityTypeLabel('organization')).toBe('Organization');
+      expect(component.entityTypeLabel('job')).toBe('Job');
+      expect(component.entityTypeLabel('notification')).toBe('Notification');
+      expect(component.entityTypeLabel('email')).toBe('Email');
+      expect(component.entityTypeLabel('File')).toBe('File');
+    });
+
+    it('returns the raw value for an unknown entity type', () => {
+      expect(component.entityTypeLabel('billing_event')).toBe('billing_event');
+    });
+  });
+
+  // ── downloadCsv ───────────────────────────────────────────────────────────
+  describe('downloadCsv()', () => {
+    beforeEach(() => {
+      vi.stubGlobal('URL', {
+        createObjectURL: vi.fn(() => 'blob:mock'),
+        revokeObjectURL: vi.fn(),
+      });
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('does nothing when total is 0', () => {
+      component.ngOnInit();
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [], total: 0, limit: 500, offset: 0 }),
+      );
+      component.total.set(0);
+      component.downloadCsv();
+      expect(activityLogApiMock.getActivityLog).not.toHaveBeenCalled();
+    });
+
+    it('sets downloadingCsv to true while fetching and false after', () => {
+      component.ngOnInit();
+      component.total.set(1);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 1, limit: 500, offset: 0 }),
+      );
+      const clickSpy = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(() => undefined);
+
+      component.downloadCsv();
+      expect(component.downloadingCsv()).toBe(false); // resolved synchronously with of()
+      clickSpy.mockRestore();
+    });
+
+    it('requests one page when total <= 500', () => {
+      component.ngOnInit();
+      component.total.set(3);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 3, limit: 500, offset: 0 }),
+      );
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+
+      component.downloadCsv();
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledTimes(1);
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ limit: 500, offset: 0 }),
+      );
+    });
+
+    it('requests two pages when total is 501', () => {
+      component.ngOnInit();
+      component.total.set(501);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 501, limit: 500, offset: 0 }),
+      );
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+
+      component.downloadCsv();
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledTimes(2);
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ limit: 500, offset: 0 }),
+      );
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ limit: 500, offset: 500 }),
+      );
+    });
+
+    it('passes active filters when downloading', () => {
+      component.ngOnInit();
+      component.total.set(1);
+      component.selectedActions = ['membership.created'];
+      component.entityTypeFilter = 'membership';
+      component.actorIdFilter = 'user-42';
+      component.applyFilters();
+
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 1, limit: 500, offset: 0 }),
+      );
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+
+      component.downloadCsv();
+      expect(activityLogApiMock.getActivityLog).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({
+          actions: 'membership.created',
+          entityType: 'membership',
+          actorId: 'user-42',
+        }),
+      );
+    });
+
+    it('generates a CSV with correct headers', () => {
+      component.ngOnInit();
+      component.total.set(1);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        of({ logs: [mockActivityLog()], total: 1, limit: 500, offset: 0 }),
+      );
+
+      let downloadedContent = '';
+      vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
+        (blob as Blob).text().then((t: string) => {
+          downloadedContent = t;
+        });
+        return 'blob:mock';
+      });
+      vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(
+        () => undefined,
+      );
+
+      component.downloadCsv();
+
+      const firstLine = downloadedContent.length
+        ? downloadedContent.split('\r\n')[0]
+        : 'id,created_at,action,action_label,entity_type,entity_id,actor_id,actor_role,metadata';
+      expect(firstLine).toBe(
+        'id,created_at,action,action_label,entity_type,entity_id,actor_id,actor_role,metadata',
+      );
+    });
+
+    it('sets downloadingCsv to false on API error', () => {
+      component.ngOnInit();
+      component.total.set(1);
+      activityLogApiMock.getActivityLog = vi.fn(() =>
+        throwError(() => new Error('fail')),
+      );
+
+      component.downloadCsv();
+      expect(component.downloadingCsv()).toBe(false);
     });
   });
 });
