@@ -124,4 +124,153 @@ describe('AdminEntitlementsTabComponent', () => {
       'ssoEnabled',
     );
   });
+
+  it('sets deletingKey = null on deleteFeatureFlagOverride error', () => {
+    mockApi.deleteFeatureFlagOverride.mockReturnValueOnce(
+      throwError(() => new Error('fail')),
+    );
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.confirmDelete('apiAccess');
+    expect(fixture.componentInstance.deletingKey()).toBeNull();
+  });
+
+  it('openAddDialog resets form and key', () => {
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.openAddDialog();
+    expect(fixture.componentInstance.editingOverride()).toBeNull();
+    expect(fixture.componentInstance.formKey()).toBeNull();
+    expect(fixture.componentInstance.form.reason).toBe('');
+    expect(fixture.componentInstance.dialogVisible).toBe(true);
+  });
+
+  it('openEditDialog populates form from override', () => {
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.openEditDialog(mockOverride);
+    expect(fixture.componentInstance.editingOverride()).toEqual(mockOverride);
+    expect(fixture.componentInstance.formKey()).toBe('ssoEnabled');
+    expect(fixture.componentInstance.form.reason).toBe('Enterprise trial');
+    expect(fixture.componentInstance.formBoolValue).toBe(true);
+    expect(fixture.componentInstance.dialogVisible).toBe(true);
+  });
+
+  it('openEditDialog sets formNumValue for numeric override', () => {
+    const numOverride = {
+      ...mockOverride,
+      key: 'maxSeats' as const,
+      value: 25,
+    };
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.openEditDialog(numOverride);
+    expect(fixture.componentInstance.formNumValue).toBe(25);
+  });
+
+  it('valueType returns "number" for NUMBER_KEYS', () => {
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.formKey.set('maxSeats');
+    expect(fixture.componentInstance.valueType()).toBe('number');
+
+    fixture.componentInstance.formKey.set('ssoEnabled');
+    expect(fixture.componentInstance.valueType()).toBe('boolean');
+  });
+
+  it('saveOverride returns early when formKey is null', () => {
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+    mockApi.setFeatureFlagOverride.mockClear();
+
+    fixture.componentInstance.formKey.set(null);
+    fixture.componentInstance.form.reason = 'some reason';
+    fixture.componentInstance.saveOverride();
+    expect(mockApi.setFeatureFlagOverride).not.toHaveBeenCalled();
+  });
+
+  it('saveOverride returns early when reason is empty', () => {
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+    mockApi.setFeatureFlagOverride.mockClear();
+
+    fixture.componentInstance.formKey.set('apiAccess');
+    fixture.componentInstance.form.reason = '';
+    fixture.componentInstance.saveOverride();
+    expect(mockApi.setFeatureFlagOverride).not.toHaveBeenCalled();
+  });
+
+  it('saveOverride sends number value for NUMBER_KEYS', () => {
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.formKey.set('maxSeats');
+    fixture.componentInstance.formNumValue = 50;
+    fixture.componentInstance.form = {
+      reason: 'Expand seats',
+      expiresAt: null,
+    };
+    fixture.componentInstance.saveOverride();
+
+    expect(mockApi.setFeatureFlagOverride).toHaveBeenCalledWith('org-1', {
+      key: 'maxSeats',
+      value: 50,
+      reason: 'Expand seats',
+      expiresAt: undefined,
+    });
+  });
+
+  it('saveOverride sends ISO expiresAt when date is set', () => {
+    const expires = new Date('2027-01-01T00:00:00Z');
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.formKey.set('apiAccess');
+    fixture.componentInstance.formBoolValue = true;
+    fixture.componentInstance.form = { reason: 'Trial', expiresAt: expires };
+    fixture.componentInstance.saveOverride();
+
+    expect(mockApi.setFeatureFlagOverride).toHaveBeenCalledWith(
+      'org-1',
+      expect.objectContaining({ expiresAt: expires.toISOString() }),
+    );
+  });
+
+  it('sets saving = false on saveOverride error', () => {
+    mockApi.setFeatureFlagOverride.mockReturnValueOnce(
+      throwError(() => new Error('fail')),
+    );
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.formKey.set('ssoEnabled');
+    fixture.componentInstance.form = { reason: 'Test', expiresAt: null };
+    fixture.componentInstance.saveOverride();
+    expect(fixture.componentInstance.saving()).toBe(false);
+  });
+
+  it('sets loading = false when listFeatureFlagOverrides errors', () => {
+    mockApi.listFeatureFlagOverrides.mockReturnValueOnce(
+      throwError(() => new Error('fail')),
+    );
+    const fixture = TestBed.createComponent(AdminEntitlementsTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loading()).toBe(false);
+  });
 });

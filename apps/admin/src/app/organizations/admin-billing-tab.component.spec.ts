@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AdminBillingTabComponent } from './admin-billing-tab.component';
 import { AdminApi } from '@saas-frontend/admin/data-access';
@@ -44,5 +44,58 @@ describe('AdminBillingTabComponent', () => {
     fixture.detectChanges();
     expect(mockApi.getBillingOverview).toHaveBeenCalledWith('org-1');
     expect(fixture.componentInstance.overview()).toEqual(mockOverview);
+  });
+
+  it('sets loading = false and null overview on API error', () => {
+    mockApi.getBillingOverview.mockReturnValueOnce(
+      throwError(() => new Error('fail')),
+    );
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loading()).toBe(false);
+    expect(fixture.componentInstance.overview()).toBeNull();
+  });
+
+  it('billingSeverity returns correct severity for known statuses', () => {
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    const cmp = fixture.componentInstance;
+    expect(cmp.billingSeverity('ACTIVE')).toBe('success');
+    expect(cmp.billingSeverity('TRIALING')).toBe('info');
+    expect(cmp.billingSeverity('PAST_DUE')).toBe('warn');
+    expect(cmp.billingSeverity('UNPAID')).toBe('danger');
+    expect(cmp.billingSeverity('CANCELED')).toBe('secondary');
+    expect(cmp.billingSeverity('NONE')).toBe('secondary');
+  });
+
+  it('openPortal calls getBillingPortalUrl and opens window', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.openPortal();
+    expect(mockApi.getBillingPortalUrl).toHaveBeenCalledWith(
+      'org-1',
+      window.location.href,
+    );
+    expect(openSpy).toHaveBeenCalledWith(
+      'https://billing.stripe.com/xxx',
+      '_blank',
+    );
+    expect(fixture.componentInstance.openingPortal()).toBe(false);
+    openSpy.mockRestore();
+  });
+
+  it('openPortal sets openingPortal = false on error', () => {
+    mockApi.getBillingPortalUrl.mockReturnValueOnce(
+      throwError(() => new Error('fail')),
+    );
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+
+    fixture.componentInstance.openPortal();
+    expect(fixture.componentInstance.openingPortal()).toBe(false);
   });
 });
