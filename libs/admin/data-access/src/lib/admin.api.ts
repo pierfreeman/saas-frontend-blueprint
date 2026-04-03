@@ -17,6 +17,7 @@ import type {
   ListOrganizationsQuery,
   ListMembersQuery,
   ListActivityQuery,
+  AdminProvisionOrgPayload,
 } from './admin.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -44,6 +45,15 @@ export class AdminApi {
   getOrganizationDetail(orgId: string): Observable<AdminOrganizationDetail> {
     return this.#http.get<AdminOrganizationDetail>(
       `${this.#base}/admin/organizations/${orgId}`,
+    );
+  }
+
+  provisionOrganization(
+    payload: AdminProvisionOrgPayload,
+  ): Observable<AdminOrganizationListItem> {
+    return this.#http.post<AdminOrganizationListItem>(
+      `${this.#base}/admin/organizations`,
+      payload,
     );
   }
 

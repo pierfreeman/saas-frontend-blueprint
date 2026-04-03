@@ -1,3 +1,14 @@
+// ── Provisioning ─────────────────────────────────────────────────────────────
+
+export const PLAN_TIERS = ['FREE', 'PRO', 'ENTERPRISE'] as const;
+export type PlanTier = (typeof PLAN_TIERS)[number];
+
+export interface AdminProvisionOrgPayload {
+  name: string;
+  ownerEmail: string;
+  plan?: PlanTier;
+}
+
 // ── Organization types ────────────────────────────────────────────────────────
 
 export type OrgStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED' | 'PENDING';

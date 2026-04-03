@@ -15,11 +15,16 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { PaginatorModule, PaginatorState } from 'primeng/paginator';
+import { DialogModule } from 'primeng/dialog';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import {
   AdminApi,
   AdminOrganizationListItem,
   OrgStatus,
   BillingStatus,
+  PLAN_TIERS,
+  PlanTier,
 } from '@saas-frontend/admin/data-access';
 
 type TagSeverity = 'success' | 'info' | 'secondary' | 'warn' | 'danger';
@@ -48,12 +53,17 @@ const STATUS_OPTIONS: { label: string; value: OrgStatus | null }[] = [
   { label: 'Deleted', value: 'DELETED' },
 ];
 
+const PLAN_OPTIONS: { label: string; value: PlanTier }[] = PLAN_TIERS.map(
+  (t) => ({ label: t, value: t }),
+);
+
 const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-admin-organizations',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [MessageService],
   imports: [
     FormsModule,
     DatePipe,
@@ -64,8 +74,11 @@ const PAGE_SIZE = 20;
     InputTextModule,
     SelectModule,
     PaginatorModule,
+    DialogModule,
+    ToastModule,
   ],
   template: `
+    <p-toast />
     <div class="flex flex-col gap-6">
       <!-- Header -->
       <div class="flex items-center justify-between">
@@ -75,6 +88,11 @@ const PAGE_SIZE = 20;
             {{ total() }} organizations total
           </p>
         </div>
+        <p-button
+          label="Provision Organization"
+          icon="pi pi-plus"
+          (onClick)="openProvisionDialog()"
+        />
       </div>
 
       <!-- Filters -->
@@ -200,14 +218,87 @@ const PAGE_SIZE = 20;
         }
       }
     </div>
+
+    <!-- Provision Organization Dialog -->
+    <p-dialog
+      header="Provision Organization"
+      [(visible)]="dialogVisible"
+      [modal]="true"
+      [style]="{ width: '28rem' }"
+      [draggable]="false"
+    >
+      <div class="flex flex-col gap-4 pt-2">
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700" for="org-name"
+            >Organization name *</label
+          >
+          <input
+            inputId="org-name"
+            pInputText
+            type="text"
+            placeholder="Acme Corp"
+            class="w-full"
+            [(ngModel)]="provisionForm.name"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700" for="owner-email"
+            >Owner email *</label
+          >
+          <input
+            inputId="owner-email"
+            pInputText
+            type="email"
+            placeholder="owner@acme.com"
+            class="w-full"
+            [(ngModel)]="provisionForm.ownerEmail"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-surface-700" for="plan-tier"
+            >Plan tier</label
+          >
+          <p-select
+            inputId="plan-tier"
+            [options]="planOptions"
+            [(ngModel)]="provisionForm.plan"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="FREE"
+            class="w-full"
+            appendTo="body"
+          />
+        </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          [text]="true"
+          (onClick)="dialogVisible = false"
+          [disabled]="saving()"
+        />
+        <p-button
+          label="Provision"
+          icon="pi pi-check"
+          [loading]="saving()"
+          [disabled]="
+            !provisionForm.name.trim() || !provisionForm.ownerEmail.trim()
+          "
+          (onClick)="submitProvision()"
+        />
+      </ng-template>
+    </p-dialog>
   `,
 })
 export class AdminOrganizationsComponent implements OnInit {
   readonly #api = inject(AdminApi);
   readonly #router = inject(Router);
+  readonly #toast = inject(MessageService);
 
   readonly PAGE_SIZE = PAGE_SIZE;
   readonly statusOptions = STATUS_OPTIONS;
+  readonly planOptions = PLAN_OPTIONS;
   readonly skeletons = Array(5);
 
   searchTerm = '';
@@ -217,6 +308,14 @@ export class AdminOrganizationsComponent implements OnInit {
   readonly total = signal(0);
   readonly offset = signal(0);
   readonly loading = signal(true);
+  readonly saving = signal(false);
+
+  dialogVisible = false;
+  provisionForm: { name: string; ownerEmail: string; plan: PlanTier } = {
+    name: '',
+    ownerEmail: '',
+    plan: 'FREE',
+  };
 
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -228,6 +327,46 @@ export class AdminOrganizationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  openProvisionDialog(): void {
+    this.provisionForm = { name: '', ownerEmail: '', plan: 'FREE' };
+    this.dialogVisible = true;
+  }
+
+  submitProvision(): void {
+    if (
+      !this.provisionForm.name.trim() ||
+      !this.provisionForm.ownerEmail.trim()
+    )
+      return;
+    this.saving.set(true);
+    this.#api
+      .provisionOrganization({
+        name: this.provisionForm.name.trim(),
+        ownerEmail: this.provisionForm.ownerEmail.trim(),
+        plan: this.provisionForm.plan,
+      })
+      .subscribe({
+        next: (org) => {
+          this.saving.set(false);
+          this.dialogVisible = false;
+          this.#toast.add({
+            severity: 'success',
+            summary: 'Organization provisioned',
+            detail: `"${org.name}" created and invite sent to ${this.provisionForm.ownerEmail}.`,
+          });
+          this.#router.navigate(['/admin/organizations', org.id]);
+        },
+        error: () => {
+          this.saving.set(false);
+          this.#toast.add({
+            severity: 'error',
+            summary: 'Provisioning failed',
+            detail: 'Could not create the organization. Please try again.',
+          });
+        },
+      });
   }
 
   onSearchChange(): void {

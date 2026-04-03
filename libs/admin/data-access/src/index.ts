@@ -1,5 +1,5 @@
 export { AdminApi } from './lib/admin.api';
-export { OVERRIDE_KEYS } from './lib/admin.api.types';
+export { OVERRIDE_KEYS, PLAN_TIERS } from './lib/admin.api.types';
 export type {
   AdminOrganizationListItem,
   AdminOrganizationDetail,
@@ -22,4 +22,6 @@ export type {
   OverrideKey,
   EntitlementOverride,
   SetFeatureFlagOverridePayload,
+  PlanTier,
+  AdminProvisionOrgPayload,
 } from './lib/admin.api.types';

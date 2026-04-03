@@ -14,6 +14,8 @@ import type {
   AdminOrganizationListItem,
   AdminOrganizationDetail,
   PaginatedAdminOrganizationsResult,
+  AdminProvisionOrgPayload,
+  PlanTier,
   AdminMemberItem,
   PaginatedAdminMembersResult,
   AdminBillingOverview,
@@ -21,6 +23,9 @@ import type {
   PaginatedAdminActivityResult,
   ActivityLogRecord,
   OrganizationEntitlements,
+  EntitlementOverride,
+  SetFeatureFlagOverridePayload,
+  OverrideKey,
   OrgStatus,
   BillingStatus,
   MembershipRole,
@@ -43,11 +48,18 @@ import type {
 | ----------------------- | ---------------------------------------------------------------------------------- | --------------------------------- |
 | `getOrganizations`      | `(query?: ListOrganizationsQuery) → Observable<PaginatedAdminOrganizationsResult>` | `GET /admin/organizations`        |
 | `getOrganizationDetail` | `(orgId: string) → Observable<AdminOrganizationDetail>`                            | `GET /admin/organizations/:orgId` |
+| `provisionOrganization` | `(payload: AdminProvisionOrgPayload) → Observable<AdminOrganizationListItem>`      | `POST /admin/organizations`       |
 
 `ListOrganizationsQuery`:
 
 ```ts
 { search?: string; status?: OrgStatus; limit?: number; offset?: number }
+```
+
+`AdminProvisionOrgPayload`:
+
+```ts
+{ name: string; ownerEmail: string; plan?: PlanTier } // PlanTier: 'FREE' | 'PRO' | 'ENTERPRISE'
 ```
 
 ### Memberships
@@ -81,10 +93,24 @@ import type {
 
 ### Entitlements
 
-| Method                   | Signature                                        | Backend endpoint                                           |
-| ------------------------ | ------------------------------------------------ | ---------------------------------------------------------- |
-| `getEntitlements`        | `(orgId) → Observable<OrganizationEntitlements>` | `GET /admin/organizations/:orgId/entitlements`             |
-| `invalidateEntitlements` | `(orgId) → Observable<void>`                     | `POST /admin/organizations/:orgId/entitlements/invalidate` |
+| Method                      | Signature                                                                           | Backend endpoint                                           |
+| --------------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `getEntitlements`           | `(orgId) → Observable<OrganizationEntitlements>`                                    | `GET /admin/organizations/:orgId/entitlements`             |
+| `invalidateEntitlements`    | `(orgId) → Observable<void>`                                                        | `POST /admin/organizations/:orgId/entitlements/invalidate` |
+| `listFeatureFlagOverrides`  | `(orgId) → Observable<EntitlementOverride[]>`                                       | `GET /admin/organizations/:orgId/entitlements/overrides`   |
+| `setFeatureFlagOverride`    | `(orgId, payload: SetFeatureFlagOverridePayload) → Observable<EntitlementOverride>` | `PATCH /admin/organizations/:orgId/feature-flags`          |
+| `deleteFeatureFlagOverride` | `(orgId, key: OverrideKey) → Observable<void>`                                      | `DELETE /admin/organizations/:orgId/feature-flags/:key`    |
+
+`SetFeatureFlagOverridePayload`:
+
+```ts
+{
+  key: OverrideKey;      // one of the OVERRIDE_KEYS constants
+  value: string;         // JSON-stringified value
+  reason?: string;
+  expiresAt?: string;    // ISO 8601 date string
+}
+```
 
 ---
 
