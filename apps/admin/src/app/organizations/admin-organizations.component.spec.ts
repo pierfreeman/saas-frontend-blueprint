@@ -260,7 +260,7 @@ describe('AdminOrganizationsComponent', () => {
     fixture.componentInstance.dialogVisible = true;
     fixture.detectChanges();
 
-    const mockEvent = { preventDefault: () => {}, stopPropagation: () => {} };
+    const mockEvent = { preventDefault: vi.fn(), stopPropagation: vi.fn() };
     // trigger all p-buttons in the dialog
     const allButtons = fixture.debugElement.queryAll(By.css('p-button'));
     allButtons.forEach((btn) => {

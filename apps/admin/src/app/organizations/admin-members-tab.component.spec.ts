@@ -312,7 +312,7 @@ describe('AdminMembersTabComponent', () => {
     fixture.componentInstance.inviteDialog = true;
     fixture.detectChanges();
 
-    const mockEvent = { preventDefault: () => {}, stopPropagation: () => {} };
+    const mockEvent = { preventDefault: vi.fn(), stopPropagation: vi.fn() };
     const allButtons = fixture.debugElement.queryAll(By.css('p-button'));
     // All p-buttons: [0] = main invite btn, others may be dialog footer btns
     allButtons.forEach((btn) => {
@@ -356,7 +356,7 @@ describe('AdminMembersTabComponent', () => {
     const confirmSvc = fixture.debugElement.injector.get(ConfirmationService);
     vi.spyOn(confirmSvc, 'confirm').mockReturnValue(confirmSvc);
 
-    const mockEvent = { preventDefault: () => {}, stopPropagation: () => {} };
+    const mockEvent = { preventDefault: vi.fn(), stopPropagation: vi.fn() };
     const allButtons = fixture.debugElement.queryAll(By.css('p-button'));
     // Trigger all p-buttons, guarding against errors
     allButtons.forEach((btn) => {

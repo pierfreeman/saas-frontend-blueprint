@@ -238,7 +238,7 @@ describe('AdminOrgDetailComponent', () => {
     const router = TestBed.inject(Router);
     vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
-    const mockEvent = { preventDefault: () => {}, stopPropagation: () => {} };
+    const mockEvent = { preventDefault: vi.fn(), stopPropagation: vi.fn() };
     const allButtons = fixture.debugElement.queryAll(By.css('p-button'));
     allButtons.forEach((btn) => {
       try {
