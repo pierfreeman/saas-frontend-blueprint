@@ -13,6 +13,8 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { ButtonModule } from 'primeng/button';
 import { TabsModule } from 'primeng/tabs';
 import { MessageModule } from 'primeng/message';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 import {
   AdminApi,
   AdminOrganizationDetail,
@@ -54,12 +56,17 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
     ButtonModule,
     TabsModule,
     MessageModule,
+    ConfirmDialogModule,
     AdminMembersTabComponent,
     AdminBillingTabComponent,
     AdminActivityTabComponent,
     AdminEntitlementsTabComponent,
   ],
+  providers: [ConfirmationService],
   template: `
+    <!-- Confirm dialogs -->
+    <p-confirmDialog />
+
     <!-- Back button -->
     <div class="mb-4">
       <p-button
@@ -120,12 +127,35 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
               }
             </div>
           </div>
-          <div class="flex flex-col items-end gap-1 text-sm text-surface-500">
-            <span>
-              <span class="pi pi-users mr-1"></span>
-              {{ org()!.membersCount }} members
-            </span>
-            <span> Created {{ org()!.createdAt | date: 'mediumDate' }} </span>
+          <div class="flex flex-col items-end gap-2">
+            <div class="flex flex-col items-end gap-1 text-sm text-surface-500">
+              <span>
+                <span class="pi pi-users mr-1"></span>
+                {{ org()!.membersCount }} members
+              </span>
+              <span> Created {{ org()!.createdAt | date: 'mediumDate' }} </span>
+            </div>
+            <!-- Status action buttons -->
+            @if (org()!.status === 'ACTIVE') {
+              <p-button
+                label="Suspend"
+                icon="pi pi-ban"
+                severity="warn"
+                [outlined]="true"
+                [loading]="statusLoading()"
+                (onClick)="confirmSuspend()"
+              />
+            }
+            @if (org()!.status === 'SUSPENDED') {
+              <p-button
+                label="Reactivate"
+                icon="pi pi-check-circle"
+                severity="success"
+                [outlined]="true"
+                [loading]="statusLoading()"
+                (onClick)="confirmReactivate()"
+              />
+            }
           </div>
         </div>
       </p-card>
@@ -169,10 +199,12 @@ export class AdminOrgDetailComponent implements OnInit {
   readonly #api = inject(AdminApi);
   readonly #router = inject(Router);
   readonly #route = inject(ActivatedRoute);
+  readonly #confirm = inject(ConfirmationService);
 
   readonly org = signal<AdminOrganizationDetail | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly statusLoading = signal(false);
   orgId = '';
 
   readonly orgStatusSeverity = (status: OrgStatus): TagSeverity =>
@@ -191,6 +223,44 @@ export class AdminOrgDetailComponent implements OnInit {
       error: () => {
         this.error.set('Failed to load organization.');
         this.loading.set(false);
+      },
+    });
+  }
+
+  confirmSuspend(): void {
+    this.#confirm.confirm({
+      header: 'Suspend organization',
+      message: `Suspend "${this.org()?.name}"? All members will immediately lose access.`,
+      acceptLabel: 'Suspend',
+      rejectLabel: 'Cancel',
+      acceptButtonStyleClass: 'p-button-warn',
+      accept: () => this.changeStatus('SUSPENDED'),
+    });
+  }
+
+  confirmReactivate(): void {
+    this.#confirm.confirm({
+      header: 'Reactivate organization',
+      message: `Reactivate "${this.org()?.name}"? Members will regain access immediately.`,
+      acceptLabel: 'Reactivate',
+      rejectLabel: 'Cancel',
+      acceptButtonStyleClass: 'p-button-success',
+      accept: () => this.changeStatus('ACTIVE'),
+    });
+  }
+
+  private changeStatus(status: OrgStatus): void {
+    this.statusLoading.set(true);
+    this.#api.setOrgStatus(this.orgId, { status }).subscribe({
+      next: (updated) => {
+        this.org.update((prev) =>
+          prev ? { ...prev, status: updated.status } : prev,
+        );
+        this.statusLoading.set(false);
+      },
+      error: () => {
+        this.error.set('Failed to update organization status.');
+        this.statusLoading.set(false);
       },
     });
   }

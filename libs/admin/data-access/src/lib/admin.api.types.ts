@@ -9,6 +9,11 @@ export interface AdminProvisionOrgPayload {
   plan?: PlanTier;
 }
 
+export interface AdminSetOrgStatusPayload {
+  status: OrgStatus;
+  reason?: string;
+}
+
 // ── Organization types ────────────────────────────────────────────────────────
 
 export type OrgStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED' | 'PENDING';

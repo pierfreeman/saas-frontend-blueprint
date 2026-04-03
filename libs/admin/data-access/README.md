@@ -44,11 +44,12 @@ import type {
 
 ### Organizations
 
-| Method                  | Signature                                                                          | Backend endpoint                  |
-| ----------------------- | ---------------------------------------------------------------------------------- | --------------------------------- |
-| `getOrganizations`      | `(query?: ListOrganizationsQuery) → Observable<PaginatedAdminOrganizationsResult>` | `GET /admin/organizations`        |
-| `getOrganizationDetail` | `(orgId: string) → Observable<AdminOrganizationDetail>`                            | `GET /admin/organizations/:orgId` |
-| `provisionOrganization` | `(payload: AdminProvisionOrgPayload) → Observable<AdminOrganizationListItem>`      | `POST /admin/organizations`       |
+| Method                  | Signature                                                                                    | Backend endpoint                           |
+| ----------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `getOrganizations`      | `(query?: ListOrganizationsQuery) → Observable<PaginatedAdminOrganizationsResult>`           | `GET /admin/organizations`                 |
+| `getOrganizationDetail` | `(orgId: string) → Observable<AdminOrganizationDetail>`                                      | `GET /admin/organizations/:orgId`          |
+| `provisionOrganization` | `(payload: AdminProvisionOrgPayload) → Observable<AdminOrganizationListItem>`                | `POST /admin/organizations`                |
+| `setOrgStatus`          | `(orgId: string, payload: AdminSetOrgStatusPayload) → Observable<AdminOrganizationListItem>` | `PATCH /admin/organizations/:orgId/status` |
 
 `ListOrganizationsQuery`:
 
@@ -61,6 +62,14 @@ import type {
 ```ts
 { name: string; ownerEmail: string; plan?: PlanTier } // PlanTier: 'FREE' | 'PRO' | 'ENTERPRISE'
 ```
+
+`AdminSetOrgStatusPayload`:
+
+```ts
+{ status: OrgStatus; reason?: string }
+```
+
+Used to suspend (`SUSPENDED`) or reactivate (`ACTIVE`) an organization. When the tenant API receives a `403` with `message: 'Organization is suspended'`, the `errorInterceptor` automatically clears the active org and redirects to `/org/select`.
 
 ### Memberships
 

@@ -24,4 +24,5 @@ export type {
   SetFeatureFlagOverridePayload,
   PlanTier,
   AdminProvisionOrgPayload,
+  AdminSetOrgStatusPayload,
 } from './lib/admin.api.types';

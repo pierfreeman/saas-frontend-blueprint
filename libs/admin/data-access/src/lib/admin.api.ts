@@ -18,6 +18,7 @@ import type {
   ListMembersQuery,
   ListActivityQuery,
   AdminProvisionOrgPayload,
+  AdminSetOrgStatusPayload,
 } from './admin.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -53,6 +54,16 @@ export class AdminApi {
   ): Observable<AdminOrganizationListItem> {
     return this.#http.post<AdminOrganizationListItem>(
       `${this.#base}/admin/organizations`,
+      payload,
+    );
+  }
+
+  setOrgStatus(
+    orgId: string,
+    payload: AdminSetOrgStatusPayload,
+  ): Observable<AdminOrganizationListItem> {
+    return this.#http.patch<AdminOrganizationListItem>(
+      `${this.#base}/admin/organizations/${orgId}/status`,
       payload,
     );
   }

@@ -159,4 +159,24 @@ describe('AdminApi', () => {
     expect(req.request.method).toBe('POST');
     req.flush(null);
   });
+
+  // ── Org status ────────────────────────────────────────────────────────────
+
+  it('PATCH /admin/organizations/:orgId/status with status and reason', () => {
+    api
+      .setOrgStatus('org-1', {
+        status: 'SUSPENDED',
+        reason: 'Policy violation',
+      })
+      .subscribe();
+    const req = httpMock.expectOne(
+      'http://test/admin/organizations/org-1/status',
+    );
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({
+      status: 'SUSPENDED',
+      reason: 'Policy violation',
+    });
+    req.flush({ id: 'org-1', status: 'SUSPENDED' });
+  });
 });

@@ -76,7 +76,7 @@ describe('errorInterceptor', () => {
   });
 
   describe('non-401 HTTP errors', () => {
-    it('shows "Access denied" toast for 403', () => {
+    it('shows "Access denied" toast for generic 403', () => {
       triggerError(403);
       expect(messageService.add).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -84,6 +84,35 @@ describe('errorInterceptor', () => {
           summary: 'Access denied',
         }),
       );
+    });
+
+    describe('403 Organization is suspended', () => {
+      it('clears active org', () => {
+        triggerError(403, { message: 'Organization is suspended' });
+        expect(orgsStore.clearActiveOrg).toHaveBeenCalled();
+      });
+
+      it('redirects to /org/select', () => {
+        triggerError(403, { message: 'Organization is suspended' });
+        expect(router.navigateByUrl).toHaveBeenCalledWith('/org/select');
+      });
+
+      it('shows a warn toast with org-suspended message', () => {
+        triggerError(403, { message: 'Organization is suspended' });
+        expect(messageService.add).toHaveBeenCalledWith(
+          expect.objectContaining({
+            severity: 'warn',
+            summary: 'Organization suspended',
+          }),
+        );
+      });
+
+      it('does NOT show generic "Access denied" toast', () => {
+        triggerError(403, { message: 'Organization is suspended' });
+        expect(messageService.add).not.toHaveBeenCalledWith(
+          expect.objectContaining({ summary: 'Access denied' }),
+        );
+      });
     });
 
     it('shows "Not found" toast for 404', () => {
