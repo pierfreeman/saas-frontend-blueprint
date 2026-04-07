@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { of, throwError } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AdminOrganizationsComponent } from './admin-organizations.component';
 import {
@@ -274,5 +274,41 @@ describe('AdminOrganizationsComponent', () => {
     // Trigger dialog visibleChange
     const dialog = fixture.debugElement.query(By.css('p-dialog'));
     dialog?.triggerEventHandler('visibleChange', false);
+  });
+
+  it('onSearchChange clears pending timeout when called twice', () => {
+    const fixture = TestBed.createComponent(AdminOrganizationsComponent);
+    fixture.detectChanges();
+    mockApi.getOrganizations.mockClear();
+
+    const cmp = fixture.componentInstance;
+    cmp.searchTerm = 'Acme';
+    cmp.onSearchChange(); // first call — sets a timeout
+    cmp.searchTerm = 'Acme Corp';
+    cmp.onSearchChange(); // second call — clears previous timeout and sets a new one
+
+    expect(mockApi.getOrganizations).not.toHaveBeenCalled();
+    vi.runAllTimers();
+    expect(mockApi.getOrganizations).toHaveBeenCalledOnce();
+    expect(mockApi.getOrganizations).toHaveBeenCalledWith(
+      expect.objectContaining({ search: 'Acme Corp', offset: 0 }),
+    );
+  });
+
+  it('renders org list and paginator after double detectChanges', () => {
+    mockApi.getOrganizations.mockReturnValue(
+      of({ items: [mockOrg], total: 25, limit: 20, offset: 0 }),
+    );
+    const fixture = TestBed.createComponent(AdminOrganizationsComponent);
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.total()).toBe(25);
+  });
+
+  it('renders loading skeleton when API is pending', () => {
+    mockApi.getOrganizations.mockReturnValue(NEVER);
+    const fixture = TestBed.createComponent(AdminOrganizationsComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loading()).toBe(true);
   });
 });

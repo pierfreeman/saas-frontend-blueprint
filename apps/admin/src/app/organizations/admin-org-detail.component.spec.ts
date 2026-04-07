@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { of, throwError } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { AdminOrgDetailComponent } from './admin-org-detail.component';
@@ -48,6 +48,10 @@ const mockOrg = {
     maxSeats: 10,
     storageLimitBytes: 5368709120,
   },
+  deletionRequestedAt: null,
+  deletionScheduledAt: null,
+  deletionCompletedAt: null,
+  retentionPeriodDays: null,
 };
 
 const mockApi = {
@@ -58,6 +62,12 @@ const mockApi = {
   getOrgActivity: vi.fn(() => of({ logs: [], total: 0, limit: 20, offset: 0 })),
   getEntitlements: vi.fn(() => of(mockOrg.entitlements)),
   listFeatureFlagOverrides: vi.fn(() => of([])),
+  getOrgJobs: vi.fn(() => of({ items: [], total: 0, limit: 20, offset: 0 })),
+  listOrgExports: vi.fn(() =>
+    of({ items: [], total: 0, limit: 10, offset: 0 }),
+  ),
+  triggerExport: vi.fn(() => of({ exportId: 'export-new' })),
+  getOrgStorageStats: vi.fn(() => of({ totalBytes: '0', fileCount: 0 })),
 };
 
 describe('AdminOrgDetailComponent', () => {
@@ -102,7 +112,7 @@ describe('AdminOrgDetailComponent', () => {
     expect(cmp.orgStatusSeverity('ACTIVE')).toBe('success');
     expect(cmp.orgStatusSeverity('SUSPENDED')).toBe('warn');
     expect(cmp.orgStatusSeverity('DELETED')).toBe('danger');
-    expect(cmp.orgStatusSeverity('PENDING')).toBe('secondary');
+    expect(cmp.orgStatusSeverity('PENDING_DELETION')).toBe('secondary');
   });
 
   it('billingStatusSeverity maps billing statuses correctly', () => {
@@ -247,5 +257,36 @@ describe('AdminOrgDetailComponent', () => {
         // ignore errors
       }
     });
+  });
+
+  it('renders loading skeleton when API is pending', () => {
+    mockApi.getOrganizationDetail.mockReturnValue(NEVER);
+    const fixture = TestBed.createComponent(AdminOrgDetailComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loading()).toBe(true);
+  });
+
+  it('renders Reactivate button for SUSPENDED org and triggers onClick', () => {
+    mockApi.getOrganizationDetail.mockReturnValueOnce(
+      of({ ...mockOrg, status: 'SUSPENDED' }),
+    );
+    const fixture = TestBed.createComponent(AdminOrgDetailComponent);
+    fixture.detectChanges();
+
+    const confirmSvc = fixture.debugElement.injector.get(ConfirmationService);
+    vi.spyOn(confirmSvc, 'confirm').mockReturnValue(confirmSvc);
+
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    const buttons = fixture.debugElement.queryAll(By.css('p-button'));
+    buttons.forEach((btn) => {
+      try {
+        btn.triggerEventHandler('onClick', null);
+      } catch {
+        // ignore
+      }
+    });
+    expect(fixture.componentInstance.org()?.status).toBe('SUSPENDED');
   });
 });

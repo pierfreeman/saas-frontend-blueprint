@@ -272,4 +272,101 @@ describe('AdminApi', () => {
     });
     req.flush({ id: 'org-1', status: 'SUSPENDED' });
   });
+
+  // ── Jobs ──────────────────────────────────────────────────────────────────
+
+  it('GET /admin/organizations/:orgId/jobs with no filters', () => {
+    api.getOrgJobs('org-1').subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/jobs'),
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.has('status')).toBe(false);
+    req.flush({ items: [], total: 0, limit: 20, offset: 0 });
+  });
+
+  it('GET /admin/organizations/:orgId/jobs with status and type filters', () => {
+    api
+      .getOrgJobs('org-1', {
+        status: 'FAILED',
+        type: 'ORG_EXPORT',
+        limit: 10,
+        offset: 0,
+      })
+      .subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/jobs'),
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('status')).toBe('FAILED');
+    expect(req.request.params.get('type')).toBe('ORG_EXPORT');
+    expect(req.request.params.get('limit')).toBe('10');
+    req.flush({ items: [], total: 0, limit: 10, offset: 0 });
+  });
+
+  // ── Billing plan & trial ──────────────────────────────────────────────────
+
+  it('PATCH /admin/organizations/:orgId/billing/plan calls changePlan', () => {
+    api.changePlan('org-1', { priceId: 'price_pro' }).subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/billing/plan'),
+    );
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ priceId: 'price_pro' });
+    req.flush(null);
+  });
+
+  it('PATCH /admin/organizations/:orgId/billing/trial calls extendTrial', () => {
+    api
+      .extendTrial('org-1', { trialEnd: '2025-12-31T23:59:59.000Z' })
+      .subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/billing/trial'),
+    );
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ trialEnd: '2025-12-31T23:59:59.000Z' });
+    req.flush(null);
+  });
+
+  // ── Exports ────────────────────────────────────────────────────────────────
+
+  it('POST /admin/organizations/:orgId/exports triggers export', () => {
+    api.triggerExport('org-1').subscribe();
+    const req = httpMock.expectOne(
+      (r) => r.url === 'http://test/admin/organizations/org-1/exports',
+    );
+    expect(req.request.method).toBe('POST');
+    req.flush({ exportId: 'export-1' });
+  });
+
+  it('GET /admin/organizations/:orgId/exports with pagination', () => {
+    api.listOrgExports('org-1', { limit: 10, offset: 20 }).subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/exports'),
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('limit')).toBe('10');
+    expect(req.request.params.get('offset')).toBe('20');
+    req.flush({ items: [], total: 0, limit: 10, offset: 20 });
+  });
+
+  it('GET /admin/organizations/:orgId/exports/:exportId fetches single export', () => {
+    api.getExport('org-1', 'export-abc').subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/exports/export-abc'),
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush({ exportId: 'export-abc', status: 'COMPLETED' });
+  });
+
+  // ── Storage ────────────────────────────────────────────────────────────────
+
+  it('GET /admin/organizations/:orgId/storage fetches storage stats', () => {
+    api.getOrgStorageStats('org-1').subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/storage'),
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush({ totalBytes: '1024', fileCount: 5 });
+  });
 });

@@ -9,6 +9,8 @@ import type {
   PaginatedAdminMembersResult,
   AdminBillingOverview,
   AdminBillingPortalResponse,
+  AdminChangePlanPayload,
+  AdminExtendTrialPayload,
   PaginatedAdminActivityResult,
   OrganizationEntitlements,
   EntitlementOverride,
@@ -19,6 +21,12 @@ import type {
   ListActivityQuery,
   AdminProvisionOrgPayload,
   AdminSetOrgStatusPayload,
+  PaginatedAdminJobsResult,
+  ListJobsQuery,
+  AdminExportItem,
+  PaginatedAdminExportsResult,
+  ListExportsQuery,
+  AdminStorageStats,
 } from './admin.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -130,6 +138,23 @@ export class AdminApi {
     );
   }
 
+  changePlan(orgId: string, payload: AdminChangePlanPayload): Observable<void> {
+    return this.#http.patch<void>(
+      `${this.#base}/admin/organizations/${orgId}/billing/plan`,
+      payload,
+    );
+  }
+
+  extendTrial(
+    orgId: string,
+    payload: AdminExtendTrialPayload,
+  ): Observable<void> {
+    return this.#http.patch<void>(
+      `${this.#base}/admin/organizations/${orgId}/billing/trial`,
+      payload,
+    );
+  }
+
   // ── Activity log ────────────────────────────────────────────────────────────
 
   getOrgActivity(
@@ -200,6 +225,61 @@ export class AdminApi {
   deleteFeatureFlagOverride(orgId: string, key: string): Observable<void> {
     return this.#http.delete<void>(
       `${this.#base}/admin/organizations/${orgId}/feature-flags/${key}`,
+    );
+  }
+
+  // ── Jobs ────────────────────────────────────────────────────────────────────
+
+  getOrgJobs(
+    orgId: string,
+    query: ListJobsQuery = {},
+  ): Observable<PaginatedAdminJobsResult> {
+    let params = new HttpParams();
+    if (query.limit != null) params = params.set('limit', String(query.limit));
+    if (query.offset != null)
+      params = params.set('offset', String(query.offset));
+    if (query.status) params = params.set('status', query.status);
+    if (query.type) params = params.set('type', query.type);
+    return this.#http.get<PaginatedAdminJobsResult>(
+      `${this.#base}/admin/organizations/${orgId}/jobs`,
+      { params },
+    );
+  }
+
+  // ── Exports ────────────────────────────────────────────────────────────────
+
+  triggerExport(orgId: string): Observable<{ exportId: string }> {
+    return this.#http.post<{ exportId: string }>(
+      `${this.#base}/admin/organizations/${orgId}/exports`,
+      {},
+    );
+  }
+
+  listOrgExports(
+    orgId: string,
+    query: ListExportsQuery = {},
+  ): Observable<PaginatedAdminExportsResult> {
+    let params = new HttpParams();
+    if (query.limit != null) params = params.set('limit', String(query.limit));
+    if (query.offset != null)
+      params = params.set('offset', String(query.offset));
+    return this.#http.get<PaginatedAdminExportsResult>(
+      `${this.#base}/admin/organizations/${orgId}/exports`,
+      { params },
+    );
+  }
+
+  getExport(orgId: string, exportId: string): Observable<AdminExportItem> {
+    return this.#http.get<AdminExportItem>(
+      `${this.#base}/admin/organizations/${orgId}/exports/${exportId}`,
+    );
+  }
+
+  // ── Storage ──────────────────────────────────────────────────────────
+
+  getOrgStorageStats(orgId: string): Observable<AdminStorageStats> {
+    return this.#http.get<AdminStorageStats>(
+      `${this.#base}/admin/organizations/${orgId}/storage`,
     );
   }
 }

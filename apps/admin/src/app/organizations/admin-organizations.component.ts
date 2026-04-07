@@ -33,7 +33,7 @@ const ORG_STATUS_SEVERITY: Record<OrgStatus, TagSeverity> = {
   ACTIVE: 'success',
   SUSPENDED: 'warn',
   DELETED: 'danger',
-  PENDING: 'secondary',
+  PENDING_DELETION: 'secondary',
 };
 
 const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
@@ -49,7 +49,7 @@ const STATUS_OPTIONS: { label: string; value: OrgStatus | null }[] = [
   { label: 'All', value: null },
   { label: 'Active', value: 'ACTIVE' },
   { label: 'Suspended', value: 'SUSPENDED' },
-  { label: 'Pending', value: 'PENDING' },
+  { label: 'Pending Deletion', value: 'PENDING_DELETION' },
   { label: 'Deleted', value: 'DELETED' },
 ];
 

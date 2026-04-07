@@ -16,7 +16,7 @@ export interface AdminSetOrgStatusPayload {
 
 // ── Organization types ────────────────────────────────────────────────────────
 
-export type OrgStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED' | 'PENDING';
+export type OrgStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED' | 'PENDING_DELETION';
 export type BillingStatus =
   | 'ACTIVE'
   | 'PAST_DUE'
@@ -76,6 +76,11 @@ export interface AdminOrganizationDetail extends AdminOrganizationListItem {
   cancelAtPeriodEnd: boolean;
   recentActivity: ActivityLogRecord[];
   entitlements: OrganizationEntitlements;
+  // ── Deletion fields ────────────────────────────────────────────────────
+  deletionRequestedAt: string | null;
+  deletionScheduledAt: string | null;
+  deletionCompletedAt: string | null;
+  retentionPeriodDays: number | null;
 }
 
 // ── Membership types ──────────────────────────────────────────────────────────
@@ -121,6 +126,15 @@ export interface AdminBillingOverview {
 
 export interface AdminBillingPortalResponse {
   url: string;
+}
+
+export interface AdminChangePlanPayload {
+  priceId: string;
+  reason?: string;
+}
+
+export interface AdminExtendTrialPayload {
+  trialEnd: string; // ISO 8601
 }
 
 // ── Activity log types ────────────────────────────────────────────────────────
@@ -187,4 +201,77 @@ export interface SetFeatureFlagOverridePayload {
   value: boolean | number;
   reason: string;
   expiresAt?: string;
+}
+
+// ── Jobs types ────────────────────────────────────────────────────────────────
+
+export type JobStatus = 'PENDING' | 'PROCESSING' | 'DONE' | 'FAILED';
+
+export interface AdminJobItem {
+  id: string;
+  orgId: string;
+  userId: string | null;
+  type: string;
+  status: JobStatus;
+  payload: Record<string, unknown>;
+  result: Record<string, unknown> | null;
+  error: string | null;
+  attempts: number;
+  startedAt: string | null;
+  finishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedAdminJobsResult {
+  items: AdminJobItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface ListJobsQuery {
+  limit?: number;
+  offset?: number;
+  status?: JobStatus;
+  type?: string;
+}
+
+// ── Exports types ────────────────────────────────────────────────────────────────
+
+export type ExportStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export interface AdminExportItem {
+  id: string;
+  orgId: string;
+  jobId: string;
+  requestedByUserId: string;
+  status: ExportStatus;
+  fileUrl: string | null;
+  fileSize: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  failedAt: string | null;
+  error: string | null;
+}
+
+export interface PaginatedAdminExportsResult {
+  items: AdminExportItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface ListExportsQuery {
+  limit?: number;
+  offset?: number;
+}
+
+// ── Storage types ────────────────────────────────────────────────
+
+export interface AdminStorageStats {
+  /** Total bytes used by confirmed files (serialized from server-side BigInt). */
+  totalBytes: string;
+  fileCount: number;
 }

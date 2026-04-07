@@ -42,7 +42,7 @@ Designed to pair with [saas-backend-blueprint](../saas-backend-blueprint).
 - 🧩 **Module Federation** — each MFE is independently built and deployable; the shell composes them at runtime
 - 🔒 **Route guards** — `authGuard` (Auth0 session) + `orgGuard` (active org required before accessing platform routes)
 - 📅 **Planning / Calendar** — FullCalendar with month/week/day views, recurring events (RRULE builder), drag-and-drop rescheduling, RSVP, live conflict checking, per-occurrence exceptions, This-and-Following series splitting, IANA timezone selector, event reminder presets
-- 🛠️ **Admin backoffice portal** — super-admin area (protected by `isSystemAdmin` flag) with org list, org detail, member management, billing overview with Stripe portal access, per-org and cross-tenant activity log, per-org entitlement override management (set / delete with reason, expiry date, and `createdByName` column), entitlement cache invalidation
+- 🛠️ **Admin backoffice portal** — super-admin area (protected by `isSystemAdmin` flag) with org list, org detail, member management, billing overview (Change Plan dialog, Extend Trial dialog — TRIALING only, Stripe portal), per-org and cross-tenant activity log, per-org entitlement override management (set / delete with reason, expiry date, and `createdByName` column), entitlement cache invalidation, Set Storage Quota dialog (GB input → `storageLimitBytes` entitlement override)
 
 ---
 
@@ -53,7 +53,7 @@ apps/
   shell/          — Host app (port 4200): routing, layout, guards, global providers
   auth/           — Auth MFE (port 4201): login page, Auth0 callback handler
   platform/       — Platform MFE (port 4202): dashboard, members, settings, billing
-  admin/          — Admin MFE (port 4203): super-admin backoffice portal (org inspection, members, billing, activity log, entitlement override management)
+  admin/          — Admin MFE (port 4203): super-admin backoffice portal (org inspection, members, billing with plan change + trial extension, activity log, entitlement overrides, storage quota)
 
 libs/
   admin/
