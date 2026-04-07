@@ -222,3 +222,34 @@ export interface ListJobsQuery {
   status?: JobStatus;
   type?: string;
 }
+
+// ── Exports types ────────────────────────────────────────────────────────────────
+
+export type ExportStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+export interface AdminExportItem {
+  id: string;
+  orgId: string;
+  jobId: string;
+  requestedByUserId: string;
+  status: ExportStatus;
+  fileUrl: string | null;
+  fileSize: string | null;
+  expiresAt: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  failedAt: string | null;
+  error: string | null;
+}
+
+export interface PaginatedAdminExportsResult {
+  items: AdminExportItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface ListExportsQuery {
+  limit?: number;
+  offset?: number;
+}

@@ -29,4 +29,8 @@ export type {
   AdminJobItem,
   PaginatedAdminJobsResult,
   ListJobsQuery,
+  ExportStatus,
+  AdminExportItem,
+  PaginatedAdminExportsResult,
+  ListExportsQuery,
 } from './lib/admin.api.types';

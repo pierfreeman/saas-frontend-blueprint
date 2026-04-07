@@ -21,6 +21,9 @@ import type {
   AdminSetOrgStatusPayload,
   PaginatedAdminJobsResult,
   ListJobsQuery,
+  AdminExportItem,
+  PaginatedAdminExportsResult,
+  ListExportsQuery,
 } from './admin.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -220,6 +223,35 @@ export class AdminApi {
     return this.#http.get<PaginatedAdminJobsResult>(
       `${this.#base}/admin/organizations/${orgId}/jobs`,
       { params },
+    );
+  }
+
+  // ── Exports ────────────────────────────────────────────────────────────────
+
+  triggerExport(orgId: string): Observable<{ exportId: string }> {
+    return this.#http.post<{ exportId: string }>(
+      `${this.#base}/admin/organizations/${orgId}/exports`,
+      {},
+    );
+  }
+
+  listOrgExports(
+    orgId: string,
+    query: ListExportsQuery = {},
+  ): Observable<PaginatedAdminExportsResult> {
+    let params = new HttpParams();
+    if (query.limit != null) params = params.set('limit', String(query.limit));
+    if (query.offset != null)
+      params = params.set('offset', String(query.offset));
+    return this.#http.get<PaginatedAdminExportsResult>(
+      `${this.#base}/admin/organizations/${orgId}/exports`,
+      { params },
+    );
+  }
+
+  getExport(orgId: string, exportId: string): Observable<AdminExportItem> {
+    return this.#http.get<AdminExportItem>(
+      `${this.#base}/admin/organizations/${orgId}/exports/${exportId}`,
     );
   }
 }
