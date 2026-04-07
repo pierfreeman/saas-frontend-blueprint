@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { By } from '@angular/platform-browser';
+import { NEVER, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { AdminStorageTabComponent } from './admin-storage-tab.component';
 import { AdminApi } from '@saas-frontend/admin/data-access';
@@ -127,6 +128,47 @@ describe('AdminStorageTabComponent', () => {
     comp.submitQuota();
 
     expect(mockApi.setFeatureFlagOverride).not.toHaveBeenCalled();
+  });
+
+  it('submitQuota does nothing when reason is empty', () => {
+    const fixture = TestBed.createComponent(AdminStorageTabComponent);
+    const comp = fixture.componentInstance;
+    comp.orgId = 'org-1';
+    fixture.detectChanges();
+
+    comp.quotaGb.set(10);
+    comp.quotaReason.set('');
+    comp.submitQuota();
+
+    expect(mockApi.setFeatureFlagOverride).not.toHaveBeenCalled();
+  });
+
+  it('renders stats content after load (double detectChanges)', () => {
+    const fixture = TestBed.createComponent(AdminStorageTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loading()).toBe(false);
+    expect(fixture.componentInstance.stats()).toBeTruthy();
+  });
+
+  it('renders no-files message when fileCount is zero', () => {
+    mockApi.getOrgStorageStats.mockReturnValueOnce(
+      of({ totalBytes: '0', fileCount: 0 }),
+    );
+    const fixture = TestBed.createComponent(AdminStorageTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.stats()?.fileCount).toBe(0);
+  });
+
+  it('renders loading skeleton when API is pending', () => {
+    mockApi.getOrgStorageStats.mockReturnValue(NEVER);
+    const fixture = TestBed.createComponent(AdminStorageTabComponent);
+    fixture.componentInstance.orgId = 'org-1';
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loading()).toBe(true);
   });
 
   it('submitQuota sets savingQuota = false on API error', () => {

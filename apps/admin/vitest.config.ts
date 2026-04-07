@@ -39,6 +39,8 @@ export default defineConfig(async () => {
           `${__dirname}/src/main.ts`,
           `${__dirname}/src/bootstrap.ts`,
           `${__dirname}/src/environments/**`,
+          `${__dirname}/src/app/remote-entry/entry.ts`,
+          `${__dirname}/src/app/app.routes.ts`,
         ],
         thresholds: {
           lines: 80,

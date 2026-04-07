@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { of, throwError } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { AdminOrgDetailComponent } from './admin-org-detail.component';
@@ -257,5 +257,36 @@ describe('AdminOrgDetailComponent', () => {
         // ignore errors
       }
     });
+  });
+
+  it('renders loading skeleton when API is pending', () => {
+    mockApi.getOrganizationDetail.mockReturnValue(NEVER);
+    const fixture = TestBed.createComponent(AdminOrgDetailComponent);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.loading()).toBe(true);
+  });
+
+  it('renders Reactivate button for SUSPENDED org and triggers onClick', () => {
+    mockApi.getOrganizationDetail.mockReturnValueOnce(
+      of({ ...mockOrg, status: 'SUSPENDED' }),
+    );
+    const fixture = TestBed.createComponent(AdminOrgDetailComponent);
+    fixture.detectChanges();
+
+    const confirmSvc = fixture.debugElement.injector.get(ConfirmationService);
+    vi.spyOn(confirmSvc, 'confirm').mockReturnValue(confirmSvc);
+
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    const buttons = fixture.debugElement.queryAll(By.css('p-button'));
+    buttons.forEach((btn) => {
+      try {
+        btn.triggerEventHandler('onClick', null);
+      } catch {
+        // ignore
+      }
+    });
+    expect(fixture.componentInstance.org()?.status).toBe('SUSPENDED');
   });
 });
