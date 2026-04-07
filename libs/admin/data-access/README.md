@@ -33,6 +33,7 @@ import type {
   ListOrganizationsQuery,
   ListMembersQuery,
   ListActivityQuery,
+  AdminStorageStats,
 } from '@saas-frontend/admin/data-access';
 ```
 
@@ -165,6 +166,23 @@ Used to suspend (`SUSPENDED`) or reactivate (`ACTIVE`) an organization. When the
   error: string | null;
 }
 ```
+
+### Storage
+
+| Method               | Signature                                 | Backend endpoint                          |
+| -------------------- | ----------------------------------------- | ----------------------------------------- |
+| `getOrgStorageStats` | `(orgId) → Observable<AdminStorageStats>` | `GET /admin/organizations/:orgId/storage` |
+
+`AdminStorageStats`:
+
+```ts
+{
+  totalBytes: string; // bytes as string (BigInt serialized server-side)
+  fileCount: number;
+}
+```
+
+`totalBytes` counts only files with `status = COMPLETED`.
 
 ---
 
