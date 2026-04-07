@@ -602,7 +602,7 @@ export class ActivityLogComponent implements OnInit {
 
   #buildCsv(logs: ActivityLogRecord[]): string {
     const esc = (v: string | null | undefined): string => {
-      const s = v == null ? '' : v;
+      const s = v ?? '';
       return `"${s.replaceAll('"', '""')}"`;
     };
     const header = [

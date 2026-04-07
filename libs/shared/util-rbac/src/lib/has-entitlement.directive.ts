@@ -54,12 +54,14 @@ export class HasEntitlementDirective {
 
     const e = this.#store.entitlements();
     const raw = e?.[this.#key];
-    const granted =
-      typeof raw === 'boolean'
-        ? raw
-        : typeof raw === 'number'
-          ? raw > 0
-          : false;
+    let granted: boolean;
+    if (typeof raw === 'boolean') {
+      granted = raw;
+    } else if (typeof raw === 'number') {
+      granted = raw > 0;
+    } else {
+      granted = false;
+    }
 
     if (granted && !this.#rendered) {
       this.#vcr.createEmbeddedView(this.#tpl);

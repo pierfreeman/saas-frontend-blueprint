@@ -374,8 +374,8 @@ export class AdminEntitlementsTabComponent implements OnInit {
     return NUMBER_KEYS.includes(key) ? 'number' : 'boolean';
   });
 
-  hasOverride(key: OverrideKey | string): boolean {
-    return this.overrideKeySet().has(key as OverrideKey);
+  hasOverride(key: OverrideKey): boolean {
+    return this.overrideKeySet().has(key);
   }
 
   ngOnInit(): void {

@@ -302,7 +302,7 @@ export class AdminMembersTabComponent implements OnInit {
     ROLE_SEVERITY[role] ?? 'secondary';
 
   readonly statusSeverity = (status: string): TagSeverity =>
-    (STATUS_SEVERITY[status] ?? 'secondary') as TagSeverity;
+    STATUS_SEVERITY[status] ?? 'secondary';
 
   readonly memberInitials = (m: AdminMemberItem): string => {
     const first = m.user.firstName?.[0] ?? '';
