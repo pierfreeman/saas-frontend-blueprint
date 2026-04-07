@@ -16,7 +16,7 @@ export interface AdminSetOrgStatusPayload {
 
 // ── Organization types ────────────────────────────────────────────────────────
 
-export type OrgStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED' | 'PENDING';
+export type OrgStatus = 'ACTIVE' | 'SUSPENDED' | 'DELETED' | 'PENDING_DELETION';
 export type BillingStatus =
   | 'ACTIVE'
   | 'PAST_DUE'
@@ -76,6 +76,11 @@ export interface AdminOrganizationDetail extends AdminOrganizationListItem {
   cancelAtPeriodEnd: boolean;
   recentActivity: ActivityLogRecord[];
   entitlements: OrganizationEntitlements;
+  // ── Deletion fields ────────────────────────────────────────────────────
+  deletionRequestedAt: string | null;
+  deletionScheduledAt: string | null;
+  deletionCompletedAt: string | null;
+  retentionPeriodDays: number | null;
 }
 
 // ── Membership types ──────────────────────────────────────────────────────────

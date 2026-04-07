@@ -28,6 +28,7 @@ import { AdminEntitlementsTabComponent } from './admin-entitlements-tab.componen
 import { AdminJobsTabComponent } from './admin-jobs-tab.component';
 import { AdminExportsTabComponent } from './admin-exports-tab.component';
 import { AdminStorageTabComponent } from './admin-storage-tab.component';
+import { AdminDeletionTabComponent } from './admin-deletion-tab.component';
 
 type TagSeverity = 'success' | 'info' | 'secondary' | 'warn' | 'danger';
 
@@ -35,7 +36,7 @@ const ORG_STATUS_SEVERITY: Record<OrgStatus, TagSeverity> = {
   ACTIVE: 'success',
   SUSPENDED: 'warn',
   DELETED: 'danger',
-  PENDING: 'secondary',
+  PENDING_DELETION: 'secondary',
 };
 
 const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
@@ -67,6 +68,7 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
     AdminJobsTabComponent,
     AdminExportsTabComponent,
     AdminStorageTabComponent,
+    AdminDeletionTabComponent,
   ],
   providers: [ConfirmationService],
   template: `
@@ -188,6 +190,9 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
           <p-tab value="storage">
             <span class="pi pi-database mr-2"></span>Storage
           </p-tab>
+          <p-tab value="deletion">
+            <span class="pi pi-trash mr-2"></span>Deletion
+          </p-tab>
         </p-tablist>
 
         <p-tabpanels>
@@ -211,6 +216,9 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
           </p-tabpanel>
           <p-tabpanel value="storage">
             <app-admin-storage-tab [orgId]="orgId" />
+          </p-tabpanel>
+          <p-tabpanel value="deletion">
+            <app-admin-deletion-tab [org]="org()!" />
           </p-tabpanel>
         </p-tabpanels>
       </p-tabs>

@@ -48,6 +48,10 @@ const mockOrg = {
     maxSeats: 10,
     storageLimitBytes: 5368709120,
   },
+  deletionRequestedAt: null,
+  deletionScheduledAt: null,
+  deletionCompletedAt: null,
+  retentionPeriodDays: null,
 };
 
 const mockApi = {
@@ -108,7 +112,7 @@ describe('AdminOrgDetailComponent', () => {
     expect(cmp.orgStatusSeverity('ACTIVE')).toBe('success');
     expect(cmp.orgStatusSeverity('SUSPENDED')).toBe('warn');
     expect(cmp.orgStatusSeverity('DELETED')).toBe('danger');
-    expect(cmp.orgStatusSeverity('PENDING')).toBe('secondary');
+    expect(cmp.orgStatusSeverity('PENDING_DELETION')).toBe('secondary');
   });
 
   it('billingStatusSeverity maps billing statuses correctly', () => {
