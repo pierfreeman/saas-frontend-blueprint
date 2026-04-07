@@ -158,11 +158,12 @@ describe('AdminJobsTabComponent', () => {
     fixture.detectChanges();
     mockApi.getOrgJobs.mockClear();
 
-    // Trigger status filter ngModelChange to cover template lambda
+    // Trigger status filter onChange to cover template lambda
     const selects = fixture.debugElement.queryAll(By.css('p-select'));
     selects.forEach((s) => {
       try {
-        s.triggerEventHandler('ngModelChange', 'FAILED');
+        s.triggerEventHandler('ngModelChange', 'FAILED'); // updates statusFilter
+        s.triggerEventHandler('onChange', { value: 'FAILED' }); // calls onFilterChange()
       } catch {
         // ignore
       }

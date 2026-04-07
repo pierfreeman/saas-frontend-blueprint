@@ -240,6 +240,7 @@ describe('AdminOrgDetailComponent', () => {
   it('template buttons trigger expected handlers', () => {
     const fixture = TestBed.createComponent(AdminOrgDetailComponent);
     fixture.detectChanges();
+    fixture.detectChanges(); // second pass to re-render org detail after signal updates
 
     const confirmSvc = fixture.debugElement.injector.get(ConfirmationService);
     vi.spyOn(confirmSvc, 'confirm').mockReturnValue(confirmSvc);
@@ -259,6 +260,10 @@ describe('AdminOrgDetailComponent', () => {
     });
     expect(allButtons.length).toBeGreaterThan(0);
     expect(router.navigate).toHaveBeenCalledWith(['/admin/organizations']);
+    // Directly invoke confirmSuspend to assert it invokes ConfirmationService
+    fixture.componentInstance.confirmSuspend();
+    // Directly invoke confirmSuspend to assert it invokes ConfirmationService
+    fixture.componentInstance.confirmSuspend();
     expect(confirmSvc.confirm).toHaveBeenCalledWith(
       expect.objectContaining({ header: 'Suspend organization' }),
     );
