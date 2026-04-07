@@ -27,6 +27,7 @@ import { AdminActivityTabComponent } from './admin-activity-tab.component';
 import { AdminEntitlementsTabComponent } from './admin-entitlements-tab.component';
 import { AdminJobsTabComponent } from './admin-jobs-tab.component';
 import { AdminExportsTabComponent } from './admin-exports-tab.component';
+import { AdminStorageTabComponent } from './admin-storage-tab.component';
 
 type TagSeverity = 'success' | 'info' | 'secondary' | 'warn' | 'danger';
 
@@ -65,6 +66,7 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
     AdminEntitlementsTabComponent,
     AdminJobsTabComponent,
     AdminExportsTabComponent,
+    AdminStorageTabComponent,
   ],
   providers: [ConfirmationService],
   template: `
@@ -183,6 +185,9 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
           <p-tab value="exports">
             <span class="pi pi-download mr-2"></span>Exports
           </p-tab>
+          <p-tab value="storage">
+            <span class="pi pi-database mr-2"></span>Storage
+          </p-tab>
         </p-tablist>
 
         <p-tabpanels>
@@ -203,6 +208,9 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
           </p-tabpanel>
           <p-tabpanel value="exports">
             <app-admin-exports-tab [orgId]="orgId" />
+          </p-tabpanel>
+          <p-tabpanel value="storage">
+            <app-admin-storage-tab [orgId]="orgId" />
           </p-tabpanel>
         </p-tabpanels>
       </p-tabs>

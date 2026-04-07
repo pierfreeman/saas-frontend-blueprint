@@ -253,3 +253,11 @@ export interface ListExportsQuery {
   limit?: number;
   offset?: number;
 }
+
+// ── Storage types ────────────────────────────────────────────────
+
+export interface AdminStorageStats {
+  /** Total bytes used by confirmed files (serialized from server-side BigInt). */
+  totalBytes: string;
+  fileCount: number;
+}

@@ -33,4 +33,5 @@ export type {
   AdminExportItem,
   PaginatedAdminExportsResult,
   ListExportsQuery,
+  AdminStorageStats,
 } from './lib/admin.api.types';

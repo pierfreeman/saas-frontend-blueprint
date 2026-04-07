@@ -24,6 +24,7 @@ import type {
   AdminExportItem,
   PaginatedAdminExportsResult,
   ListExportsQuery,
+  AdminStorageStats,
 } from './admin.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -252,6 +253,14 @@ export class AdminApi {
   getExport(orgId: string, exportId: string): Observable<AdminExportItem> {
     return this.#http.get<AdminExportItem>(
       `${this.#base}/admin/organizations/${orgId}/exports/${exportId}`,
+    );
+  }
+
+  // ── Storage ──────────────────────────────────────────────────────────
+
+  getOrgStorageStats(orgId: string): Observable<AdminStorageStats> {
+    return this.#http.get<AdminStorageStats>(
+      `${this.#base}/admin/organizations/${orgId}/storage`,
     );
   }
 }

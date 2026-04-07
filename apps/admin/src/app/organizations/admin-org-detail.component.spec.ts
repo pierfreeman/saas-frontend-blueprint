@@ -63,6 +63,7 @@ const mockApi = {
     of({ items: [], total: 0, limit: 10, offset: 0 }),
   ),
   triggerExport: vi.fn(() => of({ exportId: 'export-new' })),
+  getOrgStorageStats: vi.fn(() => of({ totalBytes: '0', fileCount: 0 })),
 };
 
 describe('AdminOrgDetailComponent', () => {
