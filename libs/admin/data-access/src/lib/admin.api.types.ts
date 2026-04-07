@@ -188,3 +188,37 @@ export interface SetFeatureFlagOverridePayload {
   reason: string;
   expiresAt?: string;
 }
+
+// ── Jobs types ────────────────────────────────────────────────────────────────
+
+export type JobStatus = 'PENDING' | 'PROCESSING' | 'DONE' | 'FAILED';
+
+export interface AdminJobItem {
+  id: string;
+  orgId: string;
+  userId: string | null;
+  type: string;
+  status: JobStatus;
+  payload: Record<string, unknown>;
+  result: Record<string, unknown> | null;
+  error: string | null;
+  attempts: number;
+  startedAt: string | null;
+  finishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaginatedAdminJobsResult {
+  items: AdminJobItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface ListJobsQuery {
+  limit?: number;
+  offset?: number;
+  status?: JobStatus;
+  type?: string;
+}

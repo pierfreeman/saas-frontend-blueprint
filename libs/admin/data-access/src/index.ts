@@ -25,4 +25,8 @@ export type {
   PlanTier,
   AdminProvisionOrgPayload,
   AdminSetOrgStatusPayload,
+  JobStatus,
+  AdminJobItem,
+  PaginatedAdminJobsResult,
+  ListJobsQuery,
 } from './lib/admin.api.types';

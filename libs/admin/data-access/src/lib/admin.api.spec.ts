@@ -272,4 +272,35 @@ describe('AdminApi', () => {
     });
     req.flush({ id: 'org-1', status: 'SUSPENDED' });
   });
+
+  // ── Jobs ──────────────────────────────────────────────────────────────────
+
+  it('GET /admin/organizations/:orgId/jobs with no filters', () => {
+    api.getOrgJobs('org-1').subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/jobs'),
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.has('status')).toBe(false);
+    req.flush({ items: [], total: 0, limit: 20, offset: 0 });
+  });
+
+  it('GET /admin/organizations/:orgId/jobs with status and type filters', () => {
+    api
+      .getOrgJobs('org-1', {
+        status: 'FAILED',
+        type: 'ORG_EXPORT',
+        limit: 10,
+        offset: 0,
+      })
+      .subscribe();
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/admin/organizations/org-1/jobs'),
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('status')).toBe('FAILED');
+    expect(req.request.params.get('type')).toBe('ORG_EXPORT');
+    expect(req.request.params.get('limit')).toBe('10');
+    req.flush({ items: [], total: 0, limit: 10, offset: 0 });
+  });
 });

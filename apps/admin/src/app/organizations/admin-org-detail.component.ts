@@ -25,6 +25,7 @@ import { AdminMembersTabComponent } from './admin-members-tab.component';
 import { AdminBillingTabComponent } from './admin-billing-tab.component';
 import { AdminActivityTabComponent } from './admin-activity-tab.component';
 import { AdminEntitlementsTabComponent } from './admin-entitlements-tab.component';
+import { AdminJobsTabComponent } from './admin-jobs-tab.component';
 
 type TagSeverity = 'success' | 'info' | 'secondary' | 'warn' | 'danger';
 
@@ -61,6 +62,7 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
     AdminBillingTabComponent,
     AdminActivityTabComponent,
     AdminEntitlementsTabComponent,
+    AdminJobsTabComponent,
   ],
   providers: [ConfirmationService],
   template: `
@@ -175,6 +177,7 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
           <p-tab value="entitlements">
             <span class="pi pi-sliders-h mr-2"></span>Entitlements
           </p-tab>
+          <p-tab value="jobs"> <span class="pi pi-cog mr-2"></span>Jobs </p-tab>
         </p-tablist>
 
         <p-tabpanels>
@@ -189,6 +192,9 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
           </p-tabpanel>
           <p-tabpanel value="entitlements">
             <app-admin-entitlements-tab [orgId]="orgId" />
+          </p-tabpanel>
+          <p-tabpanel value="jobs">
+            <app-admin-jobs-tab [orgId]="orgId" />
           </p-tabpanel>
         </p-tabpanels>
       </p-tabs>

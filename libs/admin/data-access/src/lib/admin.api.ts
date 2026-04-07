@@ -19,6 +19,8 @@ import type {
   ListActivityQuery,
   AdminProvisionOrgPayload,
   AdminSetOrgStatusPayload,
+  PaginatedAdminJobsResult,
+  ListJobsQuery,
 } from './admin.api.types';
 
 @Injectable({ providedIn: 'root' })
@@ -200,6 +202,24 @@ export class AdminApi {
   deleteFeatureFlagOverride(orgId: string, key: string): Observable<void> {
     return this.#http.delete<void>(
       `${this.#base}/admin/organizations/${orgId}/feature-flags/${key}`,
+    );
+  }
+
+  // ── Jobs ────────────────────────────────────────────────────────────────────
+
+  getOrgJobs(
+    orgId: string,
+    query: ListJobsQuery = {},
+  ): Observable<PaginatedAdminJobsResult> {
+    let params = new HttpParams();
+    if (query.limit != null) params = params.set('limit', String(query.limit));
+    if (query.offset != null)
+      params = params.set('offset', String(query.offset));
+    if (query.status) params = params.set('status', query.status);
+    if (query.type) params = params.set('type', query.type);
+    return this.#http.get<PaginatedAdminJobsResult>(
+      `${this.#base}/admin/organizations/${orgId}/jobs`,
+      { params },
     );
   }
 }
