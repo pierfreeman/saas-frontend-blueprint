@@ -281,7 +281,7 @@ export class AdminBillingTabComponent implements OnInit {
   readonly #api = inject(AdminApi);
   readonly #messageService = inject(MessageService);
 
-  readonly skeletons = Array(6);
+  readonly skeletons = new Array(6);
   readonly overview = signal<AdminBillingOverview | null>(null);
   readonly loading = signal(true);
   readonly openingPortal = signal(false);
@@ -313,11 +313,11 @@ export class AdminBillingTabComponent implements OnInit {
 
   openPortal(): void {
     this.openingPortal.set(true);
-    const returnUrl = window.location.href;
+    const returnUrl = globalThis.location.href;
     this.#api.getBillingPortalUrl(this.orgId, returnUrl).subscribe({
       next: ({ url }) => {
         this.openingPortal.set(false);
-        window.open(url, '_blank');
+        globalThis.open(url, '_blank');
       },
       error: () => {
         this.openingPortal.set(false);

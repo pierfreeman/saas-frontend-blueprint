@@ -473,9 +473,9 @@ export class MembersComponent implements OnInit {
   }
 
   #buildCsv(rows: MembershipSummary[]): string {
-    const esc = (v: unknown): string => {
-      const s = v == null ? '' : String(v);
-      return `"${s.replace(/"/g, '""')}"`;
+    const esc = (v: string | null | undefined): string => {
+      const s = v == null ? '' : v;
+      return `"${s.replaceAll('"', '""')}"`;
     };
     const header = [
       'id',

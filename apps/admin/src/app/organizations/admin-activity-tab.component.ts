@@ -127,7 +127,7 @@ export class AdminActivityTabComponent implements OnInit {
   readonly #api = inject(AdminApi);
 
   readonly PAGE_SIZE = PAGE_SIZE;
-  readonly skeletons = Array(8);
+  readonly skeletons = new Array(8);
 
   readonly logs = signal<ActivityLogRecord[]>([]);
   readonly total = signal(0);

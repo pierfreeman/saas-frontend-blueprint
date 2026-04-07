@@ -133,7 +133,7 @@ export class AdminAllActivityComponent implements OnInit {
   readonly #api = inject(AdminApi);
 
   readonly PAGE_SIZE = PAGE_SIZE;
-  readonly skeletons = Array(10);
+  readonly skeletons = new Array(10);
 
   readonly logs = signal<ActivityLogRecord[]>([]);
   readonly total = signal(0);

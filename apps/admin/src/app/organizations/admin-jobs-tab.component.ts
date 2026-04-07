@@ -152,7 +152,7 @@ export class AdminJobsTabComponent implements OnInit {
   readonly #api = inject(AdminApi);
 
   readonly PAGE_SIZE = PAGE_SIZE;
-  readonly skeletons = Array(8);
+  readonly skeletons = new Array(8);
   readonly statusOptions = STATUS_OPTIONS;
 
   readonly jobs = signal<AdminJobItem[]>([]);

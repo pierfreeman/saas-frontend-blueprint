@@ -299,7 +299,7 @@ export class AdminOrganizationsComponent implements OnInit {
   readonly PAGE_SIZE = PAGE_SIZE;
   readonly statusOptions = STATUS_OPTIONS;
   readonly planOptions = PLAN_OPTIONS;
-  readonly skeletons = Array(5);
+  readonly skeletons = new Array(5);
 
   searchTerm = '';
   selectedStatus: OrgStatus | null = null;

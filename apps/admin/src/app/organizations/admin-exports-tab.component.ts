@@ -149,7 +149,7 @@ export class AdminExportsTabComponent implements OnInit {
   readonly #api = inject(AdminApi);
 
   readonly PAGE_SIZE = PAGE_SIZE;
-  readonly skeletons = Array(5);
+  readonly skeletons = new Array(5);
 
   readonly exports = signal<AdminExportItem[]>([]);
   readonly total = signal(0);

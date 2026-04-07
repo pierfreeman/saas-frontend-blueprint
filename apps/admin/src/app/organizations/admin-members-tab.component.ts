@@ -282,7 +282,7 @@ export class AdminMembersTabComponent implements OnInit {
 
   readonly PAGE_SIZE = PAGE_SIZE;
   readonly roleOptions = ROLE_OPTIONS;
-  readonly skeletons = Array(5);
+  readonly skeletons = new Array(5);
 
   readonly members = signal<AdminMemberItem[]>([]);
   readonly total = signal(0);
