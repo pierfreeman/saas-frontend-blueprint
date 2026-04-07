@@ -121,6 +121,51 @@ Used to suspend (`SUSPENDED`) or reactivate (`ACTIVE`) an organization. When the
 }
 ```
 
+### Jobs
+
+| Method       | Signature                                                               | Backend endpoint                       |
+| ------------ | ----------------------------------------------------------------------- | -------------------------------------- |
+| `getOrgJobs` | `(orgId, query?: ListJobsQuery) → Observable<PaginatedAdminJobsResult>` | `GET /admin/organizations/:orgId/jobs` |
+
+`ListJobsQuery`:
+
+```ts
+{ status?: string; type?: string; limit?: number; offset?: number }
+```
+
+### Exports (GDPR)
+
+| Method           | Signature                                                                     | Backend endpoint                                    |
+| ---------------- | ----------------------------------------------------------------------------- | --------------------------------------------------- |
+| `triggerExport`  | `(orgId) → Observable<{ exportId: string }>`                                  | `POST /admin/organizations/:orgId/exports` (202)    |
+| `listOrgExports` | `(orgId, query?: ListExportsQuery) → Observable<PaginatedAdminExportsResult>` | `GET /admin/organizations/:orgId/exports`           |
+| `getExport`      | `(orgId, exportId) → Observable<AdminExportItem>`                             | `GET /admin/organizations/:orgId/exports/:exportId` |
+
+`ListExportsQuery`:
+
+```ts
+{ limit?: number; offset?: number }
+```
+
+`AdminExportItem`:
+
+```ts
+{
+  id: string;
+  orgId: string;
+  jobId: string;
+  requestedByUserId: string;
+  status: ExportStatus; // 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
+  fileUrl: string | null; // presigned S3 download URL (COMPLETED only)
+  fileSize: string | null; // bytes as string (BigInt serialized server-side)
+  expiresAt: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  failedAt: string | null;
+  error: string | null;
+}
+```
+
 ---
 
 ## Key types
