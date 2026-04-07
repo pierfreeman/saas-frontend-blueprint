@@ -269,6 +269,11 @@ describe('AdminBillingTabComponent', () => {
         // ignore errors from other button handlers
       }
     });
+    expect(buttons.length).toBeGreaterThan(0);
+    expect(mockApi.getBillingPortalUrl).toHaveBeenCalledWith(
+      'org-1',
+      window.location.href,
+    );
     openSpy.mockRestore();
   });
 

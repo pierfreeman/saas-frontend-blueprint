@@ -339,5 +339,7 @@ describe('AdminEntitlementsTabComponent', () => {
       }
     });
     fixture.detectChanges();
+    expect(buttons.length).toBeGreaterThan(0);
+    expect(mockApi.setFeatureFlagOverride).toHaveBeenCalled();
   });
 });

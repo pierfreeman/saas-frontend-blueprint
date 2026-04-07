@@ -156,6 +156,7 @@ describe('AdminJobsTabComponent', () => {
     const fixture = TestBed.createComponent(AdminJobsTabComponent);
     fixture.componentInstance.orgId = 'org-1';
     fixture.detectChanges();
+    mockApi.getOrgJobs.mockClear();
 
     // Trigger status filter ngModelChange to cover template lambda
     const selects = fixture.debugElement.queryAll(By.css('p-select'));
@@ -166,5 +167,10 @@ describe('AdminJobsTabComponent', () => {
         // ignore
       }
     });
+    expect(selects.length).toBeGreaterThan(0);
+    expect(mockApi.getOrgJobs).toHaveBeenCalledWith(
+      'org-1',
+      expect.objectContaining({ status: 'FAILED', offset: 0 }),
+    );
   });
 });

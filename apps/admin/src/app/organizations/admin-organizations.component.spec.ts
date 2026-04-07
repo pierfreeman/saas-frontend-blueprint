@@ -237,6 +237,11 @@ describe('AdminOrganizationsComponent', () => {
         // ignore
       }
     });
+    expect(cards.length).toBeGreaterThan(0);
+    expect(mockRouter.navigate).toHaveBeenCalledWith([
+      '/admin/organizations',
+      'org-1',
+    ]);
   });
 
   it('paginator fires when org total exceeds PAGE_SIZE', () => {
@@ -274,6 +279,10 @@ describe('AdminOrganizationsComponent', () => {
     // Trigger dialog visibleChange
     const dialog = fixture.debugElement.query(By.css('p-dialog'));
     dialog?.triggerEventHandler('visibleChange', false);
+
+    expect(allButtons.length).toBeGreaterThan(0);
+    expect(dialog).not.toBeNull();
+    expect(fixture.componentInstance.dialogVisible).toBe(false);
   });
 
   it('onSearchChange clears pending timeout when called twice', () => {

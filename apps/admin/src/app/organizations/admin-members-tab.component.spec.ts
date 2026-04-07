@@ -322,6 +322,10 @@ describe('AdminMembersTabComponent', () => {
         // ignore errors from actual method calls (inviteMember, etc.)
       }
     });
+    expect(allButtons.length).toBeGreaterThan(0);
+    // Clicking the invite button with empty email does nothing; dialog stays open
+    // or inviteMember is called if email was set — either way mutating resets to false
+    expect(fixture.componentInstance.mutating()).toBe(false);
   });
 
   it('change role dialog event listeners fire when dialog is open', () => {
@@ -366,6 +370,10 @@ describe('AdminMembersTabComponent', () => {
         // ignore
       }
     });
+    expect(allButtons.length).toBeGreaterThan(0);
+    expect(confirmSvc.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ header: 'Remove member' }),
+    );
   });
 
   it('paginator fires when member total exceeds PAGE_SIZE', () => {

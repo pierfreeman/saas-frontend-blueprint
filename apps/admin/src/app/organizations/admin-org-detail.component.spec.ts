@@ -257,6 +257,11 @@ describe('AdminOrgDetailComponent', () => {
         // ignore errors
       }
     });
+    expect(allButtons.length).toBeGreaterThan(0);
+    expect(router.navigate).toHaveBeenCalledWith(['/admin/organizations']);
+    expect(confirmSvc.confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ header: 'Suspend organization' }),
+    );
   });
 
   it('renders loading skeleton when API is pending', () => {
