@@ -8,7 +8,12 @@ import { AuthApi } from '@saas-frontend/auth/data-access';
 import { API_BASE_URL } from '@saas-frontend/shared/util-types';
 import type { User } from '@saas-frontend/auth/data-access';
 
-const mockUser: User = { id: 'u1', email: 'a@b.com', auth0Id: 'auth0|1' };
+const mockUser: User = {
+  id: 'u1',
+  email: 'a@b.com',
+  auth0Id: 'auth0|1',
+  isSystemAdmin: false,
+};
 const BASE = 'https://api.test';
 
 describe('AuthApi', () => {

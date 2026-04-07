@@ -9,7 +9,13 @@ import {
 import { AuthService } from '@auth0/auth0-angular';
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { vi } from 'vitest';
-import { authGuard, orgGuard, permissionGuard } from './guards';
+import {
+  authGuard,
+  isSystemAdminGuard,
+  orgGuard,
+  permissionGuard,
+} from './guards';
+import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { PermissionsService } from '@saas-frontend/shared/util-rbac';
 import { PERMISSIONS } from '@saas-frontend/shared/util-rbac';
@@ -83,6 +89,59 @@ describe('authGuard', () => {
       );
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/auth']);
     });
+  });
+});
+
+// ── isSystemAdminGuard ─────────────────────────────────────────────────────
+
+const executeIsSystemAdminGuard: CanActivateFn = (...args) =>
+  TestBed.runInInjectionContext(() => isSystemAdminGuard(...args));
+
+describe('isSystemAdminGuard', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('allows navigation when user is a system admin', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: AuthStore,
+          useValue: { currentUser: () => ({ isSystemAdmin: true }) },
+        },
+        { provide: Router, useValue: { createUrlTree: vi.fn() } },
+      ],
+    });
+    const result = executeIsSystemAdminGuard(route, state);
+    expect(result).toBe(true);
+  });
+
+  it('redirects to / when user is not a system admin', () => {
+    const urlTree = {} as UrlTree;
+    const routerSpy = { createUrlTree: vi.fn(() => urlTree) };
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: AuthStore,
+          useValue: { currentUser: () => ({ isSystemAdmin: false }) },
+        },
+        { provide: Router, useValue: routerSpy },
+      ],
+    });
+    const result = executeIsSystemAdminGuard(route, state);
+    expect(routerSpy.createUrlTree).toHaveBeenCalledWith(['/']);
+    expect(result).toBe(urlTree);
+  });
+
+  it('redirects to / when currentUser is null', () => {
+    const urlTree = {} as UrlTree;
+    const routerSpy = { createUrlTree: vi.fn(() => urlTree) };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthStore, useValue: { currentUser: () => null } },
+        { provide: Router, useValue: routerSpy },
+      ],
+    });
+    const result = executeIsSystemAdminGuard(route, state);
+    expect(result).toBe(urlTree);
   });
 });
 

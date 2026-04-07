@@ -749,8 +749,8 @@ describe('DashboardComponent', () => {
 
     it('maps activity logs to ActivityItem shape', async () => {
       const log = makeActivityLog({
-        action: 'MEMBER_ROLE_UPDATED',
-        entityType: 'MEMBERSHIP',
+        action: 'membership.role_changed',
+        entityType: 'membership',
         actorRole: 'ADMIN',
       });
       const { component, fixture } = setup({
@@ -762,13 +762,15 @@ describe('DashboardComponent', () => {
 
       const items = component.recentActivity();
       expect(items).toHaveLength(1);
-      expect(items[0].label).toBe('Member role updated');
-      expect(items[0].entityType).toBe('MEMBERSHIP');
+      expect(items[0].label).toBe('Role changed');
+      expect(items[0].severity).toBe('secondary');
+      expect(items[0].icon).toBe('pi-pencil');
+      expect(items[0].entityTypeLabel).toBe('Membership');
       expect(items[0].actorRole).toBe('ADMIN');
     });
 
-    it('converts action with multiple underscores correctly', async () => {
-      const log = makeActivityLog({ action: 'ORG_SETTINGS_UPDATED' });
+    it('uses action string as label fallback for unknown actions', async () => {
+      const log = makeActivityLog({ action: 'custom.unknown.action' });
       const { component, fixture } = setup({
         role: 'OWNER',
         activityLogs: [log],
@@ -776,7 +778,7 @@ describe('DashboardComponent', () => {
       await new Promise((r) => setTimeout(r, 0));
       fixture.detectChanges();
 
-      expect(component.recentActivity()[0].label).toBe('Org settings updated');
+      expect(component.recentActivity()[0].label).toBe('custom.unknown.action');
     });
 
     it('sets relativeTime for a log created ~5 minutes ago', async () => {

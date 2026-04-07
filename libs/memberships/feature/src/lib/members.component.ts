@@ -6,6 +6,7 @@ import {
   computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
@@ -31,13 +32,18 @@ import {
   PERMISSIONS,
 } from '@saas-frontend/shared/util-rbac';
 
-type TagSeverity = 'success' | 'info' | 'secondary' | 'warn';
+type TagSeverity = 'success' | 'info' | 'secondary' | 'warn' | 'danger';
 
 const ROLE_SEVERITY: Record<string, TagSeverity> = {
   OWNER: 'warn',
   ADMIN: 'info',
   MEMBER: 'success',
   READ_ONLY: 'secondary',
+};
+
+const STATUS_SEVERITY: Record<string, TagSeverity> = {
+  INVITED: 'warn',
+  SUSPENDED: 'danger',
 };
 
 const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
@@ -52,6 +58,7 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    TitleCasePipe,
     FormsModule,
     RouterLink,
     CardModule,
@@ -78,25 +85,35 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
             People with access to this organization.
           </p>
         </div>
-        @if (canInviteByPermission()) {
-          <div class="flex flex-col items-end gap-1">
-            <p-button
-              label="Invite member"
-              icon="pi pi-user-plus"
-              [disabled]="atSeatLimit()"
-              (onClick)="openInviteDialog()"
-            />
-            @if (atSeatLimit()) {
-              <p class="text-xs text-orange-600 m-0">
-                Seat limit reached ({{ members().length }}/{{ maxSeats() }}).
-                <a routerLink="/billing" class="underline text-orange-600"
-                  >Upgrade</a
-                >
-                to add more.
-              </p>
-            }
-          </div>
-        }
+        <div class="flex items-center gap-2">
+          <p-button
+            label="Export CSV"
+            icon="pi pi-download"
+            size="small"
+            severity="secondary"
+            [disabled]="members().length === 0 || loading()"
+            (onClick)="downloadCsv()"
+          />
+          @if (canInviteByPermission()) {
+            <div class="flex flex-col items-end gap-1">
+              <p-button
+                label="Invite member"
+                icon="pi pi-user-plus"
+                [disabled]="atSeatLimit()"
+                (onClick)="openInviteDialog()"
+              />
+              @if (atSeatLimit()) {
+                <p class="text-xs text-orange-600 m-0">
+                  Seat limit reached ({{ members().length }}/{{ maxSeats() }}).
+                  <a routerLink="/billing" class="underline text-orange-600"
+                    >Upgrade</a
+                  >
+                  to add more.
+                </p>
+              }
+            </div>
+          }
+        </div>
       </div>
 
       <p-card>
@@ -148,9 +165,19 @@ const ROLE_OPTIONS: { label: string; value: MembershipRole }[] = [
                     {{ displayName(m) }}
                   </p>
                   <p class="text-xs text-surface-400 m-0 truncate">
-                    {{ displayEmail(m) || (m.status ?? 'ACTIVE') }}
+                    {{ displayEmail(m) }}
                   </p>
                 </div>
+
+                @if (m.status && m.status !== 'ACTIVE') {
+                  <p-tag
+                    [value]="m.status | titlecase"
+                    [severity]="statusSeverity(m.status)"
+                    [icon]="
+                      m.status === 'INVITED' ? 'pi pi-envelope' : 'pi pi-ban'
+                    "
+                  />
+                }
 
                 @if (canEditRole(m)) {
                   <p-select
@@ -325,6 +352,10 @@ export class MembersComponent implements OnInit {
     return ROLE_SEVERITY[role ?? ''] ?? 'secondary';
   }
 
+  statusSeverity(status?: string): TagSeverity {
+    return STATUS_SEVERITY[status ?? ''] ?? 'secondary';
+  }
+
   canEditRole(m: MembershipSummary): boolean {
     return this.canEditRoles() && m.role !== 'OWNER';
   }
@@ -431,5 +462,53 @@ export class MembersComponent implements OnInit {
     const orgId = this.#orgsStore.activeOrgId();
     if (!orgId) return;
     this.#ent.loadEntitlements(orgId);
+  }
+
+  downloadCsv(): void {
+    if (this.members().length === 0) return;
+    const csv = this.#buildCsv(this.members());
+    const orgId = this.#orgsStore.activeOrgId() ?? 'org';
+    const date = new Date().toISOString().slice(0, 10);
+    this.#triggerDownload(csv, `members-${orgId}-${date}.csv`);
+  }
+
+  #buildCsv(rows: MembershipSummary[]): string {
+    const esc = (v: string | null | undefined): string => {
+      const s = v ?? '';
+      return `"${s.replaceAll('"', '""')}"`;
+    };
+    const header = [
+      'id',
+      'user_id',
+      'email',
+      'first_name',
+      'last_name',
+      'role',
+      'status',
+    ].join(',');
+    const lines = rows.map((m) =>
+      [
+        m.id ?? '',
+        m.userId ?? '',
+        m.user?.email ?? '',
+        m.user?.firstName ?? '',
+        m.user?.lastName ?? '',
+        m.role ?? '',
+        m.status ?? '',
+      ]
+        .map(esc)
+        .join(','),
+    );
+    return [header, ...lines].join('\r\n');
+  }
+
+  #triggerDownload(content: string, filename: string): void {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
   }
 }

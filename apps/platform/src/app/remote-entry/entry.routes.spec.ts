@@ -7,6 +7,7 @@ import { AuthStore } from '@saas-frontend/auth/data-access';
 import type { User } from '@saas-frontend/auth/data-access';
 import { MembershipsStore } from '@saas-frontend/memberships/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
+import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import { OrgContextService } from '@saas-frontend/shared/util-org-context';
 
 const baseUser: User = {
@@ -16,6 +17,7 @@ const baseUser: User = {
   firstName: 'Alice',
   lastName: 'Smith',
   pictureUrl: null,
+  isSystemAdmin: false,
 };
 
 describe('PLATFORM_ROUTES', () => {
@@ -89,6 +91,10 @@ describe('syncCurrentUser guard', () => {
   }) {
     const { user = baseUser, activeOrgId = null, membershipsLength = 0 } = opts;
     const mockAuthStore = { currentUser: signal<User | null>(user) };
+    const mockEntitlementsStore = {
+      entitlements: signal(null),
+      loadEntitlements: vi.fn().mockResolvedValue(undefined),
+    };
     const mockMembershipsStore = {
       setCurrentUserId: vi.fn(),
       memberships: signal(new Array(membershipsLength).fill({})),
@@ -103,6 +109,7 @@ describe('syncCurrentUser guard', () => {
         { provide: AuthStore, useValue: mockAuthStore },
         { provide: MembershipsStore, useValue: mockMembershipsStore },
         { provide: OrganizationsStore, useValue: mockOrgsStore },
+        { provide: EntitlementsStore, useValue: mockEntitlementsStore },
         { provide: OrgContextService, useValue: mockOrgContext },
       ],
     });
@@ -111,6 +118,7 @@ describe('syncCurrentUser guard', () => {
       mockAuthStore,
       mockMembershipsStore,
       mockOrgsStore,
+      mockEntitlementsStore,
       mockOrgContext,
     };
   }

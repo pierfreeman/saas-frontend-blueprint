@@ -1,5 +1,9 @@
 import { inject } from '@angular/core';
-import { authGuard, orgGuard } from '@saas-frontend/shared/util-auth';
+import {
+  authGuard,
+  isSystemAdminGuard,
+  orgGuard,
+} from '@saas-frontend/shared/util-auth';
 import { Route } from '@angular/router';
 import { RemoteConfigService } from './remote-config.service';
 
@@ -33,7 +37,7 @@ export const appRoutes: Route[] = [
       },
       {
         path: 'admin',
-        canActivate: [orgGuard],
+        canActivate: [isSystemAdminGuard],
         /* v8 ignore next 3 */
         loadChildren: () =>
           inject(RemoteConfigService).loadRoutes('admin', () =>

@@ -108,6 +108,14 @@ export const appConfig: ApplicationConfig = {
               },
             },
           },
+          {
+            uri: `${environment.adminApiUrl}/*`,
+            tokenOptions: {
+              authorizationParams: {
+                audience: environment.auth0Audience,
+              },
+            },
+          },
         ],
       },
     }),

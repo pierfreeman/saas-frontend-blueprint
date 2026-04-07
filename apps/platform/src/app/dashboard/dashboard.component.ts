@@ -22,6 +22,10 @@ import {
 import {
   ActivityLogApi,
   ActivityLogRecord,
+  getActionLabel,
+  getActionSeverity,
+  getActionIcon,
+  getEntityTypeLabel,
 } from '@saas-frontend/activity-log/data-access';
 import {
   PlanningApi,
@@ -45,7 +49,9 @@ interface AgendaEvent {
 interface ActivityItem {
   id: string;
   label: string;
-  entityType: string | null;
+  severity: 'success' | 'info' | 'warn' | 'danger' | 'secondary';
+  icon: string;
+  entityTypeLabel: string | null;
   relativeTime: string;
   actorRole: string | null;
 }
@@ -58,13 +64,6 @@ function formatStorageBytes(bytes: string | null | undefined): string {
   if (n < 1_048_576) return `${(n / 1024).toFixed(1)} KB`;
   if (n < 1_073_741_824) return `${(n / 1_048_576).toFixed(1)} MB`;
   return `${(n / 1_073_741_824).toFixed(2)} GB`;
-}
-
-function formatActivityAction(action: string): string {
-  return action
-    .toLowerCase()
-    .replaceAll('_', ' ')
-    .replace(/^./, (c) => c.toUpperCase());
 }
 
 function formatRelativeTime(isoDate: string): string {
@@ -115,8 +114,10 @@ function toAgendaEvent(occ: EventOccurrence, userId: string): AgendaEvent {
 function toActivityItem(log: ActivityLogRecord): ActivityItem {
   return {
     id: log.id,
-    label: formatActivityAction(log.action),
-    entityType: log.entityType,
+    label: getActionLabel(log.action),
+    severity: getActionSeverity(log.action),
+    icon: getActionIcon(log.action),
+    entityTypeLabel: log.entityType ? getEntityTypeLabel(log.entityType) : null,
     relativeTime: formatRelativeTime(log.createdAt),
     actorRole: log.actorRole,
   };
@@ -333,14 +334,16 @@ function toActivityItem(log: ActivityLogRecord): ActivityItem {
               <div class="flex flex-col divide-y divide-surface-100">
                 @for (item of recentActivity(); track item.id) {
                   <div class="flex items-center justify-between py-2 gap-4">
-                    <div class="flex flex-col min-w-0">
-                      <span
-                        class="text-sm font-medium text-surface-800 truncate"
-                        >{{ item.label }}</span
-                      >
-                      @if (item.entityType) {
-                        <span class="text-xs text-surface-400">{{
-                          item.entityType
+                    <div class="flex items-center gap-2 min-w-0">
+                      <p-tag
+                        [value]="item.label"
+                        [severity]="item.severity"
+                        [icon]="'pi ' + item.icon"
+                        styleClass="text-xs shrink-0"
+                      />
+                      @if (item.entityTypeLabel) {
+                        <span class="text-xs text-surface-500 truncate">{{
+                          item.entityTypeLabel
                         }}</span>
                       }
                     </div>
