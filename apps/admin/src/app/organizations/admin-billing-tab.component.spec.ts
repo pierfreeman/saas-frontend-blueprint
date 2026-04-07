@@ -23,6 +23,8 @@ const mockApi = {
   getBillingPortalUrl: vi.fn(() =>
     of({ url: 'https://billing.stripe.com/xxx' }),
   ),
+  changePlan: vi.fn(() => of(undefined)),
+  extendTrial: vi.fn(() => of(undefined)),
 };
 
 describe('AdminBillingTabComponent', () => {
@@ -97,5 +99,97 @@ describe('AdminBillingTabComponent', () => {
 
     fixture.componentInstance.openPortal();
     expect(fixture.componentInstance.openingPortal()).toBe(false);
+  });
+
+  it('openChangePlanDialog resets form state and shows dialog', () => {
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    const cmp = fixture.componentInstance;
+    cmp.orgId = 'org-1';
+    fixture.detectChanges();
+    cmp.planPriceId.set('price_old');
+    cmp.planReason.set('old reason');
+
+    cmp.openChangePlanDialog();
+
+    expect(cmp.showChangePlanDialog()).toBe(true);
+    expect(cmp.planPriceId()).toBe('');
+    expect(cmp.planReason()).toBe('');
+  });
+
+  it('submitChangePlan calls changePlan API and closes dialog on success', () => {
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    const cmp = fixture.componentInstance;
+    cmp.orgId = 'org-1';
+    fixture.detectChanges();
+
+    cmp.planPriceId.set('price_enterprise');
+    cmp.planReason.set('Sales deal');
+    cmp.showChangePlanDialog.set(true);
+
+    cmp.submitChangePlan();
+
+    expect(mockApi.changePlan).toHaveBeenCalledWith('org-1', {
+      priceId: 'price_enterprise',
+      reason: 'Sales deal',
+    });
+    expect(cmp.showChangePlanDialog()).toBe(false);
+    expect(cmp.savingPlan()).toBe(false);
+  });
+
+  it('submitChangePlan sets savingPlan = false on error', () => {
+    mockApi.changePlan.mockReturnValueOnce(throwError(() => new Error('fail')));
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    const cmp = fixture.componentInstance;
+    cmp.orgId = 'org-1';
+    fixture.detectChanges();
+
+    cmp.planPriceId.set('price_enterprise');
+    cmp.submitChangePlan();
+
+    expect(cmp.savingPlan()).toBe(false);
+  });
+
+  it('openExtendTrialDialog resets form and shows dialog', () => {
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    const cmp = fixture.componentInstance;
+    cmp.orgId = 'org-1';
+    fixture.detectChanges();
+    cmp.trialEndDate.set(new Date());
+
+    cmp.openExtendTrialDialog();
+
+    expect(cmp.showExtendTrialDialog()).toBe(true);
+    expect(cmp.trialEndDate()).toBeNull();
+  });
+
+  it('submitExtendTrial calls extendTrial API and closes dialog on success', () => {
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    const cmp = fixture.componentInstance;
+    cmp.orgId = 'org-1';
+    fixture.detectChanges();
+
+    const trialEnd = new Date('2025-12-31T00:00:00Z');
+    cmp.trialEndDate.set(trialEnd);
+    cmp.showExtendTrialDialog.set(true);
+
+    cmp.submitExtendTrial();
+
+    expect(mockApi.extendTrial).toHaveBeenCalledWith('org-1', {
+      trialEnd: trialEnd.toISOString(),
+    });
+    expect(cmp.showExtendTrialDialog()).toBe(false);
+    expect(cmp.savingTrial()).toBe(false);
+  });
+
+  it('submitExtendTrial does nothing when no date is set', () => {
+    const fixture = TestBed.createComponent(AdminBillingTabComponent);
+    const cmp = fixture.componentInstance;
+    cmp.orgId = 'org-1';
+    fixture.detectChanges();
+
+    cmp.trialEndDate.set(null);
+    cmp.submitExtendTrial();
+
+    expect(mockApi.extendTrial).not.toHaveBeenCalled();
   });
 });

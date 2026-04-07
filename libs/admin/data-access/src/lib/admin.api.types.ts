@@ -128,6 +128,15 @@ export interface AdminBillingPortalResponse {
   url: string;
 }
 
+export interface AdminChangePlanPayload {
+  priceId: string;
+  reason?: string;
+}
+
+export interface AdminExtendTrialPayload {
+  trialEnd: string; // ISO 8601
+}
+
 // ── Activity log types ────────────────────────────────────────────────────────
 
 export interface PaginatedAdminActivityResult {

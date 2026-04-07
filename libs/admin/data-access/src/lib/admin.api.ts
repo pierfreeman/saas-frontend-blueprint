@@ -9,6 +9,8 @@ import type {
   PaginatedAdminMembersResult,
   AdminBillingOverview,
   AdminBillingPortalResponse,
+  AdminChangePlanPayload,
+  AdminExtendTrialPayload,
   PaginatedAdminActivityResult,
   OrganizationEntitlements,
   EntitlementOverride,
@@ -133,6 +135,23 @@ export class AdminApi {
     return this.#http.post<AdminBillingPortalResponse>(
       `${this.#base}/admin/organizations/${orgId}/billing/portal`,
       { returnUrl },
+    );
+  }
+
+  changePlan(orgId: string, payload: AdminChangePlanPayload): Observable<void> {
+    return this.#http.patch<void>(
+      `${this.#base}/admin/organizations/${orgId}/billing/plan`,
+      payload,
+    );
+  }
+
+  extendTrial(
+    orgId: string,
+    payload: AdminExtendTrialPayload,
+  ): Observable<void> {
+    return this.#http.patch<void>(
+      `${this.#base}/admin/organizations/${orgId}/billing/trial`,
+      payload,
     );
   }
 

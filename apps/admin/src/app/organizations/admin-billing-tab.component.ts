@@ -7,12 +7,17 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { SkeletonModule } from 'primeng/skeleton';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { DatePickerModule } from 'primeng/datepicker';
+import { TextareaModule } from 'primeng/textarea';
 import { MessageService } from 'primeng/api';
 import {
   AdminApi,
@@ -37,16 +42,109 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     DatePipe,
+    FormsModule,
     CardModule,
     TagModule,
     SkeletonModule,
     ButtonModule,
     MessageModule,
     ToastModule,
+    DialogModule,
+    InputTextModule,
+    DatePickerModule,
+    TextareaModule,
   ],
   providers: [MessageService],
   template: `
     <p-toast />
+
+    <!-- ─── Change Plan Dialog ─── -->
+    <p-dialog
+      header="Change Subscription Plan"
+      [modal]="true"
+      [(visible)]="showChangePlanDialog"
+      [style]="{ width: '28rem' }"
+    >
+      <div class="flex flex-col gap-4 pt-2">
+        <div class="flex flex-col gap-1">
+          <label for="priceId" class="text-sm font-medium text-surface-700">
+            Stripe Price ID
+          </label>
+          <input
+            id="priceId"
+            pInputText
+            [(ngModel)]="planPriceId"
+            placeholder="price_xxx"
+            class="w-full"
+          />
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="planReason" class="text-sm font-medium text-surface-700">
+            Reason <span class="text-surface-400">(optional)</span>
+          </label>
+          <textarea
+            id="planReason"
+            pTextarea
+            [(ngModel)]="planReason"
+            placeholder="e.g. Enterprise upgrade agreed with sales"
+            rows="2"
+            class="w-full"
+          ></textarea>
+        </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          [text]="true"
+          (onClick)="showChangePlanDialog.set(false)"
+        />
+        <p-button
+          label="Change Plan"
+          [loading]="savingPlan()"
+          [disabled]="!planPriceId().trim()"
+          (onClick)="submitChangePlan()"
+        />
+      </ng-template>
+    </p-dialog>
+
+    <!-- ─── Extend Trial Dialog ─── -->
+    <p-dialog
+      header="Extend Trial"
+      [modal]="true"
+      [(visible)]="showExtendTrialDialog"
+      [style]="{ width: '24rem' }"
+    >
+      <div class="flex flex-col gap-4 pt-2">
+        <div class="flex flex-col gap-1">
+          <label for="trialEnd" class="text-sm font-medium text-surface-700">
+            New Trial End Date
+          </label>
+          <p-datepicker
+            inputId="trialEnd"
+            [(ngModel)]="trialEndDate"
+            [minDate]="minTrialDate"
+            dateFormat="yy-mm-dd"
+            [showIcon]="true"
+            class="w-full"
+          />
+        </div>
+      </div>
+      <ng-template pTemplate="footer">
+        <p-button
+          label="Cancel"
+          severity="secondary"
+          [text]="true"
+          (onClick)="showExtendTrialDialog.set(false)"
+        />
+        <p-button
+          label="Extend Trial"
+          [loading]="savingTrial()"
+          [disabled]="!trialEndDate()"
+          (onClick)="submitExtendTrial()"
+        />
+      </ng-template>
+    </p-dialog>
 
     <div class="flex flex-col gap-4 pt-4">
       @if (loading()) {
@@ -145,9 +243,9 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
           </div>
         </div>
 
-        <!-- Stripe portal button -->
-        @if (overview()!.stripeCustomerId) {
-          <div class="flex justify-end">
+        <!-- Action buttons -->
+        <div class="flex flex-wrap gap-2 justify-end">
+          @if (overview()!.stripeCustomerId) {
             <p-button
               label="Open Stripe Portal"
               icon="pi pi-external-link"
@@ -155,8 +253,24 @@ const BILLING_STATUS_SEVERITY: Record<BillingStatus, TagSeverity> = {
               [loading]="openingPortal()"
               (onClick)="openPortal()"
             />
-          </div>
-        }
+          }
+          @if (overview()!.subscriptionId) {
+            <p-button
+              label="Change Plan"
+              icon="pi pi-sync"
+              severity="secondary"
+              (onClick)="openChangePlanDialog()"
+            />
+          }
+          @if (overview()!.billingStatus === 'TRIALING') {
+            <p-button
+              label="Extend Trial"
+              icon="pi pi-calendar-plus"
+              severity="secondary"
+              (onClick)="openExtendTrialDialog()"
+            />
+          }
+        </div>
       }
     </div>
   `,
@@ -171,6 +285,18 @@ export class AdminBillingTabComponent implements OnInit {
   readonly overview = signal<AdminBillingOverview | null>(null);
   readonly loading = signal(true);
   readonly openingPortal = signal(false);
+
+  // Change Plan dialog
+  readonly showChangePlanDialog = signal(false);
+  readonly planPriceId = signal('');
+  readonly planReason = signal('');
+  readonly savingPlan = signal(false);
+
+  // Extend Trial dialog
+  readonly showExtendTrialDialog = signal(false);
+  readonly trialEndDate = signal<Date | null>(null);
+  readonly savingTrial = signal(false);
+  readonly minTrialDate = new Date();
 
   readonly billingSeverity = (status: BillingStatus): TagSeverity =>
     BILLING_STATUS_SEVERITY[status] ?? 'secondary';
@@ -201,5 +327,67 @@ export class AdminBillingTabComponent implements OnInit {
         });
       },
     });
+  }
+
+  openChangePlanDialog(): void {
+    this.planPriceId.set('');
+    this.planReason.set('');
+    this.showChangePlanDialog.set(true);
+  }
+
+  submitChangePlan(): void {
+    const priceId = this.planPriceId().trim();
+    if (!priceId) return;
+    this.savingPlan.set(true);
+    const reason = this.planReason().trim() || undefined;
+    this.#api.changePlan(this.orgId, { priceId, reason }).subscribe({
+      next: () => {
+        this.savingPlan.set(false);
+        this.showChangePlanDialog.set(false);
+        this.#messageService.add({
+          severity: 'success',
+          summary: 'Plan change initiated',
+          detail: 'Stripe will sync the updated subscription shortly.',
+        });
+      },
+      error: () => {
+        this.savingPlan.set(false);
+        this.#messageService.add({
+          severity: 'error',
+          summary: 'Could not change plan',
+        });
+      },
+    });
+  }
+
+  openExtendTrialDialog(): void {
+    this.trialEndDate.set(null);
+    this.showExtendTrialDialog.set(true);
+  }
+
+  submitExtendTrial(): void {
+    const trialEnd = this.trialEndDate();
+    if (!trialEnd) return;
+    this.savingTrial.set(true);
+    this.#api
+      .extendTrial(this.orgId, { trialEnd: trialEnd.toISOString() })
+      .subscribe({
+        next: () => {
+          this.savingTrial.set(false);
+          this.showExtendTrialDialog.set(false);
+          this.#messageService.add({
+            severity: 'success',
+            summary: 'Trial extended',
+            detail: `Trial now ends on ${trialEnd.toLocaleDateString()}.`,
+          });
+        },
+        error: () => {
+          this.savingTrial.set(false);
+          this.#messageService.add({
+            severity: 'error',
+            summary: 'Could not extend trial',
+          });
+        },
+      });
   }
 }

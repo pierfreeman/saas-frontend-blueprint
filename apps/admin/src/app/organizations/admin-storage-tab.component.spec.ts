@@ -4,9 +4,11 @@ import { vi } from 'vitest';
 import { AdminStorageTabComponent } from './admin-storage-tab.component';
 import { AdminApi } from '@saas-frontend/admin/data-access';
 import { API_BASE_URL } from '@saas-frontend/shared/util-types';
+import { MessageService } from 'primeng/api';
 
 const mockApi = {
   getOrgStorageStats: vi.fn(() => of({ totalBytes: '5242880', fileCount: 3 })),
+  setFeatureFlagOverride: vi.fn(() => of(undefined)),
 };
 
 describe('AdminStorageTabComponent', () => {
@@ -17,6 +19,7 @@ describe('AdminStorageTabComponent', () => {
       providers: [
         { provide: AdminApi, useValue: mockApi },
         { provide: API_BASE_URL, useValue: 'http://test' },
+        MessageService,
       ],
     }).compileComponents();
   });
@@ -75,5 +78,70 @@ describe('AdminStorageTabComponent', () => {
     expect(comp.stats()).toBeNull();
     expect(comp.loading()).toBe(false);
     expect(comp.error()).toBe('Failed to load storage stats.');
+  });
+
+  it('openQuotaDialog resets form and shows dialog', () => {
+    const fixture = TestBed.createComponent(AdminStorageTabComponent);
+    const comp = fixture.componentInstance;
+    comp.orgId = 'org-1';
+    fixture.detectChanges();
+    comp.quotaGb.set(10);
+    comp.quotaReason.set('old reason');
+
+    comp.openQuotaDialog();
+
+    expect(comp.showQuotaDialog()).toBe(true);
+    expect(comp.quotaGb()).toBeNull();
+    expect(comp.quotaReason()).toBe('');
+  });
+
+  it('submitQuota calls setFeatureFlagOverride with bytes and closes dialog', () => {
+    const fixture = TestBed.createComponent(AdminStorageTabComponent);
+    const comp = fixture.componentInstance;
+    comp.orgId = 'org-1';
+    fixture.detectChanges();
+
+    comp.quotaGb.set(5);
+    comp.quotaReason.set('Custom plan');
+    comp.showQuotaDialog.set(true);
+
+    comp.submitQuota();
+
+    expect(mockApi.setFeatureFlagOverride).toHaveBeenCalledWith('org-1', {
+      key: 'storageLimitBytes',
+      value: 5 * 1_073_741_824,
+      reason: 'Custom plan',
+    });
+    expect(comp.showQuotaDialog()).toBe(false);
+    expect(comp.savingQuota()).toBe(false);
+  });
+
+  it('submitQuota does nothing when gb is null', () => {
+    const fixture = TestBed.createComponent(AdminStorageTabComponent);
+    const comp = fixture.componentInstance;
+    comp.orgId = 'org-1';
+    fixture.detectChanges();
+
+    comp.quotaGb.set(null);
+    comp.quotaReason.set('reason');
+    comp.submitQuota();
+
+    expect(mockApi.setFeatureFlagOverride).not.toHaveBeenCalled();
+  });
+
+  it('submitQuota sets savingQuota = false on API error', () => {
+    mockApi.setFeatureFlagOverride.mockReturnValueOnce(
+      throwError(() => new Error('fail')),
+    );
+    const fixture = TestBed.createComponent(AdminStorageTabComponent);
+    const comp = fixture.componentInstance;
+    comp.orgId = 'org-1';
+    fixture.detectChanges();
+
+    comp.quotaGb.set(5);
+    comp.quotaReason.set('reason');
+    comp.submitQuota();
+
+    expect(comp.savingQuota()).toBe(false);
   });
 });
