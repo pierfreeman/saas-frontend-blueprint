@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { NEVER, of, throwError } from 'rxjs';
-import { vi } from 'vitest';
+import { vi, afterEach } from 'vitest';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { AdminOrgDetailComponent } from './admin-org-detail.component';
 import { AdminApi } from '@saas-frontend/admin/data-access';
@@ -73,6 +73,7 @@ const mockApi = {
 describe('AdminOrgDetailComponent', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
     await TestBed.configureTestingModule({
       imports: [AdminOrgDetailComponent],
       providers: [
@@ -86,6 +87,8 @@ describe('AdminOrgDetailComponent', () => {
       ],
     }).compileComponents();
   });
+
+  afterEach(() => vi.useRealTimers());
 
   it('loads org detail on init', () => {
     const fixture = TestBed.createComponent(AdminOrgDetailComponent);

@@ -1,8 +1,8 @@
-import type { components, operations } from '@saas-frontend/shared/util-types';
+import type { Components, Operations } from '@saas-frontend/shared/util-types';
 
-export type CreateTaskDto = components['schemas']['CreateTaskDto'];
+export type CreateTaskDto = Components['schemas']['CreateTaskDto'];
 
 export type CreateHeavyJobResponse =
-  operations['TasksController_createHeavyJob']['responses']['202']['content']['application/json'];
+  Operations['TasksController_createHeavyJob']['responses']['202']['content']['application/json'];
 
-export type JobStatus = components['schemas']['JobStatusDto'];
+export type JobStatus = Components['schemas']['JobStatusDto'];

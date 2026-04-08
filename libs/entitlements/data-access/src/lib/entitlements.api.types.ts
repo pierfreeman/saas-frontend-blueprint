@@ -1,4 +1,4 @@
-import type { operations } from '@saas-frontend/shared/util-types';
+import type { Operations } from '@saas-frontend/shared/util-types';
 
 /**
  * Full entitlements for an organization, extended with storage quota information.
@@ -7,10 +7,10 @@ import type { operations } from '@saas-frontend/shared/util-types';
  * backend is deployed to remove the manual extension.
  */
 export type OrganizationEntitlements =
-  operations['FeatureFlagsController_getEntitlements']['responses']['200']['content']['application/json'] & {
+  Operations['FeatureFlagsController_getEntitlements']['responses']['200']['content']['application/json'] & {
     /** Total storage quota in bytes for the plan (informational display). */
     storageLimitBytes?: number;
   };
 
 export type InvalidateCacheResponse =
-  operations['FeatureFlagsController_invalidateCache']['responses']['200']['content']['application/json'];
+  Operations['FeatureFlagsController_invalidateCache']['responses']['200']['content']['application/json'];

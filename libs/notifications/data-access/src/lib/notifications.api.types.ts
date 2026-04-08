@@ -1,8 +1,8 @@
-import type { components } from '@saas-frontend/shared/util-types';
+import type { Components } from '@saas-frontend/shared/util-types';
 
 export type CreateNotificationDto =
-  components['schemas']['CreateNotificationDto'];
-export type MarkManyReadDto = components['schemas']['MarkManyReadDto'];
+  Components['schemas']['CreateNotificationDto'];
+export type MarkManyReadDto = Components['schemas']['MarkManyReadDto'];
 
 export interface GetNotificationsParams {
   orgId?: string;

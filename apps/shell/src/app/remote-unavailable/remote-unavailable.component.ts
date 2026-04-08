@@ -35,6 +35,6 @@ export class RemoteUnavailableComponent {
     'requested';
 
   reload(): void {
-    window.location.reload();
+    globalThis.location.reload();
   }
 }

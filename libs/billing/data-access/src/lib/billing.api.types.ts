@@ -1,16 +1,16 @@
-import type { components } from '@saas-frontend/shared/util-types';
+import type { Components } from '@saas-frontend/shared/util-types';
 
 export type CreateCheckoutSessionDto =
-  components['schemas']['CreateCheckoutSessionDto'];
+  Components['schemas']['CreateCheckoutSessionDto'];
 export type CreatePortalSessionDto =
-  components['schemas']['CreatePortalSessionDto'];
+  Components['schemas']['CreatePortalSessionDto'];
 export type CancelSubscriptionDto =
-  components['schemas']['CancelSubscriptionDto'];
+  Components['schemas']['CancelSubscriptionDto'];
 export type CheckoutSessionResponse =
-  components['schemas']['CheckoutSessionResponseDto'];
+  Components['schemas']['CheckoutSessionResponseDto'];
 export type PortalSessionResponse =
-  components['schemas']['PortalSessionResponseDto'];
+  Components['schemas']['PortalSessionResponseDto'];
 export type SubscriptionResponse =
-  components['schemas']['SubscriptionResponseDto'];
+  Components['schemas']['SubscriptionResponseDto'];
 export type CancelSubscriptionResponse =
-  components['schemas']['CancelSubscriptionResponseDto'];
+  Components['schemas']['CancelSubscriptionResponseDto'];
