@@ -601,10 +601,9 @@ export class ActivityLogComponent implements OnInit {
   }
 
   #buildCsv(logs: ActivityLogRecord[]): string {
-    const esc = (v: string | null | undefined): string => {
-      const s = v ?? '';
-      return `"${s.replaceAll('"', '""')}"`;
-    };
+    const esc = (v: string | undefined = ''): string =>
+      `"${v.replaceAll('"', '""')}"`;
+
     const header = [
       'id',
       'created_at',

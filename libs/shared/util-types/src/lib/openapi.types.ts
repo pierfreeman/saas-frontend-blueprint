@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export interface paths {
+export interface Paths {
   '/': {
     parameters: {
       query?: never;
@@ -15,7 +15,7 @@ export interface paths {
      * Root endpoint
      * @description Returns a greeting message confirming the API is reachable.
      */
-    get: operations['AppController_getHello'];
+    get: Operations['AppController_getHello'];
     put?: never;
     post?: never;
     delete?: never;
@@ -35,7 +35,7 @@ export interface paths {
      * Full health check
      * @description Returns the health status of the application and its external dependencies (PostgreSQL database and Redis). Each service reports its reachability and response time in milliseconds.
      */
-    get: operations['HealthController_check'];
+    get: Operations['HealthController_check'];
     put?: never;
     post?: never;
     delete?: never;
@@ -55,13 +55,13 @@ export interface paths {
      * Get the currently authenticated user
      * @description Syncs the Auth0 identity with the local database (upsert) and returns the resolved user profile. Safe to call on every app load.
      */
-    get: operations['AuthController_getMe'];
+    get: Operations['AuthController_getMe'];
     put?: never;
     post?: never;
     delete?: never;
     options?: never;
     head?: never;
-    patch: operations['AuthController_updateMe'];
+    patch: Operations['AuthController_updateMe'];
     trace?: never;
   };
   '/organizations': {
@@ -75,13 +75,13 @@ export interface paths {
      * List organizations for the current user
      * @description Returns all organizations the authenticated user belongs to, regardless of their role within each organization.
      */
-    get: operations['OrganizationsController_findMine'];
+    get: Operations['OrganizationsController_findMine'];
     put?: never;
     /**
      * Create a new organization
      * @description Creates a new organization owned by the authenticated user. The caller is automatically added as a member with the OWNER role.
      */
-    post: operations['OrganizationsController_create'];
+    post: Operations['OrganizationsController_create'];
     delete?: never;
     options?: never;
     head?: never;
@@ -99,7 +99,7 @@ export interface paths {
      * Get organization by ID
      * @description Returns full details of a single organization. Requires ORG_READ permission.
      */
-    get: operations['OrganizationsController_findOne'];
+    get: Operations['OrganizationsController_findOne'];
     put?: never;
     post?: never;
     delete?: never;
@@ -109,7 +109,7 @@ export interface paths {
      * Update an organization
      * @description Updates mutable fields (name, status) of an organization. Requires ORG_MANAGE permission (OWNER or ADMIN).
      */
-    patch: operations['OrganizationsController_update'];
+    patch: Operations['OrganizationsController_update'];
     trace?: never;
   };
   '/organizations/{id}/delete': {
@@ -125,7 +125,7 @@ export interface paths {
      * Request organization deletion
      * @description Schedules organization deletion with a retention period (default 30 days). The organization status is immediately set to PENDING_DELETION, but actual data deletion happens asynchronously after the retention period. This complies with GDPR Right to Erasure requirements. Only OWNER role can request deletion.
      */
-    post: operations['OrganizationsController_requestDeletion'];
+    post: Operations['OrganizationsController_requestDeletion'];
     delete?: never;
     options?: never;
     head?: never;
@@ -145,7 +145,7 @@ export interface paths {
      * Request organization data export
      * @description Requests a data export for the organization (GDPR Right to Data Portability). Creates an export job that will asynchronously generate a compressed JSON file containing all organization data. The export will be available for download via a signed URL for 24 hours. Only OWNER and ADMIN roles can request exports.
      */
-    post: operations['OrganizationsController_requestExport'];
+    post: Operations['OrganizationsController_requestExport'];
     delete?: never;
     options?: never;
     head?: never;
@@ -163,7 +163,7 @@ export interface paths {
      * Get export status
      * @description Retrieves the status and details of a specific export. If the export is completed, includes a signed download URL.
      */
-    get: operations['OrganizationsController_getExport'];
+    get: Operations['OrganizationsController_getExport'];
     put?: never;
     post?: never;
     delete?: never;
@@ -183,7 +183,7 @@ export interface paths {
      * List organization exports
      * @description Lists all exports for the organization, ordered by creation date (newest first). Supports pagination.
      */
-    get: operations['OrganizationsController_listExports'];
+    get: Operations['OrganizationsController_listExports'];
     put?: never;
     post?: never;
     delete?: never;
@@ -203,13 +203,13 @@ export interface paths {
      * List all members of an organization
      * @description Returns all membership records for the given organization, including each member's role and status. Requires ORG_READ permission.
      */
-    get: operations['MembershipsController_findByOrg'];
+    get: Operations['MembershipsController_findByOrg'];
     put?: never;
     /**
      * Add a member to an organization
      * @description Invites an existing user into the organization with the specified role. Requires ORG_MEMBERS_INVITE permission (OWNER or ADMIN).
      */
-    post: operations['MembershipsController_create'];
+    post: Operations['MembershipsController_create'];
     delete?: never;
     options?: never;
     head?: never;
@@ -230,14 +230,14 @@ export interface paths {
      * Remove a member from an organization
      * @description Permanently removes a membership record, revoking the user's access to the organization. Requires ORG_MEMBERS_REMOVE permission (OWNER or ADMIN). Owners cannot remove themselves.
      */
-    delete: operations['MembershipsController_delete'];
+    delete: Operations['MembershipsController_delete'];
     options?: never;
     head?: never;
     /**
      * Update a member's role
      * @description Changes the role of an existing membership. Requires ORG_MEMBERS_ROLE_UPDATE permission (OWNER or ADMIN). An OWNER cannot demote themselves.
      */
-    patch: operations['MembershipsController_update'];
+    patch: Operations['MembershipsController_update'];
     trace?: never;
   };
   '/organizations/{orgId}/memberships/invite': {
@@ -253,7 +253,7 @@ export interface paths {
      * Invite a new or existing user by email
      * @description Sends an email invitation to the given address. If the user does not exist they are created in Auth0 and Prisma, and a password-change ticket (7-day TTL) is used as the invite link. If they already have an account the invite link points to the frontend. Requires ORG_MEMBERS_INVITE permission (OWNER or ADMIN).
      */
-    post: operations['MembershipsController_invite'];
+    post: Operations['MembershipsController_invite'];
     delete?: never;
     options?: never;
     head?: never;
@@ -271,7 +271,7 @@ export interface paths {
      * Liveness probe
      * @description Confirms the process is alive. Used by orchestrators (Kubernetes, ECS) to decide whether to restart the container. This probe never checks external dependencies — it only verifies the Node.js process is responsive.
      */
-    get: operations['HealthController_liveness'];
+    get: Operations['HealthController_liveness'];
     put?: never;
     post?: never;
     delete?: never;
@@ -291,7 +291,7 @@ export interface paths {
      * Readiness probe
      * @description Checks whether the application is ready to serve traffic by verifying that PostgreSQL and Redis are reachable. Orchestrators (Kubernetes, ECS) use this to decide whether to route requests to the container.
      */
-    get: operations['HealthController_readiness'];
+    get: Operations['HealthController_readiness'];
     put?: never;
     post?: never;
     delete?: never;
@@ -313,7 +313,7 @@ export interface paths {
      * Submit a heavy computation job
      * @description Persists a PENDING job record and publishes a domain event to SQS for async processing by the worker fleet.  Poll GET /tasks/:jobId or connect to the `/jobs` WebSocket namespace (`job:update` event) for real-time status updates.
      */
-    post: operations['TasksController_createHeavyJob'];
+    post: Operations['TasksController_createHeavyJob'];
     delete?: never;
     options?: never;
     head?: never;
@@ -331,7 +331,7 @@ export interface paths {
      * Get job status
      * @description Returns the current lifecycle status, result (on success), and error message (on failure) of a background job.  Scoped to the caller's tenant to prevent cross-tenant data leakage.  Use as a polling fallback when the `/jobs` WebSocket namespace is not available.
      */
-    get: operations['TasksController_getJobStatus'];
+    get: Operations['TasksController_getJobStatus'];
     put?: never;
     post?: never;
     delete?: never;
@@ -351,7 +351,7 @@ export interface paths {
      * List activity logs for an organisation
      * @description Returns a paginated, newest-first list of activity log entries scoped to the given organisation. Accessible only to members with OWNER or ADMIN role.
      */
-    get: operations['ActivityLogController_list'];
+    get: Operations['ActivityLogController_list'];
     put?: never;
     post?: never;
     delete?: never;
@@ -373,7 +373,7 @@ export interface paths {
      * Create a Stripe Checkout session
      * @description Creates a Stripe Checkout session for purchasing a subscription plan. Returns a redirect URL the user should be sent to. Optionally accepts an Idempotency-Key header to prevent duplicate sessions on retried requests — the key is forwarded directly to the Stripe API.
      */
-    post: operations['BillingController_createCheckoutSession'];
+    post: Operations['BillingController_createCheckoutSession'];
     delete?: never;
     options?: never;
     head?: never;
@@ -393,7 +393,7 @@ export interface paths {
      * Create a Stripe Billing Portal session
      * @description Creates a Stripe Billing Portal session for subscription management. Returns a URL the user should be redirected to.
      */
-    post: operations['BillingController_createPortalSession'];
+    post: Operations['BillingController_createPortalSession'];
     delete?: never;
     options?: never;
     head?: never;
@@ -411,7 +411,7 @@ export interface paths {
      * Get current subscription state
      * @description Returns the billing subscription state for the specified organization.
      */
-    get: operations['BillingController_getSubscription'];
+    get: Operations['BillingController_getSubscription'];
     put?: never;
     post?: never;
     delete?: never;
@@ -433,7 +433,7 @@ export interface paths {
      * Cancel active subscription
      * @description Schedules the active subscription for cancellation at the end of the current billing period.
      */
-    post: operations['BillingController_cancelSubscription'];
+    post: Operations['BillingController_cancelSubscription'];
     delete?: never;
     options?: never;
     head?: never;
@@ -451,7 +451,7 @@ export interface paths {
      * Get subscription snapshot history
      * @description Returns a paginated, newest-first list of immutable SubscriptionSnapshot records for the specified organization. Each entry captures the subscription state at the time a Stripe lifecycle event was processed. Intended for internal audit UI.
      */
-    get: operations['BillingController_getSubscriptionHistory'];
+    get: Operations['BillingController_getSubscriptionHistory'];
     put?: never;
     post?: never;
     delete?: never;
@@ -473,7 +473,7 @@ export interface paths {
      * Stripe webhook endpoint
      * @description Receives and processes Stripe webhook events. Security is enforced via HMAC signature verification (stripe-signature header).
      */
-    post: operations['WebhookController_handleWebhook'];
+    post: Operations['WebhookController_handleWebhook'];
     delete?: never;
     options?: never;
     head?: never;
@@ -491,7 +491,7 @@ export interface paths {
      * Get plan entitlements for an organization
      * @description Returns the full set of feature flags and the resolved plan tier for the organization. Result is cached in Redis.
      */
-    get: operations['FeatureFlagsController_getEntitlements'];
+    get: Operations['FeatureFlagsController_getEntitlements'];
     put?: never;
     post?: never;
     delete?: never;
@@ -513,7 +513,7 @@ export interface paths {
      * Invalidate the entitlements cache for an organization
      * @description Removes the cached entitlements from Redis. The next request to GET /entitlements will re-derive the entitlements from the database. Intended for administrative use or when a plan change must take effect immediately.
      */
-    post: operations['FeatureFlagsController_invalidateCache'];
+    post: Operations['FeatureFlagsController_invalidateCache'];
     delete?: never;
     options?: never;
     head?: never;
@@ -528,10 +528,10 @@ export interface paths {
       cookie?: never;
     };
     /** List notifications for the authenticated user */
-    get: operations['NotificationsController_getNotifications'];
+    get: Operations['NotificationsController_getNotifications'];
     put?: never;
     /** Create a notification (internal / admin use) */
-    post: operations['NotificationsController_createNotification'];
+    post: Operations['NotificationsController_createNotification'];
     delete?: never;
     options?: never;
     head?: never;
@@ -546,7 +546,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get unread notification count for the authenticated user */
-    get: operations['NotificationsController_getUnreadCount'];
+    get: Operations['NotificationsController_getUnreadCount'];
     put?: never;
     post?: never;
     delete?: never;
@@ -569,7 +569,7 @@ export interface paths {
     options?: never;
     head?: never;
     /** Mark a single notification as read */
-    patch: operations['NotificationsController_markAsRead'];
+    patch: Operations['NotificationsController_markAsRead'];
     trace?: never;
   };
   '/notifications/read': {
@@ -586,7 +586,7 @@ export interface paths {
     options?: never;
     head?: never;
     /** Mark multiple notifications as read */
-    patch: operations['NotificationsController_markManyAsRead'];
+    patch: Operations['NotificationsController_markManyAsRead'];
     trace?: never;
   };
   '/notifications/{id}': {
@@ -600,7 +600,7 @@ export interface paths {
     put?: never;
     post?: never;
     /** Delete a notification */
-    delete: operations['NotificationsController_deleteNotification'];
+    delete: Operations['NotificationsController_deleteNotification'];
     options?: never;
     head?: never;
     patch?: never;
@@ -619,7 +619,7 @@ export interface paths {
      * Generate a presigned upload URL
      * @description Creates a file metadata record and returns a presigned URL for uploading the file directly to S3. The client must upload the file to the returned URL, then call the confirm endpoint.
      */
-    post: operations['StorageController_generateUploadUrl'];
+    post: Operations['StorageController_generateUploadUrl'];
     delete?: never;
     options?: never;
     head?: never;
@@ -639,7 +639,7 @@ export interface paths {
      * Confirm file upload completion
      * @description Verifies that the file has been successfully uploaded to storage and marks the file as COMPLETED. This endpoint must be called after uploading the file to the presigned URL.
      */
-    post: operations['StorageController_confirmUpload'];
+    post: Operations['StorageController_confirmUpload'];
     delete?: never;
     options?: never;
     head?: never;
@@ -657,7 +657,7 @@ export interface paths {
      * Generate a presigned download URL
      * @description Generates a presigned URL for downloading the file directly from S3. The URL expires after a configured duration (default 1 hour).
      */
-    get: operations['StorageController_generateDownloadUrl'];
+    get: Operations['StorageController_generateDownloadUrl'];
     put?: never;
     post?: never;
     delete?: never;
@@ -677,14 +677,14 @@ export interface paths {
      * Get file metadata
      * @description Returns metadata for a specific file.
      */
-    get: operations['StorageController_getFile'];
+    get: Operations['StorageController_getFile'];
     put?: never;
     post?: never;
     /**
      * Delete a file
      * @description Deletes the file from storage and removes its metadata. This operation cannot be undone.
      */
-    delete: operations['StorageController_deleteFile'];
+    delete: Operations['StorageController_deleteFile'];
     options?: never;
     head?: never;
     patch?: never;
@@ -701,7 +701,7 @@ export interface paths {
      * List organization files
      * @description Returns a list of files for the current organization.
      */
-    get: operations['StorageController_listFiles'];
+    get: Operations['StorageController_listFiles'];
     put?: never;
     post?: never;
     delete?: never;
@@ -712,7 +712,7 @@ export interface paths {
   };
 }
 export type webhooks = Record<string, never>;
-export interface components {
+export interface Components {
   schemas: {
     CreateOrganizationDto: {
       /**
@@ -745,19 +745,24 @@ export interface components {
        * @example MEMBER
        * @enum {string}
        */
-      role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+      role: Components['schemas']['MembershipRole'];
     };
     /**
      * @description New role to assign to the member. OWNER has full control; ADMIN can manage members; MEMBER has standard access; READ_ONLY can only view.
      * @enum {string}
      */
     MembershipRole: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+    /**
+     * @description Membership lifecycle status.
+     * @enum {string}
+     */
+    MembershipStatus: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
     UpdateMembershipDto: {
       /**
        * @description New role to assign to the member. OWNER has full control; ADMIN can manage members; MEMBER has standard access; READ_ONLY can only view.
        * @example ADMIN
        */
-      role: components['schemas']['MembershipRole'];
+      role: Components['schemas']['MembershipRole'];
     };
     InviteMemberDto: {
       /**
@@ -771,7 +776,7 @@ export interface components {
        * @example MEMBER
        * @enum {string}
        */
-      role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+      role: Components['schemas']['MembershipRole'];
     };
     CreateTaskDto: {
       /**
@@ -1040,7 +1045,7 @@ export interface components {
     };
     BillingHistoryResponseDto: {
       /** @description Ordered list of subscription snapshots (newest first). */
-      items: components['schemas']['SubscriptionSnapshotItemDto'][];
+      items: Components['schemas']['SubscriptionSnapshotItemDto'][];
       /**
        * @description Total number of snapshots for this organization.
        * @example 42
@@ -1272,7 +1277,7 @@ export interface components {
   pathItems: never;
 }
 export type $defs = Record<string, never>;
-export interface operations {
+export interface Operations {
   AppController_getHello: {
     parameters: {
       query?: never;
@@ -1538,7 +1543,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateOrganizationDto'];
+        'application/json': Components['schemas']['CreateOrganizationDto'];
       };
     };
     responses: {
@@ -1673,7 +1678,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpdateOrganizationDto'];
+        'application/json': Components['schemas']['UpdateOrganizationDto'];
       };
     };
     responses: {
@@ -1972,12 +1977,12 @@ export interface operations {
              * @example ADMIN
              * @enum {string}
              */
-            role?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+            role?: Components['schemas']['MembershipRole'];
             /**
              * @example ACTIVE
              * @enum {string}
              */
-            status?: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+            status?: Components['schemas']['MembershipStatus'];
             /**
              * Format: date-time
              * @example 2026-02-26T12:34:56.789Z
@@ -2034,7 +2039,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateMembershipDto'];
+        'application/json': Components['schemas']['CreateMembershipDto'];
       };
     };
     responses: {
@@ -2064,12 +2069,12 @@ export interface operations {
              * @example MEMBER
              * @enum {string}
              */
-            role: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+            role: Components['schemas']['MembershipRole'];
             /**
              * @example ACTIVE
              * @enum {string}
              */
-            status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+            status: Components['schemas']['MembershipStatus'];
             /**
              * Format: date-time
              * @example 2026-02-26T12:34:56.789Z
@@ -2169,7 +2174,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['UpdateMembershipDto'];
+        'application/json': Components['schemas']['UpdateMembershipDto'];
       };
     };
     responses: {
@@ -2199,12 +2204,12 @@ export interface operations {
              * @example ADMIN
              * @enum {string}
              */
-            role?: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ_ONLY';
+            role?: Components['schemas']['MembershipRole'];
             /**
              * @example ACTIVE
              * @enum {string}
              */
-            status?: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+            status?: Components['schemas']['MembershipStatus'];
             /**
              * Format: date-time
              * @example 2026-02-26T12:34:56.789Z
@@ -2260,7 +2265,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['InviteMemberDto'];
+        'application/json': Components['schemas']['InviteMemberDto'];
       };
     };
     responses: {
@@ -2366,7 +2371,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateTaskDto'];
+        'application/json': Components['schemas']['CreateTaskDto'];
       };
     };
     responses: {
@@ -2449,7 +2454,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['JobStatusDto'];
+          'application/json': Components['schemas']['JobStatusDto'];
         };
       };
       /** @description Missing or invalid JWT token. */
@@ -2529,7 +2534,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateCheckoutSessionDto'];
+        'application/json': Components['schemas']['CreateCheckoutSessionDto'];
       };
     };
     responses: {
@@ -2539,7 +2544,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['CheckoutSessionResponseDto'];
+          'application/json': Components['schemas']['CheckoutSessionResponseDto'];
         };
       };
       /** @description Validation failed — missing or invalid request body fields. */
@@ -2574,7 +2579,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreatePortalSessionDto'];
+        'application/json': Components['schemas']['CreatePortalSessionDto'];
       };
     };
     responses: {
@@ -2584,7 +2589,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['PortalSessionResponseDto'];
+          'application/json': Components['schemas']['PortalSessionResponseDto'];
         };
       };
       /** @description Validation failed — missing or invalid request body fields. */
@@ -2628,7 +2633,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['SubscriptionResponseDto'];
+          'application/json': Components['schemas']['SubscriptionResponseDto'];
         };
       };
       /** @description Missing or invalid JWT bearer token. */
@@ -2656,7 +2661,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CancelSubscriptionDto'];
+        'application/json': Components['schemas']['CancelSubscriptionDto'];
       };
     };
     responses: {
@@ -2666,7 +2671,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['CancelSubscriptionResponseDto'];
+          'application/json': Components['schemas']['CancelSubscriptionResponseDto'];
         };
       };
       /** @description Validation failed — missing or invalid request body fields. */
@@ -2714,7 +2719,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['BillingHistoryResponseDto'];
+          'application/json': Components['schemas']['BillingHistoryResponseDto'];
         };
       };
       /** @description Missing or invalid JWT bearer token. */
@@ -2914,7 +2919,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['CreateNotificationDto'];
+        'application/json': Components['schemas']['CreateNotificationDto'];
       };
     };
     responses: {
@@ -3014,7 +3019,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['MarkManyReadDto'];
+        'application/json': Components['schemas']['MarkManyReadDto'];
       };
     };
     responses: {
@@ -3085,7 +3090,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['GenerateUploadUrlDto'];
+        'application/json': Components['schemas']['GenerateUploadUrlDto'];
       };
     };
     responses: {
@@ -3095,7 +3100,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['UploadUrlResponseDto'];
+          'application/json': Components['schemas']['UploadUrlResponseDto'];
         };
       };
       /** @description Validation failed — invalid file size or MIME type. */
@@ -3123,7 +3128,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['ConfirmUploadDto'];
+        'application/json': Components['schemas']['ConfirmUploadDto'];
       };
     };
     responses: {
@@ -3133,7 +3138,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['ConfirmUploadResponseDto'];
+          'application/json': Components['schemas']['ConfirmUploadResponseDto'];
         };
       };
       /** @description File not uploaded, expired, or already confirmed. */
@@ -3170,7 +3175,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['DownloadUrlResponseDto'];
+          'application/json': Components['schemas']['DownloadUrlResponseDto'];
         };
       };
       /** @description File is not available for download (not in COMPLETED status). */
@@ -3207,7 +3212,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['FileMetadataResponseDto'];
+          'application/json': Components['schemas']['FileMetadataResponseDto'];
         };
       };
       /** @description File not found. */
@@ -3267,7 +3272,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['FileMetadataResponseDto'][];
+          'application/json': Components['schemas']['FileMetadataResponseDto'][];
         };
       };
     };

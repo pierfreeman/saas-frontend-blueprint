@@ -2,7 +2,7 @@
  * Planning API types — derived from the backend response DTOs.
  * These types mirror the backend planning controller's request/response shapes.
  * When backend swagger.json generation is available, these can be replaced with
- * OpenAPI-generated types via: components['schemas']['...'] and operations['...']
+ * OpenAPI-generated types via: Components['schemas']['...'] and Operations['...']
  */
 
 // ── Enums ─────────────────────────────────────────────────────────────────────

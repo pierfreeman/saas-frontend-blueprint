@@ -1,20 +1,20 @@
-import type { components } from '@saas-frontend/shared/util-types';
+import type { Components } from '@saas-frontend/shared/util-types';
 
 export type GenerateUploadUrlDto =
-  components['schemas']['GenerateUploadUrlDto'];
-export type ConfirmUploadDto = components['schemas']['ConfirmUploadDto'];
+  Components['schemas']['GenerateUploadUrlDto'];
+export type ConfirmUploadDto = Components['schemas']['ConfirmUploadDto'];
 
 export interface ListFilesParams {
   limit?: number;
   offset?: number;
 }
 
-export type UploadUrlResponse = components['schemas']['UploadUrlResponseDto'];
+export type UploadUrlResponse = Components['schemas']['UploadUrlResponseDto'];
 export type ConfirmUploadResponse =
-  components['schemas']['ConfirmUploadResponseDto'];
+  Components['schemas']['ConfirmUploadResponseDto'];
 export type DownloadUrlResponse =
-  components['schemas']['DownloadUrlResponseDto'];
-export type FileMetadata = components['schemas']['FileMetadataResponseDto'];
+  Components['schemas']['DownloadUrlResponseDto'];
+export type FileMetadata = Components['schemas']['FileMetadataResponseDto'];
 
 /**
  * Response from GET /files/quota.

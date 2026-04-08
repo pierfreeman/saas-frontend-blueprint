@@ -1,19 +1,19 @@
-import type { components, operations } from '@saas-frontend/shared/util-types';
+import type { Components, Operations } from '@saas-frontend/shared/util-types';
 
-export type CreateMembershipDto = components['schemas']['CreateMembershipDto'];
-export type UpdateMembershipDto = components['schemas']['UpdateMembershipDto'];
-export type MembershipRole = components['schemas']['MembershipRole'];
-export type InviteMemberDto = components['schemas']['InviteMemberDto'];
+export type CreateMembershipDto = Components['schemas']['CreateMembershipDto'];
+export type UpdateMembershipDto = Components['schemas']['UpdateMembershipDto'];
+export type MembershipRole = Components['schemas']['MembershipRole'];
+export type InviteMemberDto = Components['schemas']['InviteMemberDto'];
 
 export type Membership =
-  operations['MembershipsController_create']['responses']['201']['content']['application/json'];
+  Operations['MembershipsController_create']['responses']['201']['content']['application/json'];
 
 export type MembershipSummary = NonNullable<
-  operations['MembershipsController_findByOrg']['responses']['200']['content']['application/json']
+  Operations['MembershipsController_findByOrg']['responses']['200']['content']['application/json']
 >[number];
 
 export type DeleteMembershipResponse =
-  operations['MembershipsController_delete']['responses']['200']['content']['application/json'];
+  Operations['MembershipsController_delete']['responses']['200']['content']['application/json'];
 
 export type InviteMemberResponse =
-  operations['MembershipsController_invite']['responses']['201']['content']['application/json'];
+  Operations['MembershipsController_invite']['responses']['201']['content']['application/json'];

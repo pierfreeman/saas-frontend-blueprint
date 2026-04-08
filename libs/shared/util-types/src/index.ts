@@ -3,7 +3,7 @@ export { ADMIN_API_BASE_URL } from './lib/admin-api-base-url.token';
 export type {
   paths,
   webhooks,
-  components,
+  Components,
   $defs,
-  operations,
+  Operations,
 } from './lib/openapi.types';
