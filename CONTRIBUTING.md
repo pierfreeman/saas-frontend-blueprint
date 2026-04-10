@@ -29,7 +29,7 @@ saas-frontend-blueprint/
 │   ├── shell/      ← Host MFE (port 4200): routing, layout, guards, global providers
 │   ├── auth/       ← Auth MFE (port 4201): login, Auth0 callback
 │   ├── platform/   ← Platform MFE (port 4202): dashboard, members, settings, billing
-│   └── admin/      ← Admin MFE (port 4203): super-admin backoffice portal
+│   └── admin/      ← Standalone SPA (port 4203): super-admin backoffice portal (own Auth0 app, independent deployment)
 └── libs/
     ├── shared/util-types/          ← API_BASE_URL token + OpenAPI types (no logic)
     ├── shared/util-rbac/           ← PermissionsService, *hasPermission, *hasPlan, *hasEntitlement directives
@@ -120,9 +120,9 @@ apps/{remote}/src/
     environment.ts
 ```
 
-**Currently using Pattern B:** `auth`, `platform`, `admin`.
+**Currently using Pattern B:** `auth`, `platform`.
 
-The `admin` MFE exposes routes under `/admin` and is protected by `isSystemAdminGuard` in the shell (not `orgGuard`). Only users with `isSystemAdmin: true` in `AuthStore` can access these routes.
+> **`admin` is no longer a Module Federation remote.** It is a fully independent standalone Angular SPA with its own Auth0 application (`SaaS Admin Portal`), its own API resource server (`SaaS Admin API`), and its own `AdminUser` identity in the legal database. The shell links to it via a plain external URL (`ADMIN_APP_URL`) and does NOT load it as a remote bundle.
 
 The admin entitlements tab uses `AdminApi.listOverrides()`, `setOverride()`, and `deleteOverride()`. Override records include `createdByName` (resolved server-side from the admin’s user record) displayed in the “Set by” column.
 
@@ -421,7 +421,7 @@ Apps are rare. Add a new MFE only when you need a **distinct product surface** t
 npx nx g @nx/angular:remote {name} --host=shell --port={next-available-port}
 ```
 
-Ports are assigned sequentially: shell=4200, auth=4201, platform=4202, admin=4203. Use the next available.
+Ports are assigned sequentially: shell=4200, auth=4201, platform=4202. (admin=4203 is reserved for the standalone admin SPA — it is not a Module Federation remote.) Use the next available port after 4202.
 
 ### Step 2 — Configure Module Federation
 

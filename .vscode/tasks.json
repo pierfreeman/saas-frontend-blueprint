@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "serve: shell (+ auth, platform remotes)",
+      "type": "shell",
+      "command": "npx nx serve shell --devRemotes=auth,platform",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "serve: admin",
+      "type": "shell",
+      "command": "npx nx serve admin",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "serve: all (shell + admin)",
+      "dependsOn": [
+        "serve: shell (+ auth, platform remotes)",
+        "serve: admin"
+      ],
+      "dependsOrder": "parallel",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

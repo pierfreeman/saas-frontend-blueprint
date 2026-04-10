@@ -48,17 +48,6 @@ export const orgGuard: CanActivateFn = () => {
 };
 
 /**
- * Restricts a route to users flagged as system administrators (isSystemAdmin === true).
- * Redirects to '/' if the current user is not a system admin.
- */
-export const isSystemAdminGuard: CanActivateFn = () => {
-  const authStore = inject(AuthStore);
-  const router = inject(Router);
-  if (authStore.currentUser()?.isSystemAdmin) return true;
-  return router.createUrlTree(['/']);
-};
-
-/**
  * Checks that the current user holds the permission declared in route.data.requiredPermission.
  * Redirects to /dashboard when the permission is missing.
  * Routes without requiredPermission are always allowed through.

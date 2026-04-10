@@ -1,10 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { appRoutes } from './app.routes';
-import {
-  authGuard,
-  isSystemAdminGuard,
-  orgGuard,
-} from '@saas-frontend/shared/util-auth';
+import { authGuard, orgGuard } from '@saas-frontend/shared/util-auth';
 import { Route, Routes } from '@angular/router';
 import { RemoteConfigService } from './remote-config.service';
 
@@ -44,9 +40,10 @@ describe('appRoutes', () => {
     expect(platform?.canActivate).toContain(orgGuard);
   });
 
-  it('the admin child route is protected by isSystemAdminGuard', () => {
+  it('the admin child route exists and has a redirect guard', () => {
     const admin = children.find((r) => r.path === 'admin');
-    expect(admin?.canActivate).toContain(isSystemAdminGuard);
+    expect(admin).toBeDefined();
+    expect(admin?.canActivate).toHaveLength(1);
   });
 
   it('the wildcard route redirects to root', () => {
@@ -62,14 +59,6 @@ describe('appRoutes', () => {
   it('auth loadChildren resolves AUTH_ROUTES', async () => {
     const result = await TestBed.runInInjectionContext(() =>
       (authRoute!.loadChildren as () => Promise<unknown>)(),
-    );
-    expect(Array.isArray(result)).toBe(true);
-  });
-
-  it('admin loadChildren resolves ADMIN_ROUTES', async () => {
-    const admin = children.find((r) => r.path === 'admin');
-    const result = await TestBed.runInInjectionContext(() =>
-      (admin!.loadChildren as () => Promise<unknown>)(),
     );
     expect(Array.isArray(result)).toBe(true);
   });

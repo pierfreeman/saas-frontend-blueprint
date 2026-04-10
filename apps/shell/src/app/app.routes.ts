@@ -1,11 +1,22 @@
 import { inject } from '@angular/core';
 import {
   authGuard,
-  isSystemAdminGuard,
   orgGuard,
 } from '@saas-frontend/shared/util-auth';
 import { Route } from '@angular/router';
 import { RemoteConfigService } from './remote-config.service';
+import { DOCUMENT } from '@angular/common';
+import { environment } from '../environments/environment';
+
+/**
+ * Guard that immediately redirects the browser to the standalone Admin Portal.
+ * Admin is now a separate app deployed at environment.adminAppUrl.
+ */
+const adminExternalRedirectGuard = () => {
+  const doc = inject(DOCUMENT);
+  doc.defaultView?.location.replace(environment.adminAppUrl);
+  return false;
+};
 
 export const appRoutes: Route[] = [
   {
@@ -36,13 +47,10 @@ export const appRoutes: Route[] = [
           ),
       },
       {
+        // /admin redirects to the standalone admin portal (no longer an MFE remote)
         path: 'admin',
-        canActivate: [isSystemAdminGuard],
-        /* v8 ignore next 3 */
-        loadChildren: () =>
-          inject(RemoteConfigService).loadRoutes('admin', () =>
-            import('admin/Routes').then((m) => m.ADMIN_ROUTES),
-          ),
+        canActivate: [adminExternalRedirectGuard],
+        children: [],
       },
       {
         path: '',

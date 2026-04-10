@@ -16,6 +16,7 @@ import { MenuItem } from 'primeng/api';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { OrgContextService } from '@saas-frontend/shared/util-org-context';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -96,19 +97,6 @@ import { OrgContextService } from '@saas-frontend/shared/util-org-context';
             class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
           >
             <i class="pi pi-building"></i>
-          </a>
-        }
-
-        <!-- Admin Panel — system admins only -->
-        @if (isSystemAdmin()) {
-          <a
-            routerLink="/admin"
-            routerLinkActive="!text-primary"
-            pTooltip="Admin Panel"
-            tooltipPosition="right"
-            class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
-          >
-            <i class="pi pi-shield"></i>
           </a>
         }
 
@@ -197,16 +185,6 @@ import { OrgContextService } from '@saas-frontend/shared/util-org-context';
             <span class="text-sm">Organisation Settings</span>
           </a>
         }
-        @if (isSystemAdmin()) {
-          <a
-            routerLink="/admin"
-            routerLinkActive="bg-primary-50 !text-primary font-medium"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-surface-700 hover:bg-surface-50 transition-colors no-underline"
-          >
-            <i class="pi pi-shield text-lg w-5 text-center shrink-0"></i>
-            <span class="text-sm">Admin Panel</span>
-          </a>
-        }
       </nav>
 
       <!-- Bottom actions -->
@@ -287,10 +265,8 @@ export class NavbarComponent {
   /** Show the Organisation Settings icon only for OWNER and ADMIN. */
   readonly showOrgSettings = this.#orgContext.canManageOrg;
 
-  /** Show the Admin panel link only for system administrators. */
-  readonly isSystemAdmin = computed(
-    () => this.#authStore.currentUser()?.isSystemAdmin === true,
-  );
+  /** URL of the standalone admin portal. */
+  readonly adminAppUrl = environment.adminAppUrl;
 
   readonly avatarMenuItems: MenuItem[] = [
     {

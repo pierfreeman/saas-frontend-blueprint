@@ -1415,11 +1415,6 @@ export interface Operations {
              * @example https://lh3.googleusercontent.com/a/example
              */
             pictureUrl?: string | null;
-            /**
-             * @description Whether this user has system-admin access to the backoffice portal.
-             * @example false
-             */
-            isSystemAdmin: boolean;
           };
         };
       };
