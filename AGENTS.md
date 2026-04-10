@@ -8,8 +8,8 @@
 ## Project summary
 
 Multi-tenant SaaS frontend — **Nx 22**, **Angular 21**, **Webpack Module Federation**.
-Four MFEs: shell (host, 4200), auth (4201), platform (4202), admin (4203).
-Backend: [saas-backend-blueprint](../saas-backend-blueprint) (NestJS 11 + Prisma 6).
+Four apps: shell (host MFE, 4200), auth (remote, 4201), platform (remote, 4202), admin (standalone SPA, 4203).
+Backend: [saas-backend-blueprint](../saas-backend-blueprint) (NestJS 11 + Prisma 7).
 
 ## Key conventions (non-negotiable)
 
@@ -20,17 +20,18 @@ Backend: [saas-backend-blueprint](../saas-backend-blueprint) (NestJS 11 + Prisma
 - API services: `providedIn: 'root'`, return `Observable<T>`, never subscribe internally
 - Types from OpenAPI only — `import type { components } from '@saas-frontend/shared/util-types'`
 - `@saas-frontend/*` path aliases — import from barrel `index.ts`
-- MFE: share `@saas-frontend/*` as singletons, re-provide `API_BASE_URL` + `*Api` in remote `providers[]`
+- MFE: share `@saas-frontend/*` as singletons, re-provide `API_BASE_URL` + `*Api` in remote `providers[]` (shell/auth/platform only — admin is standalone)
 - Tests: Vitest 4 + jsdom, co-located `.spec.ts`, mock all APIs, `httpMock.verify()` in `afterEach`
 - Security: Auth0 SDK manages JWTs, `tenantInterceptor` for `x-org-id`, no secrets in `environment.ts`
 
 ## Commands
 
 ```sh
-npx nx serve shell --devRemotes=auth,platform,admin   # dev
-npx nx run-many -t test --all                          # tests
-npx nx run-many -t lint --all                          # lint
-npx nx run-many -t typecheck --all                     # type-check
+npx nx serve shell --devRemotes=auth,platform   # dev (admin served separately)
+npx nx serve admin                               # admin dev
+npx nx run-many -t test --all                   # tests
+npx nx run-many -t lint --all                   # lint
+npx nx run-many -t typecheck --all              # type-check
 ```
 
 ## Where to find detail
