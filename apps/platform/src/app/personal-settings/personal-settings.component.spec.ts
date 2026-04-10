@@ -13,7 +13,6 @@ const baseUser: User = {
   firstName: 'Alice',
   lastName: 'Smith',
   pictureUrl: null,
-  isSystemAdmin: false,
 };
 
 function setup(user: User | null = baseUser) {

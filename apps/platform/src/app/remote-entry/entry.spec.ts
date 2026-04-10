@@ -8,7 +8,6 @@ const mockUser: User = {
   id: 'user-1',
   email: 'test@example.com',
   auth0Id: 'auth0|123',
-  isSystemAdmin: false,
 };
 
 describe('RemoteEntry', () => {
