@@ -1,32 +1,47 @@
 # admin
 
-**Admin MFE** (`port 4203`) — super-admin backoffice portal. Provides internal operations tooling: org inspection, member management, billing oversight, and cross-tenant activity log. Accessible only to users with `isSystemAdmin === true`.
-
-Loaded by the shell at `/admin`. Exposes a single `./Routes` entry point.
+**Admin app** (`port 4203`) — standalone backoffice portal for internal operations.
+Independently deployed Angular SPA (not a Module Federation remote).
+Provides org inspection, member management, billing oversight, entitlements management, and cross-tenant activity log.
 
 ---
 
 ## Access control
 
-The shell applies **`isSystemAdminGuard`** to the `/admin` path — it reads `AuthStore.currentUser().isSystemAdmin` and redirects to `/` if the flag is `false`. The guard is defined in `@saas-frontend/shared/util-auth`.
+The admin app uses a **completely separate Auth0 application** from the tenant platform. Admin users are stored in the `admin_users` table in the legal DB — they are not tenant users and have no membership in the tenant platform.
 
-To grant admin access to a user, run the backend promotion script:
+Authentication flow:
 
-```sh
-cd saas-backend-blueprint
-node scripts/promote-admin.mjs <email> true
-```
+1. User visits `http://localhost:4203/login` → clicks "Sign In"
+2. Auth0 PKCE flow with the **Admin SPA Auth0 application** (`auth0ClientId` in environment)
+3. JWT carries audience `https://admin-api.saas-api.com` — rejected by the tenant API
+4. `admin-api` (port 3001) validates the JWT via `AdminJwtAuthGuard`, upserts into `admin_users`
+5. All admin API calls attach `Authorization: Bearer <jwt>` via `AuthHttpInterceptor`
+
+To provision a new admin user, they must first log in via Auth0 (the Admin-Users-DB connection). The `admin_users` record is created automatically on first login.
+
+**Auth0 dashboard settings required:**
+
+| Setting               | Value                                 |
+| --------------------- | ------------------------------------- |
+| Allowed Callback URLs | `http://localhost:4203/auth/callback` |
+| Allowed Logout URLs   | `http://localhost:4203/login`         |
+| Allowed Web Origins   | `http://localhost:4203`               |
 
 ---
 
 ## Routes
 
-| Route                         | Component                     | Description                                  |
-| ----------------------------- | ----------------------------- | -------------------------------------------- |
-| `/admin`                      | — (redirect)                  | Redirects to `/admin/organizations`          |
-| `/admin/organizations`        | `AdminOrganizationsComponent` | Paginated org list, search, status filter    |
-| `/admin/organizations/:orgId` | `AdminOrgDetailComponent`     | Org detail + 8-tab panel                     |
-| `/admin/activity-log`         | `AdminAllActivityComponent`   | Cross-tenant activity log, date range filter |
+| Route                   | Component                     | Description                                  |
+| ----------------------- | ----------------------------- | -------------------------------------------- |
+| `/login`                | `AdminLoginComponent`         | Auth0 login page                             |
+| `/auth/callback`        | `AdminCallbackComponent`      | Auth0 PKCE callback handler                  |
+| `/`                     | — (redirect)                  | Redirects to `/organizations`                |
+| `/organizations`        | `AdminOrganizationsComponent` | Paginated org list, search, status filter    |
+| `/organizations/:orgId` | `AdminOrgDetailComponent`     | Org detail + 8-tab panel                     |
+| `/activity-log`         | `AdminAllActivityComponent`   | Cross-tenant activity log, date range filter |
+
+All routes under `/` require `AuthGuard` (Auth0 authentication).
 
 ### Org detail tabs (`AdminOrgDetailComponent`)
 
@@ -43,15 +58,49 @@ node scripts/promote-admin.mjs <email> true
 
 ---
 
+## Layout
+
+`AdminLayoutComponent` (`src/app/layout/`) wraps all protected routes and provides:
+
+- **Icon-only sidebar** (same style as platform shell): `w-17`, brand shield icon, nav icons with tooltips
+- **Topbar** (`h-16`): "Admin Portal" label
+- **Contextual menu** (`pi-ellipsis-v`): Logout
+- **Content area**: `flex-1 overflow-auto p-6`
+
+Adding a new nav item: append an object to `NAV_ITEMS` in `entry.routes.ts` and add a corresponding `<a>` in the sidebar template.
+
+---
+
+## Environment
+
+```ts
+// src/environments/environment.ts
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:3000', // tenant API (not used directly)
+  adminApiUrl: 'http://localhost:3001', // admin API
+  auth0Domain: '...', // Admin Auth0 application domain
+  auth0ClientId: '...', // Admin Auth0 client ID
+  auth0Audience: 'https://admin-api.saas-api.com',
+  auth0RedirectUri: 'http://localhost:4203/auth/callback',
+};
+```
+
+---
+
 ## File structure
 
 ```
 src/app/
+  app.routes.ts          — top-level routes (login, callback, protected)
+  app.config.ts          — appConfig: Auth0, HttpClient, PrimeNG, router
+  layout/
+    admin-layout.component.ts    — sidebar + topbar + router-outlet
+  auth/
+    admin-login.component.ts     — full-screen login page
+    admin-callback.component.ts  — Auth0 PKCE callback
   remote-entry/
-    entry.ts             — re-exports ADMIN_ROUTES
-    entry.routes.ts      — route group: providers[] + lazy child routes
-  admin-dashboard/
-    admin-dashboard.component.ts    — landing card (logged-in user info)
+    entry.routes.ts      — protected route group: AdminLayoutComponent + lazy children
   organizations/
     admin-organizations.component.ts         — org list page (search, status filter)
     admin-organizations.component.spec.ts
@@ -77,6 +126,23 @@ src/app/
     admin-all-activity.component.ts          — cross-tenant activity log page
     admin-all-activity.component.spec.ts
 ```
+
+---
+
+## Development
+
+```sh
+# Start from saas-frontend-blueprint root
+npx nx serve admin           # http://localhost:4203
+
+# Typecheck
+npx nx typecheck admin
+
+# Tests
+npx nx test admin
+```
+
+Backend required: `apps/admin-api` (port 3001). See `saas-backend-blueprint/apps/admin-api/README.md`.
 
 ---
 
@@ -157,7 +223,6 @@ Deferred items from `saas-context-docs/docs/features/admin-backoffice-portal/def
 
 ### Security Hardening (Phase 4)
 
-- **Separate admin user base** — replace the `isSystemAdmin` flag on the tenant `User` model with a completely independent identity layer: a dedicated `AdminUser` table (in the legal audit DB or a separate admin DB), backed by its own Auth0 application and tenant. The two user bases are entirely unrelated — a compromise of the tenant platform cannot escalate to backoffice access. The `SystemAdminGuard` would validate JWTs issued by the admin Auth0 app against a separate JWKS endpoint, and the `apps/admin-api` bootstrap would configure its own `JwtStrategy` pointing at the admin Auth0 tenant.
 - **Multi-role internal RBAC** — five internal roles (`SUPER_ADMIN`, `ACCOUNT_MANAGER`, `SUPPORT_AGENT`, `FINANCE_OPERATOR`, `READ_ONLY`) with a per-domain permissions matrix. Requires `AdminRole` enum + `AdminMembership` DB table; `SystemAdminGuard` evolves into a composable guard reading `AdminMembership.role`.
 - **MFA enforcement** — mandatory MFA for backoffice access, enforced at the Auth0 organization-policy level (not in application code).
 - **IP allowlist / VPN enforcement** — `ADMIN_IP_ALLOWLIST` env var processed by NestJS middleware on `admin-api`.

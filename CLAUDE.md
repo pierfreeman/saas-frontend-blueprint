@@ -11,7 +11,7 @@
 Production-ready **multi-tenant SaaS frontend** built as an Nx 22 monorepo.
 Four independently deployable Angular 21 micro-frontends (MFEs) via Webpack Module Federation, sharing a unified design system (PrimeNG 21 Aura + Tailwind CSS v4) and a type-safe API client layer generated from the backend OpenAPI schema.
 
-Pairs with [saas-backend-blueprint](../saas-backend-blueprint) (NestJS 11 + Prisma 6).
+Pairs with [saas-backend-blueprint](../saas-backend-blueprint) (NestJS 11 + Prisma 7).
 
 ---
 
@@ -43,7 +43,7 @@ apps/
   shell/          → Host (port 4200): routing, layout, guards, global providers
   auth/           → Remote (port 4201): login, Auth0 callback
   platform/       → Remote (port 4202): dashboard, members, settings, billing, planning
-  admin/          → Remote (port 4203): super-admin (placeholder)
+  admin/          → Standalone SPA (port 4203): super-admin backoffice (dedicated Auth0 app, NO MF remote)
 
 libs/
   shared/
@@ -52,6 +52,7 @@ libs/
     util-rbac/        → PermissionsService, *hasPermission / *hasPlan directives
     util-org-context/ → OrgContextService — org switching, tenant store flushes
     util-error/       → errorInterceptor, ApiError type
+  admin/data-access/          → AdminApi (admin backoffice endpoints)
   auth/data-access/           → AuthStore (signals, sessionStorage), AuthApi
   organizations/data-access/  → OrganizationsStore (signals, localStorage), OrganizationsApi, tenantInterceptor
   memberships/data-access/    → MembershipsApi, MembershipsStore
@@ -73,18 +74,19 @@ libs/
 ### Module Federation topology
 
 - **Shell** is the only host. It owns global providers, Auth0 init, route guards, and the persistent layout (navbar + `<router-outlet>`).
-- **Remotes** (auth, platform, admin) each expose `./Routes` entry point. The shell loads them lazily via `loadChildren`.
+- **Remotes** (auth, platform) each expose `./Routes` entry point. The shell loads them lazily via `loadChildren`.
+- **Admin** is a **standalone SPA** (port 4203) — not a Module Federation remote. It has its own `app.config.ts` with a dedicated Auth0 configuration pointing to the admin Auth0 app (`ADMIN_AUTH0_*` env vars).
 - All `@saas-frontend/*` libs MUST be shared as **singletons** in every `module-federation.config.ts` — otherwise `InjectionToken` identity breaks across bundles.
 - Every remote MUST re-provide `API_BASE_URL` and all `*Api` services in its route group `providers[]` to avoid `NullInjectorError`.
 
 ### Four architectural patterns
 
-| Pattern | What                | Where                         | Purpose                                          |
-| ------- | ------------------- | ----------------------------- | ------------------------------------------------ |
-| A       | Shell host app      | `apps/shell/`                 | Global providers, routing, layout, guards        |
-| B       | Remote MFE app      | `apps/{auth,platform,admin}/` | Feature pages, `entry.routes.ts` with `./Routes` |
-| C       | data-access library | `libs/{domain}/data-access/`  | API service + types + optional store/interceptor |
-| D       | shared utility lib  | `libs/shared/{name}/`         | Tokens, types, constants — no business logic     |
+| Pattern | What                | Where                        | Purpose                                          |
+| ------- | ------------------- | ---------------------------- | ------------------------------------------------ |
+| A       | Shell host app      | `apps/shell/`                | Global providers, routing, layout, guards        |
+| B       | Remote MFE app      | `apps/{auth,platform}/`      | Feature pages, `entry.routes.ts` with `./Routes` |
+| C       | data-access library | `libs/{domain}/data-access/` | API service + types + optional store/interceptor |
+| D       | shared utility lib  | `libs/shared/{name}/`        | Tokens, types, constants — no business logic     |
 
 ### Request pipeline (interceptors in order)
 

@@ -1,13 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { appRoutes } from './app.routes';
-import {
-  authGuard,
-  isSystemAdminGuard,
-  orgGuard,
-} from '@saas-frontend/shared/util-auth';
+import { authGuard, orgGuard } from '@saas-frontend/shared/util-auth';
 import { Route, Routes } from '@angular/router';
 import { RemoteConfigService } from './remote-config.service';
-
+import { DOCUMENT } from '@angular/common';
 describe('appRoutes', () => {
   const authRoute = appRoutes.find((r) => r.path === 'auth');
   const layoutRoute = appRoutes.find((r) => r.path === '' && r.children);
@@ -44,14 +40,29 @@ describe('appRoutes', () => {
     expect(platform?.canActivate).toContain(orgGuard);
   });
 
-  it('the admin child route is protected by isSystemAdminGuard', () => {
+  it('the admin child route exists and has a redirect guard', () => {
     const admin = children.find((r) => r.path === 'admin');
-    expect(admin?.canActivate).toContain(isSystemAdminGuard);
+    expect(admin).toBeDefined();
+    expect(admin?.canActivate).toHaveLength(1);
   });
 
   it('the wildcard route redirects to root', () => {
     const wildcard = appRoutes.find((r) => r.path === '**');
     expect(wildcard?.redirectTo).toBe('');
+  });
+
+  it('admin redirect guard calls location.replace and returns false', () => {
+    const mockReplace = vi.fn();
+    TestBed.overrideProvider(DOCUMENT, {
+      useValue: { defaultView: { location: { replace: mockReplace } } },
+    });
+
+    const adminRoute = children.find((r) => r.path === 'admin')!;
+    const guard = adminRoute.canActivate![0] as () => boolean;
+    const result = TestBed.runInInjectionContext(() => guard());
+
+    expect(mockReplace).toHaveBeenCalled();
+    expect(result).toBe(false);
   });
 
   // ── Lazy loader functions ────────────────────────────────────────────────
@@ -62,14 +73,6 @@ describe('appRoutes', () => {
   it('auth loadChildren resolves AUTH_ROUTES', async () => {
     const result = await TestBed.runInInjectionContext(() =>
       (authRoute!.loadChildren as () => Promise<unknown>)(),
-    );
-    expect(Array.isArray(result)).toBe(true);
-  });
-
-  it('admin loadChildren resolves ADMIN_ROUTES', async () => {
-    const admin = children.find((r) => r.path === 'admin');
-    const result = await TestBed.runInInjectionContext(() =>
-      (admin!.loadChildren as () => Promise<unknown>)(),
     );
     expect(Array.isArray(result)).toBe(true);
   });

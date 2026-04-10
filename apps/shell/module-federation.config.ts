@@ -15,7 +15,6 @@ const config: ModuleFederationConfig = {
   remotes: [
     remote('auth', 'REMOTE_AUTH_URL'),
     remote('platform', 'REMOTE_PLATFORM_URL'),
-    remote('admin', 'REMOTE_ADMIN_URL'),
   ],
   shared: sharedMappings,
 };
