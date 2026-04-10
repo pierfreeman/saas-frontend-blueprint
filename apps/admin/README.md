@@ -8,7 +8,7 @@ Provides org inspection, member management, billing oversight, entitlements mana
 
 ## Access control
 
-The admin app uses a **completely separate Auth0 application** from the tenant platform. Admin users are stored in the `admin_users` table in the legal DB — they are not tenant users and have no `isSystemAdmin` flag.
+The admin app uses a **completely separate Auth0 application** from the tenant platform. Admin users are stored in the `admin_users` table in the legal DB — they are not tenant users and have no membership in the tenant platform.
 
 Authentication flow:
 
@@ -223,7 +223,6 @@ Deferred items from `saas-context-docs/docs/features/admin-backoffice-portal/def
 
 ### Security Hardening (Phase 4)
 
-- **Separate admin user base** — replace the `isSystemAdmin` flag on the tenant `User` model with a completely independent identity layer: a dedicated `AdminUser` table (in the legal audit DB or a separate admin DB), backed by its own Auth0 application and tenant. The two user bases are entirely unrelated — a compromise of the tenant platform cannot escalate to backoffice access. The `SystemAdminGuard` would validate JWTs issued by the admin Auth0 app against a separate JWKS endpoint, and the `apps/admin-api` bootstrap would configure its own `JwtStrategy` pointing at the admin Auth0 tenant.
 - **Multi-role internal RBAC** — five internal roles (`SUPER_ADMIN`, `ACCOUNT_MANAGER`, `SUPPORT_AGENT`, `FINANCE_OPERATOR`, `READ_ONLY`) with a per-domain permissions matrix. Requires `AdminRole` enum + `AdminMembership` DB table; `SystemAdminGuard` evolves into a composable guard reading `AdminMembership.role`.
 - **MFA enforcement** — mandatory MFA for backoffice access, enforced at the Auth0 organization-policy level (not in application code).
 - **IP allowlist / VPN enforcement** — `ADMIN_IP_ALLOWLIST` env var processed by NestJS middleware on `admin-api`.
