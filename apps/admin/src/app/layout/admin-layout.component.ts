@@ -9,10 +9,15 @@ import { MenuItem } from 'primeng/api';
   selector: 'app-admin-layout',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MenuModule, TooltipModule],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MenuModule,
+    TooltipModule,
+  ],
   template: `
     <div class="flex h-screen overflow-hidden bg-surface-100">
-
       <!-- Sidebar (icon-only, matches shell) -->
       <aside
         class="hidden lg:flex flex-col w-17 h-full bg-surface-0 border-r border-surface-200 shrink-0 select-none"
@@ -23,7 +28,9 @@ import { MenuItem } from 'primeng/api';
           class="flex items-center justify-center h-16 border-b border-surface-100 no-underline shrink-0"
           aria-label="Home"
         >
-          <div class="w-9 h-9 rounded-xl bg-gray-900 flex items-center justify-center">
+          <div
+            class="w-9 h-9 rounded-xl bg-gray-900 flex items-center justify-center"
+          >
             <i class="pi pi-shield text-white text-sm"></i>
           </div>
         </a>
@@ -42,7 +49,9 @@ import { MenuItem } from 'primeng/api';
         </nav>
 
         <!-- Bottom: contextual menu -->
-        <div class="flex flex-col items-center gap-1 pb-4 pt-2 border-t border-surface-100">
+        <div
+          class="flex flex-col items-center gap-1 pb-4 pt-2 border-t border-surface-100"
+        >
           <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body" />
           <button
             type="button"
@@ -59,7 +68,6 @@ import { MenuItem } from 'primeng/api';
 
       <!-- Main area -->
       <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
-
         <!-- Topbar -->
         <header
           class="flex items-center gap-3 px-4 lg:px-6 h-16 bg-surface-0 border-b border-surface-200 shrink-0"
@@ -86,7 +94,7 @@ export class AdminLayoutComponent {
       icon: 'pi pi-sign-out',
       command: () =>
         this.#auth0.logout({
-          logoutParams: { returnTo: window.location.origin + '/login' },
+          logoutParams: { returnTo: globalThis.location.origin + '/login' },
         }),
     },
   ];

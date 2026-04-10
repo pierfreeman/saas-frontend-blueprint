@@ -53,7 +53,7 @@ export class AdminAuthStore {
     this.clearUser();
     return firstValueFrom(
       this.#auth0.logout({
-        logoutParams: { returnTo: window.location.origin },
+        logoutParams: { returnTo: globalThis.location.origin },
       }),
     ).then(() => undefined);
   }

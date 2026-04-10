@@ -1,4 +1,3 @@
-import { inject } from '@angular/core';
 import { Route } from '@angular/router';
 import { AuthGuard } from '@auth0/auth0-angular';
 import { AdminLoginComponent } from './auth/admin-login.component';
