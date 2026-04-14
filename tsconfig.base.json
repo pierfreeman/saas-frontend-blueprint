@@ -35,6 +35,9 @@
       "@saas-frontend/activity-log/data-access": [
         "libs/activity-log/data-access/src/index.ts"
       ],
+      "@saas-frontend/ai/data-access": [
+        "libs/ai/data-access/src/index.ts"
+      ],
       "@saas-frontend/admin/data-access": [
         "libs/admin/data-access/src/index.ts"
       ],
