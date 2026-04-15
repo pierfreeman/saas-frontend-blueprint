@@ -4,6 +4,5 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "pierfreeman",
     "projectKey": "pierfreeman_saas-frontend-blueprint"
-  },
-  "typescript.tsdk": "node_modules/typescript/lib"
+  }
 }
