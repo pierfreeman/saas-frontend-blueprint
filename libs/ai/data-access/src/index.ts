@@ -4,5 +4,5 @@ export type {
   ChatMessage,
   ChatMessageRole,
   ChatRequest,
-  ChatResponse,
+  SseChunk,
 } from './lib/ai.api.types';

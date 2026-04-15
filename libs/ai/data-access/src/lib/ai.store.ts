@@ -1,5 +1,4 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
 import { AiApi } from './ai.api';
 import type { ChatMessage } from './ai.api.types';
 import type { ApiError } from '@saas-frontend/shared/util-error';
@@ -25,21 +24,35 @@ export class AiStore {
       content,
       createdAt: new Date().toISOString(),
     };
-    this.messages.update((msgs) => [...msgs, userMsg]);
+
+    const assistantMsg: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      content: '',
+      createdAt: new Date().toISOString(),
+    };
+
+    this.messages.update((msgs) => [...msgs, userMsg, assistantMsg]);
     this.loading.set(true);
     this.error.set(null);
 
     try {
-      const res = await firstValueFrom(
-        this.#api.sendMessage(orgId, {
-          message: content,
-          conversationId: this.conversationId() ?? undefined,
-        }),
-      );
-      this.conversationId.set(res.conversationId);
-      this.messages.update((msgs) => [...msgs, res.message]);
+      const stream = this.#api.streamChat(orgId, {
+        message: content,
+        conversationId: this.conversationId() ?? undefined,
+      });
+
+      for await (const chunk of stream) {
+        if (chunk.error) {
+          throw { status: 500, message: chunk.error };
+        }
+        if (chunk.content) {
+          this.#appendToLastAssistantMessage(chunk.content);
+        }
+      }
     } catch (err) {
       this.error.set(err as ApiError);
+      this.#removeEmptyAssistantMessage();
     } finally {
       this.loading.set(false);
     }
@@ -55,5 +68,29 @@ export class AiStore {
   /** Called by OrgContextService on org switch to flush tenant-scoped state. */
   flush(): void {
     this.clearConversation();
+  }
+
+  #appendToLastAssistantMessage(text: string): void {
+    this.messages.update((msgs) => {
+      const updated = [...msgs];
+      const last = updated[updated.length - 1];
+      if (last?.role === 'assistant') {
+        updated[updated.length - 1] = {
+          ...last,
+          content: last.content + text,
+        };
+      }
+      return updated;
+    });
+  }
+
+  #removeEmptyAssistantMessage(): void {
+    this.messages.update((msgs) => {
+      const last = msgs[msgs.length - 1];
+      if (last?.role === 'assistant' && !last.content) {
+        return msgs.slice(0, -1);
+      }
+      return msgs;
+    });
   }
 }

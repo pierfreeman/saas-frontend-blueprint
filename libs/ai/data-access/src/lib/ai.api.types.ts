@@ -1,9 +1,3 @@
-/**
- * AI Chat API types — local definitions.
- * No backend endpoints exist yet; replace with OpenAPI-generated
- * types once the backend AI controller is available.
- */
-
 export type ChatMessageRole = 'user' | 'assistant' | 'system';
 
 export interface ChatMessage {
@@ -18,7 +12,8 @@ export interface ChatRequest {
   conversationId?: string;
 }
 
-export interface ChatResponse {
-  conversationId: string;
-  message: ChatMessage;
+/** Shape of each SSE `data:` JSON chunk from the backend. */
+export interface SseChunk {
+  content?: string;
+  error?: string;
 }
