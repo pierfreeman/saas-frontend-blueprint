@@ -11,7 +11,6 @@ export class AiStore {
   readonly messages = signal<ChatMessage[]>([]);
   readonly loading = signal<boolean>(false);
   readonly error = signal<ApiError | null>(null);
-  readonly conversationId = signal<string | null>(null);
 
   readonly hasMessages = computed(() => this.messages().length > 0);
 
@@ -37,10 +36,7 @@ export class AiStore {
     this.error.set(null);
 
     try {
-      const stream = this.#api.streamChat(orgId, {
-        message: content,
-        conversationId: this.conversationId() ?? undefined,
-      });
+      const stream = this.#api.streamChat(orgId, { message: content });
 
       for await (const chunk of stream) {
         if (chunk.error) {
@@ -60,7 +56,6 @@ export class AiStore {
 
   clearConversation(): void {
     this.messages.set([]);
-    this.conversationId.set(null);
     this.error.set(null);
     this.loading.set(false);
   }

@@ -9,7 +9,6 @@ export interface ChatMessage {
 
 export interface ChatRequest {
   message: string;
-  conversationId?: string;
 }
 
 /** Shape of each SSE `data:` JSON chunk from the backend. */
