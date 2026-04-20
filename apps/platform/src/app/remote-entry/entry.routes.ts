@@ -24,6 +24,7 @@ import {
   PlanningApi,
   PlanningStore,
 } from '@saas-frontend/planning/data-access';
+import { AiApi, AiStore } from '@saas-frontend/ai/data-access';
 import { PermissionsService } from '@saas-frontend/shared/util-rbac';
 import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrgContextService } from '@saas-frontend/shared/util-org-context';
@@ -93,6 +94,8 @@ export const PLATFORM_ROUTES: Route[] = [
       StorageApi,
       PlanningApi,
       PlanningStore,
+      AiApi,
+      AiStore,
       PermissionsService,
     ],
     children: [
@@ -172,6 +175,12 @@ export const PLATFORM_ROUTES: Route[] = [
           import('@saas-frontend/planning/feature').then(
             (m) => m.FEATURE_PLANNING_ROUTES,
           ),
+      },
+      {
+        path: 'chat',
+        /* v8 ignore next 3 */
+        loadComponent: () =>
+          import('../chat/chat.component').then((m) => m.ChatComponent),
       },
       {
         path: 'notifications',

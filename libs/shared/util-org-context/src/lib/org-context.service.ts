@@ -6,6 +6,7 @@ import {
 } from '@saas-frontend/memberships/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import { NotificationsSocketService } from '@saas-frontend/notifications/data-access';
+import { AiStore } from '@saas-frontend/ai/data-access';
 
 /**
  * Single orchestration point for org-context state.
@@ -20,6 +21,7 @@ export class OrgContextService {
   readonly #membershipsStore = inject(MembershipsStore);
   readonly #entitlementsStore = inject(EntitlementsStore);
   readonly #notificationsWs = inject(NotificationsSocketService);
+  readonly #aiStore = inject(AiStore);
 
   /** The currently active organization ID — reactive signal. */
   readonly activeOrgId = computed(() => this.#orgsStore.activeOrgId());
@@ -65,6 +67,7 @@ export class OrgContextService {
     // 1. Flush all tenant-scoped state
     this.#membershipsStore.flush();
     this.#entitlementsStore.flush();
+    this.#aiStore.flush();
     this.#navRole.set(null);
 
     // 2. Disconnect WS before switching context so no stale org events arrive

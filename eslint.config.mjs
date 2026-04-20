@@ -67,6 +67,7 @@ export default [
               sourceTag: 'scope:shared',
               onlyDependOnLibsWithTags: [
                 'scope:shared',
+                'scope:ai',
                 'scope:auth',
                 'scope:organizations',
                 'scope:memberships',
@@ -115,6 +116,10 @@ export default [
             {
               allSourceTags: ['scope:activity-log', 'type:data-access'],
               onlyDependOnLibsWithTags: ['scope:activity-log', 'scope:shared'],
+            },
+            {
+              allSourceTags: ['scope:ai', 'type:data-access'],
+              onlyDependOnLibsWithTags: ['scope:ai', 'scope:shared'],
             },
           ],
         },

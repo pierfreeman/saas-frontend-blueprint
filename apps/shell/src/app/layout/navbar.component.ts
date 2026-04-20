@@ -80,6 +80,17 @@ import { OrgContextService } from '@saas-frontend/shared/util-org-context';
         >
           <i class="pi pi-folder"></i>
         </a>
+
+        <!-- AI Chat -->
+        <a
+          routerLink="/chat"
+          routerLinkActive="!text-primary"
+          pTooltip="AI Chat"
+          tooltipPosition="right"
+          class="flex items-center justify-center w-11 h-11 rounded-xl text-xl text-surface-400 hover:bg-surface-100 hover:text-surface-700 transition-colors no-underline"
+        >
+          <i class="pi pi-comments"></i>
+        </a>
       </nav>
 
       <!-- Bottom Actions -->
@@ -186,6 +197,14 @@ import { OrgContextService } from '@saas-frontend/shared/util-org-context';
         >
           <i class="pi pi-folder text-lg w-5 text-center shrink-0"></i>
           <span class="text-sm">Storage</span>
+        </a>
+        <a
+          routerLink="/chat"
+          routerLinkActive="bg-primary-50 !text-primary font-medium"
+          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-surface-700 hover:bg-surface-50 transition-colors no-underline"
+        >
+          <i class="pi pi-comments text-lg w-5 text-center shrink-0"></i>
+          <span class="text-sm">AI Chat</span>
         </a>
         @if (showOrgSettings()) {
           <a
