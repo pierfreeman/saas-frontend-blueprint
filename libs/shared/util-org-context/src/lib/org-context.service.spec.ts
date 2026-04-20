@@ -6,6 +6,7 @@ import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import { MembershipsStore } from '@saas-frontend/memberships/data-access';
 import { EntitlementsStore } from '@saas-frontend/entitlements/data-access';
 import { NotificationsSocketService } from '@saas-frontend/notifications/data-access';
+import { AiStore } from '@saas-frontend/ai/data-access';
 
 function makeOrgsStore(
   activeOrgId: string | null = null,
@@ -46,11 +47,18 @@ function makeNotificationsWs() {
   };
 }
 
+function makeAiStore() {
+  return {
+    flush: vi.fn(),
+  };
+}
+
 function setup(
   orgsStore = makeOrgsStore(),
   membershipsStore = makeMembershipsStore(),
   entitlementsStore = makeEntitlementsStore(),
   notificationsWs = makeNotificationsWs(),
+  aiStore = makeAiStore(),
 ) {
   TestBed.configureTestingModule({
     providers: [
@@ -58,6 +66,7 @@ function setup(
       { provide: MembershipsStore, useValue: membershipsStore },
       { provide: EntitlementsStore, useValue: entitlementsStore },
       { provide: NotificationsSocketService, useValue: notificationsWs },
+      { provide: AiStore, useValue: aiStore },
     ],
   });
   return {
@@ -66,6 +75,7 @@ function setup(
     membershipsStore,
     entitlementsStore,
     notificationsWs,
+    aiStore,
   };
 }
 
@@ -168,6 +178,12 @@ describe('OrgContextService', () => {
     const { service, entitlementsStore } = setup();
     service.switchOrg('org-2');
     expect(entitlementsStore.flush).toHaveBeenCalled();
+  });
+
+  it('switchOrg() flushes the AI store', () => {
+    const { service, aiStore } = setup();
+    service.switchOrg('org-2');
+    expect(aiStore.flush).toHaveBeenCalled();
   });
 
   it('switchOrg() disconnects the notifications WS', () => {
