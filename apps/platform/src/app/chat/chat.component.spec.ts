@@ -69,6 +69,58 @@ describe('ChatComponent', () => {
     });
   });
 
+  // ── rendering ───────────────────────────────────────────────────────────────
+
+  describe('rendering', () => {
+    it('shows empty state when there are no messages and not loading', () => {
+      const { fixture } = setup();
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.textContent).toContain('Start a conversation');
+    });
+
+    it('renders user and assistant messages', () => {
+      const { fixture } = setup({
+        messages: [
+          { id: '1', role: 'user', content: 'Hello', createdAt: '2026-01-01T00:00:00Z' },
+          { id: '2', role: 'assistant', content: 'Hi there', createdAt: '2026-01-01T00:00:01Z' },
+        ],
+      });
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.textContent).toContain('Hello');
+      expect(el.textContent).toContain('Hi there');
+    });
+
+    it('shows loading indicator when loading', () => {
+      const { fixture } = setup({ loading: true });
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.textContent).toContain('Thinking');
+    });
+
+    it('shows new-conversation button when messages exist and calls clearConversation on click', () => {
+      const { fixture, mockAiStore } = setup({
+        messages: [
+          { id: '1', role: 'user', content: 'Hello', createdAt: '2026-01-01T00:00:00Z' },
+        ],
+      });
+      // hasMessages should reflect that there are messages
+      (mockAiStore.hasMessages as ReturnType<typeof signal>).set(true);
+      fixture.detectChanges();
+      const btn = (fixture.nativeElement as HTMLElement).querySelector('p-button[icon="pi pi-plus"]');
+      expect(btn).toBeTruthy();
+      btn?.dispatchEvent(new Event('click', { bubbles: true }));
+      fixture.detectChanges();
+      expect(mockAiStore.clearConversation).toHaveBeenCalled();
+    });
+
+    it('shows error message when error is set', () => {
+      const { fixture } = setup({
+        error: { message: 'Something went wrong', status: 500 },
+      });
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.textContent).toContain('Failed to get a response');
+    });
+  });
+
   // ── onKeydown() ─────────────────────────────────────────────────────────────
 
   describe('onKeydown()', () => {
