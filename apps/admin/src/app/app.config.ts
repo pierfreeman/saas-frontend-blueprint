@@ -4,34 +4,56 @@ import {
 } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
-  withInterceptors,
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { AuthHttpInterceptor } from '@auth0/auth0-angular';
+import { AuthHttpInterceptor, provideAuth0 } from '@auth0/auth0-angular';
 import { appRoutes } from './app.routes';
-import { API_BASE_URL } from '@saas-frontend/shared/util-types';
-import { tenantInterceptor } from '@saas-frontend/organizations/data-access';
+import {
+  ADMIN_API_BASE_URL,
+  SaasTheme,
+} from '@saas-frontend/shared/util-types';
+import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
-  // These providers are only active when admin runs standalone (port 4203).
-  // When loaded through the shell, the shell's root providers take effect instead.
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideAnimationsAsync(),
     provideRouter(appRoutes),
-    provideHttpClient(
-      withInterceptorsFromDi(),
-      withInterceptors([tenantInterceptor]),
-    ),
+
+    // Auth0 — Admin-Users-DB SPA application
+    provideAuth0({
+      domain: environment.auth0Domain,
+      clientId: environment.auth0ClientId,
+      authorizationParams: {
+        redirect_uri: environment.auth0RedirectUri,
+        audience: environment.auth0Audience,
+      },
+      httpInterceptor: {
+        allowedList: [
+          {
+            // Attach Bearer token to all admin API calls
+            uri: `${environment.adminApiUrl}/admin/*`,
+            tokenOptions: {
+              authorizationParams: { audience: environment.auth0Audience },
+            },
+          },
+        ],
+      },
+    }),
+
+    provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: AuthHttpInterceptor, multi: true },
-    { provide: API_BASE_URL, useValue: 'http://localhost:3000' },
+    { provide: ADMIN_API_BASE_URL, useValue: environment.adminApiUrl },
+
     providePrimeNG({
-      theme: { preset: Aura, options: { darkModeSelector: 'false' } },
+      theme: {
+        preset: SaasTheme,
+        options: { darkModeSelector: '.dark' },
+      },
     }),
   ],
 };

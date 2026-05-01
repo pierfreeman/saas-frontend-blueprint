@@ -12,7 +12,6 @@ const mockUser: User = {
   id: 'u1',
   email: 'a@b.com',
   auth0Id: 'auth0|1',
-  isSystemAdmin: false,
 };
 const BASE = 'https://api.test';
 

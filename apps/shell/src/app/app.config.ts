@@ -14,52 +14,14 @@ import {
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { AuthHttpInterceptor, provideAuth0 } from '@auth0/auth0-angular';
-import { definePreset } from '@primeuix/themes';
-import Aura from '@primeuix/themes/aura';
 import { tenantInterceptor } from '@saas-frontend/organizations/data-access';
 import { errorInterceptor } from '@saas-frontend/shared/util-error';
-import { API_BASE_URL } from '@saas-frontend/shared/util-types';
+import { API_BASE_URL, SaasTheme } from '@saas-frontend/shared/util-types';
 import { MessageService } from 'primeng/api';
 import { providePrimeNG } from 'primeng/config';
 import { environment } from 'src/environments/environment';
 import { AppInitService } from './app-init.service';
 import { appRoutes } from './app.routes';
-
-const AppTheme = definePreset(Aura, {
-  semantic: {
-    primary: {
-      50: '{indigo.50}',
-      100: '{indigo.100}',
-      200: '{indigo.200}',
-      300: '{indigo.300}',
-      400: '{indigo.400}',
-      500: '{indigo.500}',
-      600: '{indigo.600}',
-      700: '{indigo.700}',
-      800: '{indigo.800}',
-      900: '{indigo.900}',
-      950: '{indigo.950}',
-    },
-    colorScheme: {
-      light: {
-        surface: {
-          0: '#ffffff',
-          50: '{zinc.50}',
-          100: '{zinc.100}',
-          200: '{zinc.200}',
-          300: '{zinc.300}',
-          400: '{zinc.400}',
-          500: '{zinc.500}',
-          600: '{zinc.600}',
-          700: '{zinc.700}',
-          800: '{zinc.800}',
-          900: '{zinc.900}',
-          950: '{zinc.950}',
-        },
-      },
-    },
-  },
-});
 
 // Prevents ngrok's interstitial warning page from being returned instead of the
 // actual API response. The header is ignored by non-ngrok servers.
@@ -83,7 +45,7 @@ export const appConfig: ApplicationConfig = {
     { provide: API_BASE_URL, useValue: environment.apiUrl },
     providePrimeNG({
       theme: {
-        preset: AppTheme,
+        preset: SaasTheme,
         options: {
           darkModeSelector: '.dark',
         },

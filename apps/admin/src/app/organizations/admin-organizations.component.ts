@@ -356,7 +356,7 @@ export class AdminOrganizationsComponent implements OnInit {
             summary: 'Organization provisioned',
             detail: `"${org.name}" created and invite sent to ${this.provisionForm.ownerEmail}.`,
           });
-          this.#router.navigate(['/admin/organizations', org.id]);
+          this.#router.navigate(['/organizations', org.id]);
         },
         error: () => {
           this.saving.set(false);
@@ -388,7 +388,7 @@ export class AdminOrganizationsComponent implements OnInit {
   }
 
   goToDetail(org: AdminOrganizationListItem): void {
-    this.#router.navigate(['/admin/organizations', org.id]);
+    this.#router.navigate(['/organizations', org.id]);
   }
 
   private load(): void {

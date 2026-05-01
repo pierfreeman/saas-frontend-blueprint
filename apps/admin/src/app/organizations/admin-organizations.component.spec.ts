@@ -141,7 +141,7 @@ describe('AdminOrganizationsComponent', () => {
     fixture.detectChanges();
     fixture.componentInstance.goToDetail(mockOrg);
     expect(mockRouter.navigate).toHaveBeenCalledWith([
-      '/admin/organizations',
+      '/organizations',
       'org-1',
     ]);
   });
@@ -191,7 +191,7 @@ describe('AdminOrganizationsComponent', () => {
       plan: 'FREE',
     });
     expect(mockRouter.navigate).toHaveBeenCalledWith([
-      '/admin/organizations',
+      '/organizations',
       'org-1',
     ]);
     expect(fixture.componentInstance.saving()).toBe(false);
@@ -239,7 +239,7 @@ describe('AdminOrganizationsComponent', () => {
     });
     expect(cards.length).toBeGreaterThan(0);
     expect(mockRouter.navigate).toHaveBeenCalledWith([
-      '/admin/organizations',
+      '/organizations',
       'org-1',
     ]);
   });

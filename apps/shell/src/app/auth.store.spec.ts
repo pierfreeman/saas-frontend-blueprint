@@ -8,7 +8,6 @@ const mockUser: User = {
   id: 'u1',
   email: 'a@b.com',
   auth0Id: 'auth0|1',
-  isSystemAdmin: false,
 };
 
 function mockApi(overrides: Partial<InstanceType<typeof AuthApi>> = {}) {

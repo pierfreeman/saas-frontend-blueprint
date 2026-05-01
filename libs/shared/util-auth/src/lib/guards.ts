@@ -1,7 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
-import { AuthStore } from '@saas-frontend/auth/data-access';
 import { OrganizationsStore } from '@saas-frontend/organizations/data-access';
 import type { Permission } from '@saas-frontend/shared/util-rbac';
 import { PermissionsService } from '@saas-frontend/shared/util-rbac';
@@ -45,17 +44,6 @@ export const orgGuard: CanActivateFn = () => {
   const router = inject(Router);
   if (orgsStore.hasActiveOrg()) return true;
   return router.createUrlTree(['/org/select']);
-};
-
-/**
- * Restricts a route to users flagged as system administrators (isSystemAdmin === true).
- * Redirects to '/' if the current user is not a system admin.
- */
-export const isSystemAdminGuard: CanActivateFn = () => {
-  const authStore = inject(AuthStore);
-  const router = inject(Router);
-  if (authStore.currentUser()?.isSystemAdmin) return true;
-  return router.createUrlTree(['/']);
 };
 
 /**

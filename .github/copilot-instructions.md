@@ -9,7 +9,7 @@
 
 Multi-tenant SaaS frontend — Nx 22 monorepo, Angular 21, Webpack Module Federation.
 Four independently deployable MFEs: shell (host), auth, platform, admin.
-Pairs with [saas-backend-blueprint](../saas-backend-blueprint) (NestJS 11 + Prisma 6).
+Pairs with [saas-backend-blueprint](../saas-backend-blueprint) (NestJS 11 + Prisma 7).
 
 ## Tech stack
 
@@ -21,13 +21,14 @@ Angular 21 (standalone, signals, `inject()`) · Nx 22 · Webpack Module Federati
 apps/shell/      → Host (4200): routing, layout, guards, global providers
 apps/auth/       → Remote (4201): login, Auth0 callback
 apps/platform/   → Remote (4202): dashboard, members, settings, billing, planning
-apps/admin/      → Remote (4203): super-admin placeholder
+apps/admin/      → Standalone SPA (4203): super-admin backoffice (dedicated Auth0 app, NO MF remote)
 
 libs/shared/util-types/       → API_BASE_URL token + OpenAPI types (auto-generated)
 libs/shared/util-auth/        → authGuard, orgGuard, permissionGuard
 libs/shared/util-rbac/        → PermissionsService, *hasPermission / *hasPlan directives
 libs/shared/util-org-context/ → OrgContextService — org switching
 libs/shared/util-error/       → errorInterceptor, ApiError type
+libs/admin/data-access/       → AdminApi (admin backoffice endpoints)
 libs/{domain}/data-access/    → API service + types + optional store/interceptor
 libs/planning/feature/        → FullCalendar UI, RRULE builder, dialogs
 ```
@@ -49,6 +50,7 @@ libs/planning/feature/        → FullCalendar UI, RRULE builder, dialogs
 - Every `module-federation.config.ts` MUST share `@saas-frontend/*` as **singletons**.
 - Every remote's `entry.routes.ts` MUST re-provide `API_BASE_URL` and all `*Api` services in `providers[]`.
 - Never add `*Api` services to shell `appConfig`.
+- **Admin** is a standalone SPA — it is NOT a Module Federation remote. It has its own `app.config.ts` with dedicated `ADMIN_AUTH0_*` Auth0 config.
 
 ## Interceptor pipeline (shell registers these)
 
@@ -87,11 +89,12 @@ Frontend RBAC is UX only — backend always re-validates.
 ## Commands
 
 ```sh
-npx nx serve shell --devRemotes=auth,platform,admin   # dev
-npx nx run-many -t test --all                          # all tests
-npx nx run platform:test --watch                       # single project
-npx nx run-many -t lint --all                          # lint
-npx nx run-many -t typecheck --all                     # type-check
+npx nx serve shell --devRemotes=auth,platform   # dev (admin served separately)
+npx nx serve admin                               # admin dev
+npx nx run-many -t test --all                    # all tests
+npx nx run platform:test --watch                 # single project
+npx nx run-many -t lint --all                    # lint
+npx nx run-many -t typecheck --all               # type-check
 ```
 
 > Always run through `npx nx` — never raw tooling.
@@ -108,12 +111,12 @@ npx nx run-many -t typecheck --all                     # type-check
 
 ## Where to find more
 
-| Topic | File |
-|---|---|
-| Architecture patterns | `.claude/rules/architecture.md` |
-| Full code style | `.claude/rules/code-style.md` |
-| Testing conventions | `.claude/rules/testing.md` |
-| Security rules | `.claude/rules/security.md` |
-| Contributing guide | `CONTRIBUTING.md` |
-| Per-lib detail | `libs/{domain}/data-access/README.md` |
-| Per-app detail | `apps/{name}/README.md` |
+| Topic                 | File                                  |
+| --------------------- | ------------------------------------- |
+| Architecture patterns | `.claude/rules/architecture.md`       |
+| Full code style       | `.claude/rules/code-style.md`         |
+| Testing conventions   | `.claude/rules/testing.md`            |
+| Security rules        | `.claude/rules/security.md`           |
+| Contributing guide    | `CONTRIBUTING.md`                     |
+| Per-lib detail        | `libs/{domain}/data-access/README.md` |
+| Per-app detail        | `apps/{name}/README.md`               |

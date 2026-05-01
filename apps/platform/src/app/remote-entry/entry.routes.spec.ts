@@ -17,7 +17,6 @@ const baseUser: User = {
   firstName: 'Alice',
   lastName: 'Smith',
   pictureUrl: null,
-  isSystemAdmin: false,
 };
 
 describe('PLATFORM_ROUTES', () => {
