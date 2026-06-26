@@ -19,5 +19,13 @@ export default async (cfg: any) => {
       '**/coverage/**',
     ],
   };
+  result.devServer = {
+    ...result.devServer,
+    headers: {
+      'Access-Control-Allow-Origin': 'http://localhost:4200',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  };
   return result;
 };
